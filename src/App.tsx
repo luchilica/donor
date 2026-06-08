@@ -213,7 +213,7 @@ export default function App() {
           <div className="flex items-center gap-2 select-none">
             <Heart className="w-6.5 h-6.5 text-red-650 text-red-600 fill-red-600" />
             <h1 className="font-extrabold text-slate-800 text-lg tracking-tight select-all">
-              Донор-Алерт <span className="font-light text-slate-400">v2.0</span>
+              Донор-Алерт
             </h1>
           </div>
 
@@ -235,9 +235,7 @@ export default function App() {
             {session ? (
               <div className="flex items-center gap-3">
                 <div className="hidden sm:block text-right">
-                  <span className="text-[10px] font-bold uppercase text-slate-400 block tracking-wider">
-                    {session.user.role === 'donor' ? 'Личный кабинет Донора' : 'Сотрудник Координатора'}
-                  </span>
+
                   <span className="text-xs text-slate-700 font-semibold">{session.user.email}</span>
                 </div>
                 <button 
@@ -248,12 +246,7 @@ export default function App() {
                   Выйти
                 </button>
               </div>
-            ) : (
-              <span className="text-xs font-semibold text-slate-500 flex items-center">
-                <HelpCircle className="w-4.5 h-4.5 mr-1 text-slate-400" />
-                Воспользуйтесь демо-панелью ролей выше для входа!
-              </span>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
@@ -297,7 +290,6 @@ export default function App() {
       <footer className="bg-white border-t border-slate-100 py-6 px-6 text-center text-xs text-slate-400 font-light select-none">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
           <p>© 2026 Проект «Донор-Алерт» — Экосистема спасения жизней Республики Беларусь.</p>
-          <p className="font-medium text-slate-550 text-slate-500">Республиканский Конкурс «100 идей для Беларуси»</p>
         </div>
       </footer>
 

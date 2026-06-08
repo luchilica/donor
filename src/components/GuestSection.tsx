@@ -167,9 +167,6 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
         <div className="bg-gradient-to-r from-rose-800 to-red-600 text-white py-12 px-6 rounded-2xl mb-8 shadow-md relative overflow-hidden">
           <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-16 -mt-16 blur-xl pointer-events-none"></div>
           <div className="max-w-3xl relative z-10">
-            <span className="bg-white/20 text-xs text-white uppercase tracking-wider font-semibold px-3 py-1 rounded-full mb-4 inline-block">
-              Проект «100 идей для Беларуси»
-            </span>
             <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-4 leading-tight">
               Спаси жизнь — стань <strong className="font-semibold">донором крови</strong> в Беларуси
             </h1>

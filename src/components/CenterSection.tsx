@@ -399,11 +399,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
         <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1">
           {[
-            { id: 'stats', label: 'Показатели (Дашборды)', icon: Activity },
-            { id: 'donors', label: 'База доноров', icon: Users },
-            { id: 'pending', label: 'Ожидающие одобрения', icon: HelpCircle },
-            { id: 'notify', label: 'Алертор (Оповещения)', icon: Bell },
-            { id: 'news', label: 'Новости филиала', icon: FileText }
+            { id: 'stats', label: 'Показатели', icon: Activity },
+            { id: 'donors', label: 'Доноры', icon: Users },
+            { id: 'pending', label: 'Заявки', icon: HelpCircle },
+            { id: 'notify', label: 'Рассылка', icon: Bell },
+            { id: 'news', label: 'Новости', icon: FileText }
           ].map(menu => {
             const Icon = menu.icon;
             return (
