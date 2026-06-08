@@ -218,14 +218,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                   });
                   setShowAuthModal('register');
                 }}
-                className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition duration-150 shadow-sm flex items-center"
+                className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
               >
                 <UserPlus className="w-5 h-5 mr-2" />
                 Зарегистрироваться как донор
               </button>
               <button 
                 onClick={() => setShowAuthModal('login')}
-                className="bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium px-6 py-3 rounded-xl transition duration-150 flex items-center"
+                className="bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:border-white/60 hover:shadow-lg flex items-center"
               >
                 <LogIn className="w-5 h-5 mr-2" />
                 Личный кабинет
@@ -276,34 +276,34 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
         <div className="space-y-8">
           {/* Main info cards */}
           <div className="w-full space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
               <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center">
                 <Heart className="w-5 h-5 text-red-500 mr-2" />
                 Как это работает?
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold">1</div>
-                  <h3 className="font-medium text-slate-800 text-sm">Регистрация в базе</h3>
+                <div className="space-y-2 group cursor-default">
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">1</div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Регистрация в базе</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">Вы вносите свои медицинские и контактные данные, выбирая удобный центр переливания.</p>
                 </div>
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold">2</div>
-                  <h3 className="font-medium text-slate-800 text-sm">Мониторинг дефицита</h3>
+                <div className="space-y-2 group cursor-default">
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">2</div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Мониторинг дефицита</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">При острой нехватке конкретной группы крови центр отправляет мгновенный сигнал.</p>
                 </div>
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold">3</div>
-                  <h3 className="font-medium text-slate-800 text-sm">Спасение жизни</h3>
+                <div className="space-y-2 group cursor-default">
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">3</div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Спасение жизни</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">Система отправляет вам Push, SMS или Email. Вы знаете, что нужны именно сейчас, и совершаете донацию!</p>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100 group">
                 <div>
-                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4">
+                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-500 ease-out group-hover:scale-110">
                     <Activity className="w-6 h-6" />
                   </span>
                   <h3 className="font-semibold text-slate-800 text-base mb-2">Подготовка к донации</h3>
@@ -311,14 +311,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                     Узнайте о противопоказаниях, необходимых интервалах и правилах подготовки, чтобы ваша донация прошла успешно.
                   </p>
                 </div>
-                <button onClick={() => setActiveTab('info')} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center">
+                <button onClick={() => { setActiveTab('info'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center transition-transform duration-500 ease-out group-hover:translate-x-1">
                   Узнать подробнее <ChevronRight className="w-4 h-4 ml-1" />
                 </button>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100 group">
                 <div>
-                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4">
+                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-500 ease-out group-hover:scale-110">
                     <FileText className="w-6 h-6" />
                   </span>
                   <h3 className="font-semibold text-slate-800 text-base mb-2">Необходимые документы</h3>
@@ -326,7 +326,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                     Список документов для первичной и повторной донации крови и её компонентов.
                   </p>
                 </div>
-                <button onClick={() => setActiveTab('docs')} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center">
+                <button onClick={() => { setActiveTab('docs'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center transition-transform duration-500 ease-out group-hover:translate-x-1">
                   Список документов <ChevronRight className="w-4 h-4 ml-1" />
                 </button>
               </div>
@@ -338,7 +338,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
             {/* Quick Stats sidebar widget */}
             <motion.div 
-              className="bg-red-50 border border-red-100 p-6 rounded-2xl shadow-sm transition-all duration-300 hover:bg-red-100"
+              className="bg-red-50 border border-red-100 p-6 rounded-2xl shadow-sm transition-all duration-500 ease-out hover:bg-red-100"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -350,11 +350,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                     initial={{ opacity: 0 }} 
                     whileInView={{ opacity: 1 }} 
                     transition={{ delay: 0.2, duration: 0.5 }}
-                    className="text-2xl font-light text-slate-800 block"
+                    className="text-2xl font-semibold text-slate-900 block mb-1"
                   >
                     {totalDonorsCount}
                   </motion.span>
-                  <span className="text-xs text-slate-500 font-light">Доноров крови в экосистеме</span>
+                  <span className="text-xs text-slate-700 font-medium leading-relaxed block">Доноров крови в экосистеме</span>
                 </div>
                 
                 <div>
@@ -362,11 +362,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                     initial={{ opacity: 0 }} 
                     whileInView={{ opacity: 1 }} 
                     transition={{ delay: 0.3, duration: 0.5 }}
-                    className="text-2xl font-light text-slate-800 block"
+                    className="text-2xl font-semibold text-slate-900 block mb-1"
                   >
                     42
                   </motion.span>
-                  <span className="text-xs text-slate-500 font-light">Центров переливания по всей РБ</span>
+                  <span className="text-xs text-slate-700 font-medium leading-relaxed block">Центров переливания по всей РБ</span>
                 </div>
                 
                 <div>
@@ -374,11 +374,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                     initial={{ opacity: 0 }} 
                     whileInView={{ opacity: 1 }} 
                     transition={{ delay: 0.4, duration: 0.5 }}
-                    className="text-2xl font-light text-slate-800 block"
+                    className="text-2xl font-semibold text-slate-900 block mb-1"
                   >
                     100%
                   </motion.span>
-                  <span className="text-xs text-slate-500 font-light">Соответствие законодательству РБ</span>
+                  <span className="text-xs text-slate-700 font-medium leading-relaxed block">Соответствие законодательству РБ</span>
                 </div>
               </div>
             </motion.div>
