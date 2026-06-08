@@ -205,7 +205,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
               Спаси жизнь — стань <strong className="font-semibold">донором крови</strong> в Беларуси
             </h1>
             <p className="text-lg text-rose-100 font-light mb-8 max-w-2xl">
-              «Донор-Алерт» — современная экосистема оповещения доноров. Мы связываем региональные центры переливания крови РБ с донорами для мгновенного закрытия экстренных дефицитов.
+              «Донор-Алерт» — современная система оповещения доноров. Мы связываем региональные центры переливания крови РБ с донорами для мгновенного закрытия экстренных дефицитов.
             </p>
             <div className="flex flex-wrap gap-4">
               <button 
@@ -503,69 +503,35 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
       {/* DOCUMENTS TAB */}
       {activeTab === 'docs' && (
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-3xl mx-auto space-y-6">
+        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-4xl mx-auto space-y-6">
           <div>
             <h2 className="text-2xl font-semibold text-slate-800 mb-2">Бланки и необходимые документы</h2>
             <p className="text-sm text-slate-500">Какие документы взять с собой на станцию переливания крови.</p>
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-base font-semibold text-slate-800 border-b pb-2">Первичная донация</h3>
-            <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
-              <li>Паспорт гражданина РБ (или иной документ, удостоверяющий личность: вид на жительство, удостоверение беженца).</li>
-              <li>Военный билет или удостоверение призывника (при наличии).</li>
-              <li>Выписка из медицинской документации о состоянии здоровья.</li>
-              <li>Результат флюорографического (рентгенологического, КТ) исследования органов грудной клетки.</li>
-              <li>Результаты осмотра врачом-гинекологом (для женщин).</li>
-              <li>Данные электрокардиографического исследования (для доноров компонентов методом афереза).</li>
-            </ul>
-
-            <h3 className="text-base font-semibold text-slate-800 border-b pb-2 mt-6">Повторная донация</h3>
-            <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
-              <li>Паспорт (или аналогичный документ).</li>
-              <li>Карта-анкета донора.</li>
-              <li>Выписка из медицинской документации — 1 раз в 12 месяцев.</li>
-              <li>Результат флюорографии — 1 раз в 12 месяцев.</li>
-              <li>Осмотр врачом-гинекологом — 1 раз в 12 месяцев (для женщин).</li>
-              <li>ЭКГ — 1 раз в 12 месяцев (для доноров компонентов методом афереза).</li>
-            </ul>
+          <div className="space-y-4">
+             <AccordionItem title="Первичная донация">
+                <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
+                  <li>Паспорт гражданина РБ (или иной документ, удостоверяющий личность: вид на жительство, удостоверение беженца).</li>
+                  <li>Военный билет или удостоверение призывника (при наличии).</li>
+                  <li>Выписка из медицинской документации о состоянии здоровья.</li>
+                  <li>Результат флюорографического (рентгенологического, КТ) исследования органов грудной клетки.</li>
+                  <li>Результаты осмотра врачом-гинекологом (для женщин).</li>
+                  <li>Данные электрокардиографического исследования (для доноров компонентов методом афереза).</li>
+                </ul>
+             </AccordionItem>
+             <AccordionItem title="Повторная донация">
+                <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
+                  <li>Паспорт (или аналогичный документ).</li>
+                  <li>Карта-анкета донора.</li>
+                  <li>Выписка из медицинской документации — 1 раз в 12 месяцев.</li>
+                  <li>Результат флюорографии — 1 раз в 12 месяцев.</li>
+                  <li>Осмотр врачом-гинекологом — 1 раз в 12 месяцев (для женщин).</li>
+                  <li>ЭКГ — 1 раз в 12 месяцев (для доноров компонентов методом афереза).</li>
+                </ul>
+             </AccordionItem>
           </div>
 
-          <div className="space-y-4 pt-4">
-            <h3 className="text-base font-semibold text-slate-800 border-b pb-2">Скачать бланки заявлений (интерактивные PDF)</h3>
-            <p className="text-xs text-slate-500">Заполните анкету заранее на компьютере или распечатайте пустой бланк, чтобы сэкономить до 20 минут в регистрационной очереди.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <a 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); alert('Файл "Карта-анкета донора РБ.pdf" успешно загружен на устройство!'); }}
-                className="p-4 border border-slate-200 rounded-xl hover:border-red-300 transition duration-150 flex items-center justify-between"
-              >
-                <div className="flex items-center">
-                  <FileText className="w-8 h-8 text-red-500 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Анкета донора крови РБ</p>
-                    <p className="text-xs text-slate-500">Форма Минздрава, PDF 220KB</p>
-                  </div>
-                </div>
-                <Download className="w-5 h-5 text-slate-400" />
-              </a>
-
-              <a 
-                href="#" 
-                onClick={(e) => { e.preventDefault(); alert('Файл "Заявление донора на компенсацию питания.pdf" успешно загружен на устройство!'); }}
-                className="p-4 border border-slate-200 rounded-xl hover:border-red-300 transition duration-150 flex items-center justify-between"
-              >
-                <div className="flex items-center">
-                  <FileText className="w-8 h-8 text-red-500 mr-3 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Заявление на компенсацию</p>
-                    <p className="text-xs text-slate-500">Безвозмездное питание, PDF 140KB</p>
-                  </div>
-                </div>
-                <Download className="w-5 h-5 text-slate-400" />
-              </a>
-            </div>
-          </div>
         </div>
       )}
 
