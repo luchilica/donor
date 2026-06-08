@@ -597,6 +597,14 @@
       "role": "donor",
       "isActive": true,
       "createdAt": "2026-06-08T09:44:41.291Z"
+    },
+    {
+      "id": 22,
+      "email": "marfakramer@gmail.com",
+      "passwordHash": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "role": "donor",
+      "isActive": true,
+      "createdAt": "2026-06-08T09:48:50.078Z"
     }
   ],
   "donors": [
@@ -1137,6 +1145,28 @@
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-28",
       "createdAt": "2026-06-08T09:44:41.291Z"
+    },
+    {
+      "id": 21,
+      "userId": 22,
+      "lastName": "fvsxf",
+      "firstName": "sfdv",
+      "middleName": "sdfvs",
+      "birthDate": "1995-01-01",
+      "gender": "male",
+      "bloodGroup": "II_A",
+      "rhFactor": "positive",
+      "weight": 70,
+      "phone": "+375 (333922338",
+      "status": "active",
+      "smsEnabled": true,
+      "pushEnabled": true,
+      "emailNotificationsEnabled": true,
+      "onesignalPlayerId": "onesignal-21-121611",
+      "personalPause": false,
+      "donationsCount": 0,
+      "bloodDonationsCount": 0,
+      "createdAt": "2026-06-08T09:48:50.078Z"
     }
   ],
   "donorCenters": [
@@ -1349,6 +1379,17 @@
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
       "createdAt": "2026-06-08T09:44:41.291Z"
+    },
+    {
+      "id": 21,
+      "donorId": 21,
+      "centerId": 1,
+      "isPrimary": true,
+      "status": "confirmed",
+      "resubmissionCount": 0,
+      "createdAt": "2026-06-08T09:48:50.078Z",
+      "confirmedAt": "2026-06-08T09:49:01.068Z",
+      "confirmedById": 2
     }
   ],
   "donations": [
