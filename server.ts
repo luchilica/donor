@@ -88,6 +88,17 @@ async function startServer() {
 
   // --- API ---
 
+  // SERVE PDF
+  app.get('/api/download/contraindications', (req, res) => {
+    const filePath = path.join(process.cwd(), 'assets', 'Перечень противопоказаний.pdf');
+    res.download(filePath, 'Перечень противопоказаний.pdf', (err) => {
+      if (err) {
+        console.error('Download error:', err);
+        res.status(404).send('File not found');
+      }
+    });
+  });
+
   // AUTH LOGIN
   app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;

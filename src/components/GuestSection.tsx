@@ -273,9 +273,9 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
       {/* HOME TAB */}
       {activeTab === 'home' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="space-y-8">
           {/* Main info cards */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="w-full space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
               <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center">
                 <Heart className="w-5 h-5 text-red-500 mr-2" />
@@ -306,13 +306,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                   <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4">
                     <Activity className="w-6 h-6" />
                   </span>
-                  <h3 className="font-semibold text-slate-800 text-base mb-2">Медицинский календарь</h3>
+                  <h3 className="font-semibold text-slate-800 text-base mb-2">Подготовка к донации</h3>
                   <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                    Интервалы рассчитываются автоматически по постановлению Минздрава РБ № 80 с учетом Вашего пола, истории сдач и действия правила 5-й донации.
+                    Узнайте о противопоказаниях, необходимых интервалах и правилах подготовки, чтобы ваша донация прошла успешно.
                   </p>
                 </div>
                 <button onClick={() => setActiveTab('info')} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center">
-                  Узнать про интервалы <ChevronRight className="w-4 h-4 ml-1" />
+                  Узнать подробнее <ChevronRight className="w-4 h-4 ml-1" />
                 </button>
               </div>
 
@@ -321,69 +321,67 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                   <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4">
                     <FileText className="w-6 h-6" />
                   </span>
-                  <h3 className="font-semibold text-slate-800 text-base mb-2">Бланки и выписки</h3>
+                  <h3 className="font-semibold text-slate-800 text-base mb-2">Необходимые документы</h3>
                   <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                    Скачивайте актуальные медицинские бланки, анкету донора и образцы выписок перед визитом к врачу непосредственно из вашего кабинета.
+                    Список документов для первичной и повторной донации крови и её компонентов.
                   </p>
                 </div>
                 <button onClick={() => setActiveTab('docs')} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center">
-                  Посмотреть список <ChevronRight className="w-4 h-4 ml-1" />
+                  Список документов <ChevronRight className="w-4 h-4 ml-1" />
                 </button>
               </div>
             </div>
           </div>
 
           {/* Sidebar panel */}
-          <div className="space-y-6">
-            <div className="bg-slate-50 border border-slate-200/60 p-6 rounded-2xl">
-              <h3 className="text-base font-semibold text-slate-800 mb-4">Тестовый доступ на конкурсе</h3>
-              <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                Для ознакомления со всем функционалом платформы вы можете войти под предзаполненными тестовыми ролями:
-              </p>
-              <div className="space-y-3">
-                <div className="bg-white p-3 rounded-lg border border-slate-200 text-xs">
-                  <span className="font-semibold text-red-700 block mb-1">Кабинет центра крови:</span>
-                  <p className="text-slate-600">Email: <span className="font-mono font-medium">center@test.by</span></p>
-                  <p className="text-slate-600">Пароль: <span className="font-mono font-medium">password123</span></p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border border-slate-200 text-xs">
-                  <span className="font-semibold text-blue-700 block mb-1">Кабинет Донора:</span>
-                  <p className="text-slate-600">Email: <span className="font-mono font-medium">donor@test.by</span></p>
-                  <p className="text-slate-600">Пароль: <span className="font-mono font-medium">password123</span></p>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  setLoginEmail('center@test.by');
-                  setLoginPassword('password123');
-                  setShowAuthModal('login');
-                }}
-                className="mt-4 w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium py-2.5 rounded-xl transition duration-150"
-              >
-                Быстрый вход (Центр крови)
-              </button>
-            </div>
+          <div className="w-full space-y-6">
 
             {/* Quick Stats sidebar widget */}
-            <div className="bg-slate-900 text-white p-6 rounded-2xl">
-              <h4 className="text-xs uppercase tracking-wider text-rose-300 font-semibold mb-4">Статистика системы</h4>
-              <div className="space-y-4">
+            <motion.div 
+              className="bg-red-50 border border-red-100 p-6 rounded-2xl shadow-sm transition-all duration-300 hover:bg-red-100"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h4 className="text-xs uppercase tracking-wider text-red-600 font-semibold mb-4">Статистика системы</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div>
-                  <span className="text-2xl font-light block">{totalDonorsCount}</span>
-                  <span className="text-xs text-rose-100 font-light">Доноров крови в экосистеме</span>
+                  <motion.span 
+                    initial={{ opacity: 0 }} 
+                    whileInView={{ opacity: 1 }} 
+                    transition={{ delay: 0.2, duration: 0.5 }}
+                    className="text-2xl font-light text-slate-800 block"
+                  >
+                    {totalDonorsCount}
+                  </motion.span>
+                  <span className="text-xs text-slate-500 font-light">Доноров крови в экосистеме</span>
                 </div>
-                <hr className="border-white/10" />
+                
                 <div>
-                  <span className="text-2xl font-light block">42</span>
-                  <span className="text-xs text-rose-100 font-light">Центров переливания по всей РБ</span>
+                  <motion.span 
+                    initial={{ opacity: 0 }} 
+                    whileInView={{ opacity: 1 }} 
+                    transition={{ delay: 0.3, duration: 0.5 }}
+                    className="text-2xl font-light text-slate-800 block"
+                  >
+                    42
+                  </motion.span>
+                  <span className="text-xs text-slate-500 font-light">Центров переливания по всей РБ</span>
                 </div>
-                <hr className="border-white/10" />
+                
                 <div>
-                  <span className="text-2xl font-light block">100%</span>
-                  <span className="text-xs text-rose-100 font-light">Соответствие законодательству РБ</span>
+                  <motion.span 
+                    initial={{ opacity: 0 }} 
+                    whileInView={{ opacity: 1 }} 
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    className="text-2xl font-light text-slate-800 block"
+                  >
+                    100%
+                  </motion.span>
+                  <span className="text-xs text-slate-500 font-light">Соответствие законодательству РБ</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       )}
@@ -399,7 +397,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
           <div className="space-y-4">
             <AccordionItem title="Что такое донорство крови">
-               Краткое описание процесса добровольной сдачи крови или её компонентов для трансфузиологической помощи нуждающимся.
+               Процесс добровольной сдачи крови или её компонентов для трансфузиологической помощи нуждающимся.
             </AccordionItem>
             
             <AccordionItem title="Кто может стать донором">
@@ -411,7 +409,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                </div>
             </AccordionItem>
 
-            <AccordionItem title="Противопоказания к донорству">
+<AccordionItem title="Противопоказания к донорству">
               <div className="space-y-4 text-sm text-slate-600">
                 <p><strong>Временные противопоказания:</strong></p>
                 <ul className="list-disc list-inside space-y-1">
@@ -428,10 +426,16 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                     <li>Оперативное вмешательство — через 6 месяцев (кроме протезирования суставов).</li>
                     <li>След от венепункции в локтевом сгибе без документа — 7 суток.</li>
                 </ul>
+                <div className="mt-4 pt-4 border-t border-red-100">
+                    <a href="/api/download/contraindications" target="_blank" download className="text-sm text-red-600 font-semibold hover:underline flex items-center">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Скачать полный перечень всех противопоказаний (PDF)
+                    </a>
+                </div>
               </div>
             </AccordionItem>
 
-            <AccordionItem title="Как подготовиться к сдаче крови">
+<AccordionItem title="Как подготовиться к сдаче крови">
                 <div className="space-y-2 text-sm text-slate-600">
                     <p><strong>За 10 дней</strong> — воздержаться от приёма антибактериальных медицинских препаратов.</p>
                     <p><strong>За 5 дней</strong> — от салицилатов и аналгетиков.</p>
@@ -461,6 +465,22 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                 <p>9. <strong>Получение компенсации на питание (при безвозмездной донации).</strong></p>
               </div>
             </AccordionItem>
+            
+            <AccordionItem title="Минимальные интервалы между донациями">
+                <div className="space-y-2 text-sm text-slate-600">
+                    <p>Минимальные интервалы между донациями составляют:</p>
+                    <ul className="list-disc list-inside ml-2 space-y-1">
+                        <li>Крови – не менее 60 календарных дней, после каждой 5-ой донации – не менее 90 календарных дней.</li>
+                        <li>Компонентов крови методом афереза (плазмы, тромбоцитов) – не менее 14 календарных дней.</li>
+                        <li>Донацией компонентов крови методом афереза (плазмы, тромбоцитов) и донацией крови – не менее 14 календарных дней.</li>
+                        <li>Донацией крови и донацией компонентов крови методом афереза (плазмы, тромбоцитов) – не менее 30 календарных дней.</li>
+                        <li>Донацией гранулоцитов (методом афереза) и донацией крови (донацией компонентов крови методом афереза (плазмы, тромбоцитов)) – не менее 30 календарных дней.</li>
+                        <li>Донацией крови и донацией гранулоцитов (методом афереза) – не менее 30 календарных дней, после каждой 5-ой донации – не менее 60 календарных дней.</li>
+                    </ul>
+                </div>
+            </AccordionItem>
+
+            
 
             <AccordionItem title="Польза донорства для здоровья">
               <ul className="list-disc list-inside text-sm text-slate-600">
@@ -505,8 +525,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
       {activeTab === 'docs' && (
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-4xl mx-auto space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-800 mb-2">Бланки и необходимые документы</h2>
-            <p className="text-sm text-slate-500">Какие документы взять с собой на станцию переливания крови.</p>
+            <h2 className="text-2xl font-semibold text-slate-800 mb-2">Необходимые документы</h2>
+            <p className="text-sm text-slate-500">Какие документы взять с собой на сдачу крови.</p>
           </div>
 
           <div className="space-y-4">
@@ -657,7 +677,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
           {news.map(item => {
             const centerName = centers.find(c => c.id === item.centerId)?.name || 'Центр переливания крови';
             return (
-              <div key={item.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+              <div key={item.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-red-100 transition-all duration-300 space-y-3">
                 <div className="flex justify-between text-xs text-slate-400">
                   <span>{centerName}</span>
                   <span>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Свежая новость'}</span>
