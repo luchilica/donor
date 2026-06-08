@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model BloodCenter {
+  id                  Int      @id @default(autoincrement())
+  name                String   @db.VarChar(255)
+  address             String   @db.Text
+  phone               String   @db.VarChar(20)
+  email               String?  @db.VarChar(255)
+  workingHours        String?  @db.Text
+  mapLink             String?  @db.Text
+  eRegistrationLink   String?  @db.Text
+  createdAt           DateTime @default(now())
+
+  users       User[]
+  donorLinks  DonorCenter[]
+  donations   Donation[]
+  medicalNotes MedicalNote[]
+  notifications Notification[]
+  news        News[]
+  smsTemplates SmsTemplate[]
+
+  @@map("blood_centers")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @db.VarChar(255)
+  role         UserRole
+  centerId     Int?
+  center       BloodCenter? @relation(fields: [centerId], references: [id])
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  lastLogin    DateTime?
+
+  donor        Donor?
+  confirmedLinks DonorCenter[] @relation("ConfirmedBy")
+  addedDonations  Donation[]    @relation("AddedBy")
+  medicalNotes    MedicalNote[] @relation("CreatedBy")
+  liftedNotes     MedicalNote[] @relation("LiftedBy")
+  sentNotifications Notification[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  donor
+  center
+  admin
+}
+
+model Donor {
+  id                      Int          @id @default(autoincrement())
+  userId                  Int          @unique
+  user                    User         @relation(fields: [userId], references: [id])
+  lastName                String       @db.VarChar(100)
+  firstName               String       @db.VarChar(100)
+  middleName              String?      @db.VarChar(100)
+  birthDate               DateTime     @db.Date
+  gender                  Gender
+  bloodGroup              BloodGroup
+  rhFactor                RhFactor
+  weight                  Decimal      @db.Decimal(5, 2)
+  phone                   String       @db.VarChar(20)
+  status                  DonorStatus  @default(active)
+  smsEnabled              Boolean      @default(false)
+  pushEnabled             Boolean      @default(false)
+  emailNotificationsEnabled Boolean    @default(true)
+  onesignalPlayerId       String?      @db.VarChar(255)
+  personalPause           Boolean      @default(false)
+  personalPauseUntil      DateTime?    @db.Date
+  personalPauseNote       String?      @db.Text
+  donationsCount          Int          @default(0)
+  bloodDonationsCount     Int          @default(0)
+  lastDonationDate        DateTime?    @db.Date
+  lastDonationType        DonationType?
+  nextAvailableDate       DateTime?    @db.Date
+  createdAt               DateTime     @default(now())
+
+  centerLinks   DonorCenter[]
+  donations     Donation[]
+  medicalNotes  MedicalNote[]
+  notificationRecipients NotificationRecipient[]
+
+  @@map("donors")
+}
+
+enum DonorStatus { 
+  active 
+  inactive 
+}
+
+enum Gender { 
+  male 
+  female 
+}
+
+enum BloodGroup { 
+  I_O 
+  II_A 
+  III_B 
+  IV_AB 
+}
+
+enum RhFactor { 
+  positive 
+  negative 
+}
+
+enum DonationType { 
+  blood 
+  plasma 
+  platelets 
+  granulocytes 
+}
+
+model DonorCenter {
+  id                Int               @id @default(autoincrement())
+  donorId           Int
+  donor             Donor             @relation(fields: [donorId], references: [id])
+  centerId          Int
+  center            BloodCenter       @relation(fields: [centerId], references: [id])
+  isPrimary         Boolean           @default(false)
+  status            DonorCenterStatus @default(pending)
+  rejectionReason   String?           @db.Text
+  resubmissionCount Int               @default(0)
+  resubmittedAt     DateTime?
+  confirmedAt       DateTime?
+  confirmedById     Int?
+  confirmedBy       User?             @relation("ConfirmedBy", fields: [confirmedById], references: [id])
+  createdAt         DateTime          @default(now())
+
+  @@unique([donorId, centerId])
+  @@map("donor_centers")
+}
+
+enum DonorCenterStatus { 
+  pending 
+  confirmed 
+  rejected 
+}
+
+model Donation {
+  id           Int      @id @default(autoincrement())
+  donorId      Int
+  donor        Donor    @relation(fields: [donorId], references: [id])
+  centerId     Int
+  center       BloodCenter @relation(fields: [centerId], references: [id])
+  donationDate DateTime @db.Date
+  donationType DonationType
+  volumeMl     Int?
+  note         String?  @db.Text
+  addedById    Int?
+  addedBy      User?    @relation("AddedBy", fields: [addedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@map("donations")
+}
+
+model MedicalNote {
+  id          Int      @id @default(autoincrement())
+  donorId     Int
+  donor       Donor    @relation(fields: [donorId], references: [id])
+  centerId    Int
+  center      BloodCenter @relation(fields: [centerId], references: [id])
+  createdById Int
+  createdBy   User     @relation("CreatedBy", fields: [createdById], references: [id])
+  reason      String   @db.Text
+  startDate   DateTime @db.Date
+  endDate     DateTime? @db.Date
+  isActive    Boolean  @default(true)
+  liftedAt    DateTime?
+  liftedById  Int?
+  liftedBy    User?    @relation("LiftedBy", fields: [liftedById], references: [id])
+  liftNote    String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@map("medical_notes")
+}
+
+model Notification {
+  id                   Int      @id @default(autoincrement())
+  centerId             Int
+  center               BloodCenter @relation(fields: [centerId], references: [id])
+  sentById             Int?
+  sentBy               User?    @relation(fields: [sentById], references: [id])
+  bloodGroups          String   @db.VarChar(50) // JSON array string
+  rhFactor             NotificationRhFactor
+  donationType         NotificationDonationType
+  minDaysSinceDonation Int
+  excludeMedical       Boolean  @default(true)
+  excludePause         Boolean  @default(true)
+  channel              NotificationChannel
+  messageText          String   @db.Text
+  recipientsCount      Int      @default(0)
+  pushSent             Int      @default(0)
+  smsSent              Int      @default(0)
+  emailSent            Int      @default(0)
+  status               NotificationStatus
+  createdAt            DateTime @default(now())
+
+  recipients NotificationRecipient[]
+
+  @@map("notifications")
+}
+
+enum NotificationRhFactor {
+  positive
+  negative
+  both
+}
+
+enum NotificationDonationType {
+  blood
+  plasma
+  platelets
+  granulocytes
+  any
+}
+
+enum NotificationChannel {
+  push
+  sms
+  email
+  push_sms
+  all
+}
+
+enum NotificationStatus {
+  sent
+  partial
+  failed
+}
+
+model NotificationRecipient {
+  id             Int      @id @default(autoincrement())
+  notificationId Int
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  donorId        Int
+  donor          Donor    @relation(fields: [donorId], references: [id])
+  pushStatus     DeliveryStatus
+  smsStatus      DeliveryStatus
+  emailStatus    DeliveryStatus
+  sentAt         DateTime
+
+  @@map("notification_recipients")
+}
+
+enum DeliveryStatus {
+  sent
+  failed
+  skipped
+}
+
+model News {
+  id          Int      @id @default(autoincrement())
+  centerId    Int
+  center      BloodCenter @relation(fields: [centerId], references: [id])
+  title       String   @db.VarChar(255)
+  content     String   @db.Text
+  isPublished Boolean  @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  createdById Int?
+
+  @@map("news")
+}
+
+model SmsTemplate {
+  id          Int      @id @default(autoincrement())
+  centerId    Int?
+  center      BloodCenter? @relation(fields: [centerId], references: [id])
+  name        String   @db.VarChar(100)
+  text        String   @db.VarChar(160)
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("sms_templates")
+}

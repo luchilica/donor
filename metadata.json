@@ -1,0 +1,6 @@
+{
+  "name": "Донор-Алерт",
+  "description": "Система оповещения доноров крови в Республике Беларусь",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

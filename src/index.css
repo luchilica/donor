@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+/* Smooth transition for theme toggle */
+html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, input, select, textarea, button, table, tr, td, th {
+  transition-property: background-color, border-color, text-decoration-color, fill, stroke, box-shadow;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Custom dark theme root variables */
+.dark {
+  --background: #0f172a; /* slate-900 */
+  --foreground: #f8fafc; /* slate-50 */
+  --card: #1e293b; /* slate-800 */
+  --border: #334155; /* slate-700 */
+  --muted: #64748b; /* slate-500 */
+  --muted-foreground: #cbd5e1; /* slate-300 */
+}
+
+/* Base Dark Mode classes */
+.dark body {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* Background Class Overrides */
+.dark .bg-white {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+}
+
+.dark .bg-slate-50, 
+.dark .bg-slate-50\/50, 
+.dark .min-h-screen {
+  background-color: var(--background) !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+.dark .bg-slate-900 {
+  background-color: #020617 !important;
+}
+
+/* Navigation items hover overrides in dark mode */
+.dark .hover\:bg-slate-100:hover, 
+.dark .hover\:bg-slate-50\/50:hover, 
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-200:hover {
+  background-color: #334155 !important;
+}
+
+/* Text color overrides */
+.dark .text-slate-800, 
+.dark .text-slate-900, 
+.dark .text-slate-950 {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+.dark .text-slate-700 {
+  color: #e2e8f0 !important; /* slate-200 */
+}
+
+.dark .text-slate-600 {
+  color: #cbd5e1 !important; /* slate-300 */
+}
+
+.dark .text-slate-500, 
+.dark .text-slate-400 {
+  color: #94a3b8 !important; /* slate-400 */
+}
+
+.dark .text-slate-350,
+.dark .text-slate-300 {
+  color: #cbd5e1 !important;
+}
+
+/* Header & Footer Custom overrides */
+.dark header, 
+.dark footer {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* Border overrides */
+.dark .border-slate-100, 
+.dark .border-slate-150, 
+.dark .border-slate-200, 
+.dark .border-slate-250, 
+.dark .border-slate-200\/60,
+.dark .border-slate-200\/80,
+.dark .border-slate-300 {
+  border-color: var(--border) !important;
+}
+
+/* Forms (inputs, select, textarea, etc.) */
+.dark input[type="text"], 
+.dark input[type="date"], 
+.dark input[type="number"], 
+.dark input[type="password"],
+.dark select, 
+.dark textarea {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #475569 !important;
+}
+
+.dark input::placeholder, 
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Special Badges and Banners handling to ensure readability */
+.dark .bg-rose-50, 
+.dark .bg-rose-50\/50, 
+.dark .bg-rose-50\/30, 
+.dark .bg-rose-50\/20,
+.dark .bg-red-50, 
+.dark .bg-red-50\/50 {
+  background-color: rgb(153 27 27 / 0.15) !important; /* semi-transparent dark red */
+}
+
+.dark .text-red-700, 
+.dark .text-red-800, 
+.dark .text-red-900,
+.dark .text-rose-700, 
+.dark .text-rose-800, 
+.dark .text-rose-900,
+.dark .text-red-650,
+.dark .text-rose-650 {
+  color: #fda4af !important; /* salmon/light pink-red */
+}
+
+.dark .bg-emerald-50, 
+.dark .bg-emerald-50\/30, 
+.dark .bg-emerald-50\/20 {
+  background-color: rgb(6 95 70 / 0.2) !important; /* translucent dark green */
+}
+
+.dark .text-emerald-800, 
+.dark .text-emerald-900, 
+.dark .text-emerald-750, 
+.dark .text-emerald-700 {
+  color: #6ee7b7 !important; /* mint green */
+}
+
+.dark .bg-indigo-50, 
+.dark .bg-indigo-50\/50, 
+.dark .bg-indigo-50\/30 {
+  background-color: rgb(30 58 138 / 0.25) !important; /* translucent dark indigo */
+}
+
+.dark .text-indigo-800, 
+.dark .text-indigo-900, 
+.dark .text-indigo-950 {
+  color: #93c5fd !important; /* light sky blue */
+}
+
+.dark .bg-amber-50, 
+.dark .bg-amber-50\/50, 
+.dark .bg-amber-50\/20 {
+  background-color: rgb(180 83 9 / 0.15) !important; /* translucent dark orange-amber */
+}
+
+.dark .text-amber-800, 
+.dark .text-amber-900, 
+.dark .text-amber-950 {
+  color: #fcd34d !important; /* light golden-yellow */
+}
+
+/* Modals overlays background dimming */
+.dark .bg-slate-900\/50,
+.dark .bg-black\/50,
+.dark .bg-slate-900\/60 {
+  background-color: rgba(2, 6, 17, 0.7) !important;
+}
+
+/* Shadows enhancement */
+.dark .shadow-xs, 
+.dark .shadow-sm, 
+.dark .shadow-md, 
+.dark .shadow-lg {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5) !important;
+}
+
+/* Tab indicator / pills styling */
+.dark .bg-rose-500 {
+  background-color: #f43f5e !important; /* Rose-500 stays vivid */
+  color: #ffffff !important;
+}
+
+.dark .text-amber-650 {
+  color: #fbbf24 !important;
+}
