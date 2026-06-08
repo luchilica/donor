@@ -1,9 +1,43 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, FileText, Phone, MapPin, Calendar, 
   ChevronRight, LogIn, UserPlus, HelpCircle, Check, Search, Download
 } from 'lucide-react';
 import { BloodCenter, News, BloodGroup, RhFactor, Gender } from '../types';
+
+const AccordionItem = ({ title, children }: { title: string; children: React.ReactNode }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className={`mb-3 rounded-2xl border transition-all duration-300 overflow-hidden ${isOpen ? 'border-red-200 shadow-md' : 'border-slate-100 hover:border-red-100 shadow-sm'}`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex justify-between items-center p-5 transition-all duration-300 ${isOpen ? 'bg-gradient-to-r from-red-50 to-white' : 'bg-white hover:bg-slate-50'}`}
+      >
+        <span className={`font-semibold text-sm transition-colors ${isOpen ? 'text-red-800' : 'text-slate-800'}`}>
+          {title}
+        </span>
+        <div className={`p-1 rounded-full transition-transform duration-300 ${isOpen ? 'bg-red-100 text-red-600 rotate-90' : 'bg-slate-100 text-slate-500'}`}>
+          <ChevronRight className="w-4 h-4" />
+        </div>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="p-5 bg-white border-t border-red-50 text-sm text-slate-600 leading-relaxed">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 interface GuestSectionProps {
   centers: BloodCenter[];
@@ -362,106 +396,108 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
             <p className="text-sm text-slate-500">Нормативы составлены на основании Закона РБ «О донорстве крови и ее компонентов» и Постановления Министерства здравоохранения № 80.</p>
           </div>
 
+
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-800 border-l-4 border-red-500 pl-3">Кто может стать донором в нашей стране?</h3>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-600">
-              <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <strong>Возрастной ценз:</strong> строго от 18 до 65 лет включительно.
-              </li>
-              <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <strong>Ограничение по весу:</strong> масса тела не должна быть менее 55 кг.
-              </li>
-              <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <strong>Гражданство:</strong> граждане РБ, а также постоянно проживающие иностранные граждане и лица без гражданства.
-              </li>
-              <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <strong>Состояние здоровья:</strong> отсутствие абсолютных хронических противопоказаний (гепатиты, туберкулез, диабет, онкологические заболевания).
-              </li>
-            </ul>
+            <AccordionItem title="Что такое донорство крови">
+               Краткое описание процесса добровольной сдачи крови или её компонентов для трансфузиологической помощи нуждающимся.
+            </AccordionItem>
+            
+            <AccordionItem title="Кто может стать донором">
+               <div className="space-y-2 text-sm text-slate-600">
+                  <p><strong>Возраст:</strong> от 18 до 65 лет (ст. 26 Закона РБ «О донорстве крови»). В экстренных случаях допуск возможен по решению врачебно-консультационной комиссии.</p>
+                  <p><strong>Вес:</strong> не менее 55 кг и не более ожирения II степени.</p>
+                  <p><strong>Гражданство:</strong> граждане РБ, а также иностранные граждане и лица без гражданства, постоянно проживающие в РБ, обладающие полной дееспособностью.</p>
+                  <p><strong>Состояние здоровья:</strong> отсутствие заболеваний, состояний и форм рискованного поведения, при которых донация противопоказана (временно или постоянно).</p>
+               </div>
+            </AccordionItem>
+
+            <AccordionItem title="Противопоказания к донорству">
+              <div className="space-y-4 text-sm text-slate-600">
+                <p><strong>Временные противопоказания:</strong></p>
+                <ul className="list-disc list-inside space-y-1">
+                    <li>Острая респираторная инфекция — через 15 суток после выздоровления.</li>
+                    <li>Грипп, COVID-19 — через 1 месяц.</li>
+                    <li>Пневмония (средней и тяжёлой степени) — через 6 месяцев.</li>
+                    <li>Приём антибиотиков — за 10 дней до донации.</li>
+                    <li>Приём салицилатов и анальгетиков — за 5 дней.</li>
+                    <li>Алкоголь и пиво — за 48 часов.</li>
+                    <li>Курение — за 2 часа.</li>
+                    <li>Прививки инактивированными вакцинами — через 10 суток; живыми — через 30 суток.</li>
+                    <li>Татуировка, пирсинг, перманентный макияж — через 6 месяцев.</li>
+                    <li>Травма — не ранее 3 месяцев после выздоровления.</li>
+                    <li>Оперативное вмешательство — через 6 месяцев (кроме протезирования суставов).</li>
+                    <li>След от венепункции в локтевом сгибе без документа — 7 суток.</li>
+                </ul>
+              </div>
+            </AccordionItem>
+
+            <AccordionItem title="Как подготовиться к сдаче крови">
+                <div className="space-y-2 text-sm text-slate-600">
+                    <p><strong>За 10 дней</strong> — воздержаться от приёма антибактериальных медицинских препаратов.</p>
+                    <p><strong>За 5 дней</strong> — от салицилатов и аналгетиков.</p>
+                    <p><strong>За 48 часов</strong> — от приёма алкогольных (слабоалкогольных) напитков и пива.</p>
+                    <p><strong>За 2 часа</strong> — от курения.</p>
+                    <p><strong>Режим питания:</strong></p>
+                    <p>Исключить: жирную, жареную, острую, копчёную пищу, молочные продукты, яйца, масло, бананы, цитрусовые, орехи, семечки.</p>
+                    <p>Разрешено: сладкий чай, варенье, хлеб, сухари, сушки, отварные крупы, макароны на воде без масла, рыба на пару, соки, морсы, компоты, минеральная вода, овощи, фрукты (кроме цитрусовых и бананов).</p>
+                    <p>На голодный желудок проходить донацию не рекомендуется.</p>
+                    <p>Не планировать донацию перед экзаменами, соревнованиями, интенсивной работой, перед/после работы в горячих цехах и ночью.</p>
+                </div>
+            </AccordionItem>
+
+            <AccordionItem title="Что происходит во время сдачи крови">
+              <div className="space-y-2 text-sm text-slate-600">
+                <p>1. <strong>Регистрация.</strong> При первичном обращении оформляются учётная карточка, медицинский документ донора, карта-анкета. При повторных — только карта-анкета.</p>
+                <p>2. <strong>Заполнение карты-анкеты.</strong> Донор отвечает на вопросы и подписывает добровольное согласие на забор крови.</p>
+                <p>3. <strong>Клинико-лабораторные исследования.</strong></p>
+                <p>4. <strong>Медицинский осмотр.</strong> Врач оценивает анамнез, проводит осмотр, измеряет:</p>
+                <p className="pl-4">Артериальное давление: систолическое 100–159 мм рт. ст., диастолическое 70–99 мм рт. ст.<br/>
+                   Пульс: ритмичный, 55–100 ударов в минуту.<br/>
+                   Температура: 36–37°C.</p>
+                <p>5. <strong>Приём завтрака.</strong></p>
+                <p>6. <strong>Процедура донации.</strong> Заготовка крови в количестве 450 мл ± 10%. До 40 мл забирается для анализов (ВИЧ, гепатит B и C, сифилис и др.). Продолжительность — 10–15 минут. После процедуры накладывается асептическая давящая повязка на 4+ часа.</p>
+                <p>7. <strong>Наблюдение 30 минут после донации.</strong></p>
+                <p>8. <strong>Получение документов для гарантий и компенсаций.</strong></p>
+                <p>9. <strong>Получение компенсации на питание (при безвозмездной донации).</strong></p>
+              </div>
+            </AccordionItem>
+
+            <AccordionItem title="Польза донорства для здоровья">
+              <ul className="list-disc list-inside text-sm text-slate-600">
+                <li>Стимуляция кроветворения</li>
+                <li>Бесплатное обследование (ВИЧ, гепатит, сифилис)</li>
+                <li>Контроль состояния здоровья</li>
+              </ul>
+            </AccordionItem>
+
+            <AccordionItem title="Льготы доноров в Беларуси">
+                <div className="space-y-2 text-sm text-slate-600">
+                    <p><strong>Всем донорам:</strong></p>
+                    <ul className="list-disc list-inside ml-4">
+                        <li>Освобождение от работы/учёбы/военной службы в день донации с сохранением среднего заработка (денежного довольствия).</li>
+                        <li>Освобождение от работы на время медосмотра и дороги туда-обратно с сохранением заработка.</li>
+                        <li>Бесплатное питание или его компенсация.</li>
+                        <li>Возмещение расходов, связанных с выполнением донорской функции.</li>
+                    </ul>
+                    <p><strong>При 4+ донациях крови или 16+ донациях компонентов в течение 12 месяцев:</strong></p>
+                    <p>Пособие по временной нетрудоспособности назначается с первого дня в размере 100% среднедневного заработка (независимо от причины). <em>(Примечание: 1 донация крови приравнивается к 4 донациям компонентов)</em></p>
+                    <p><strong>При 20+ донациях крови или 40+ компонентов (безвозмездно), либо при 40+ крови или 80+ компонентов (с возмещением):</strong></p>
+                    <p>Награждение нагрудным знаком «Ганаровы донар Рэспублiкi Беларусь».</p>
+                    <p><strong>Льготы почётным донорам:</strong></p>
+                    <ul className="list-disc list-inside ml-4">
+                        <li>Скидка 25% на платные медицинские услуги в государственных организациях здравоохранения.</li>
+                        <li>Внеочередное медицинское обслуживание.</li>
+                        <li>Внеочередной приём в социальные учреждения стационарного типа.</li>
+                        <li>Первоочередной приём в государственных органах и иных организациях.</li>
+                        <li>Внеочередное пользование услугами связи, культурно-просветительских и спортивно оздоровительных организаций, приобретение билетов на транспорт, обслуживание в торговле и бытовом обслуживании.</li>
+                        <li>Использование трудового отпуска в удобное время + отпуск без сохранения заработной платы до 14 календарных дней в год.</li>
+                        <li>Повышение пенсии по достижении пенсионного возраста.</li>
+                    </ul>
+                </div>
+            </AccordionItem>
           </div>
 
-          {/* Temporary Medical Restriction Intervals */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-800 border-l-4 border-red-500 pl-3">Временные противопоказания и отводы:</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className="pb-2 font-medium">Причина отвода / Воздействие</th>
-                    <th className="pb-2 font-medium">Минимальный срок отвода</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-600">
-                  <tr>
-                    <td className="py-2.5">Перенесенное ОРВИ / Ангина</td>
-                    <td className="py-2.5 text-red-600 font-medium">15 дней после выздоровления</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5">Грипп, COVID-19, среднетяжелая пневмония</td>
-                    <td className="py-2.5 text-red-600 font-medium">1 месяц после выздоровления</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5">Прием антибиотиков</td>
-                    <td className="py-2.5 text-red-600 font-medium">10 дней после последнего приема</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5">Нанесение татуировок, пирсинг, перманентный макияж</td>
-                    <td className="py-2.5 text-red-600 font-medium">6 месяцев с момента процедуры</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5">Хирургические вмешательства (операции)</td>
-                    <td className="py-2.5 text-red-600 font-medium">6 месяцев со дня операции</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5">Употребление спиртных напитков и пива</td>
-                    <td className="py-2.5 text-red-600 font-medium">48 часов перед кроводачей</td>
-                  </tr>
-                  <tr>
-                    <td className="py-2.5">Курение сигарет / вейпов</td>
-                    <td className="py-2.5 text-red-600 font-medium">2 часа до и после процедуры</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          {/* Intervals between donations */}
-          <div className="bg-red-50/50 p-5 rounded-2xl border border-red-100/50 space-y-3">
-            <h4 className="font-semibold text-slate-800 text-base">Интервалы между донациями (Постановление № 80):</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-600">
-              <div className="bg-white p-3 rounded-xl border border-red-100">
-                <span className="font-semibold text-red-700 block text-sm mb-1">60 дней</span>
-                Стандартный интервал после сдачи цельной крови до следующей сдачи крови.
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-red-100">
-                <span className="font-semibold text-red-700 block text-sm mb-1">90 дней!</span>
-                <strong>Правило 5-й донации:</strong> После каждой 5-й кроводачи минимальный интервал увеличивается до 90 дней для восстановления суставов и депо железа.
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-red-100">
-                <span className="font-semibold text-red-700 block text-sm mb-1">14 дней</span>
-                Срок восстановления после афереза плазмы или тромбоцитов.
-              </div>
-            </div>
-          </div>
-
-          {/* Benefits in BY */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-800 border-l-4 border-red-500 pl-3">Льготы и компенсации в Республике Беларусь:</h3>
-            <ul className="space-y-3 text-sm text-slate-600">
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-emerald-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span><strong>Освобождение от работы:</strong> Донору гарантируется предоставление освобождения от работы или учебы в день кроводачи с сохранением среднего заработка.</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-emerald-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span><strong>Больничный 100%:</strong> При совершении 4+ кроводач (или 16 донаций компонентов) за 12 месяцев, больничный лист оплачивается в размере 100% с первого дня болезни.</span>
-              </li>
-              <li className="flex items-start">
-                <Check className="w-5 h-5 text-emerald-500 mr-2 flex-shrink-0 mt-0.5" />
-                <span><strong>Знак почетного донора:</strong> Безвозмездная сдача крови 20 и более раз гарантирует награждение знаком «Ганаровы донар Рэспублiкi Беларусь» и пожизненные скидки 25% на платные медуслуги во всех госклиниках страны.</span>
-              </li>
-            </ul>
-          </div>
         </div>
       )}
 
@@ -473,38 +509,26 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
             <p className="text-sm text-slate-500">Какие документы взять с собой на станцию переливания крови.</p>
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-base font-semibold text-slate-800 border-b pb-2">Перечень личных документов</h3>
-            <div className="space-y-3 text-sm text-slate-600">
-              <div className="p-3 bg-slate-50 rounded-lg flex justify-between items-center border border-slate-100">
-                <div>
-                  <p className="font-medium text-slate-800">1. Паспорт гражданина Республики Беларусь</p>
-                  <p className="text-xs text-slate-500">Удостоверение личности обязательно для входа на любой режимный объект</p>
-                </div>
-                <span className="text-xs font-semibold text-red-600 bg-red-50 px-2.5 py-1 rounded-full">Обязательно</span>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-lg flex justify-between items-center border border-slate-100">
-                <div>
-                  <p className="font-medium text-slate-800">2. Выписка из медицинской карты с печатью терапевта</p>
-                  <p className="text-xs text-slate-500">Запрашивается по месту жительства донора (срок действия - 12 месяцев)</p>
-                </div>
-                <span className="text-xs font-semibold text-red-600 bg-red-50 px-2.5 py-1 rounded-full">Обязательно</span>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-lg flex justify-between items-center border border-slate-100">
-                <div>
-                  <p className="font-medium text-slate-800">3. Результат флюорографического исследования</p>
-                  <p className="text-xs text-slate-500">Проходится раз в 12 месяцев по месту учебы, жительства или работы</p>
-                </div>
-                <span className="text-xs font-semibold text-red-600 bg-red-50 px-2.5 py-1 rounded-full">Обязательно</span>
-              </div>
-              <div className="p-3 bg-slate-50 rounded-lg flex justify-between items-center border border-slate-100">
-                <div>
-                  <p className="font-medium text-slate-800">4. Военный билет или приписное свидетельство</p>
-                  <p className="text-xs text-slate-500">Предоставляется военнообязанными гражданами при первой регистрационной процедуре</p>
-                </div>
-                <span className="text-xs font-semibold text-slate-500 bg-slate-200/50 px-2.5 py-1 rounded-full">При наличии</span>
-              </div>
-            </div>
+          <div className="space-y-6">
+            <h3 className="text-base font-semibold text-slate-800 border-b pb-2">Первичная донация</h3>
+            <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
+              <li>Паспорт гражданина РБ (или иной документ, удостоверяющий личность: вид на жительство, удостоверение беженца).</li>
+              <li>Военный билет или удостоверение призывника (при наличии).</li>
+              <li>Выписка из медицинской документации о состоянии здоровья.</li>
+              <li>Результат флюорографического (рентгенологического, КТ) исследования органов грудной клетки.</li>
+              <li>Результаты осмотра врачом-гинекологом (для женщин).</li>
+              <li>Данные электрокардиографического исследования (для доноров компонентов методом афереза).</li>
+            </ul>
+
+            <h3 className="text-base font-semibold text-slate-800 border-b pb-2 mt-6">Повторная донация</h3>
+            <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
+              <li>Паспорт (или аналогичный документ).</li>
+              <li>Карта-анкета донора.</li>
+              <li>Выписка из медицинской документации — 1 раз в 12 месяцев.</li>
+              <li>Результат флюорографии — 1 раз в 12 месяцев.</li>
+              <li>Осмотр врачом-гинекологом — 1 раз в 12 месяцев (для женщин).</li>
+              <li>ЭКГ — 1 раз в 12 месяцев (для доноров компонентов методом афереза).</li>
+            </ul>
           </div>
 
           <div className="space-y-4 pt-4">
