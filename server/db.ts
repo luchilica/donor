@@ -22,10 +22,10 @@ const INITIAL_CENTERS: BloodCenter[] = [
     id: 1,
     name: "ГУ «РНПЦ трансфузиологии и медицинских биотехнологий» (Минск)",
     address: "г. Минск, ул. Долгиновский тракт, д. 160",
-    phone: "+375 (17) 289-86-40",
-    email: "rnpc@blood.by",
+    phone: "+375 29 390-84-84",
+    email: "branch@blood.by",
     workingHours: "Пн-Пт: 08:00 - 16:00, Сб: 08:30 - 13:00",
-    mapLink: "https://yandex.by/maps/-/CCUf68beDA",
+    mapLink: "https://yandex.by/maps/-/CPdxaM7D",
     eRegistrationLink: "https://form.blood.by",
     createdAt: new Date().toISOString()
   },
@@ -33,10 +33,10 @@ const INITIAL_CENTERS: BloodCenter[] = [
     id: 2,
     name: "ГУЗ «Витебский областной центр трансфузиологии»",
     address: "г. Витебск, ул. Фрунзе, д. 71",
-    phone: "+375 (212) 24-03-80",
-    email: "voct@bankblood-vitebsk.by",
+    phone: "+375 21 248-03-80",
+    email: "vospk@vitebsk.by",
     workingHours: "Пн-Пт: 08:00 - 15:30",
-    mapLink: "https://yandex.by/maps/-/CCUf68beDA",
+    mapLink: "https://yandex.by/maps/-/CPdxa0Pb",
     eRegistrationLink: "https://bankblood-vitebsk.by",
     createdAt: new Date().toISOString()
   },
@@ -44,11 +44,11 @@ const INITIAL_CENTERS: BloodCenter[] = [
     id: 3,
     name: "ГУ «Брестская областная станция переливания крови»",
     address: "г. Брест, ул. Медицинская, д. 2",
-    phone: "+375 (162) 28-53-01",
-    email: "bospk@brest.by",
+    phone: "+375 16 228-53-81",
+    email: "bospk@bospk.by",
     workingHours: "Пн-Пт: 08:00 - 16:30",
-    mapLink: "https://yandex.by/maps/-/CCUf68beDA",
-    eRegistrationLink: "https://tutmed.by",
+    mapLink: "https://yandex.by/maps/-/CPdxmYnF",
+    eRegistrationLink: "https://bospk.by/",
     createdAt: new Date().toISOString()
   },
   {
@@ -56,20 +56,20 @@ const INITIAL_CENTERS: BloodCenter[] = [
     name: "УЗ «Мозырская станция переливания крови»",
     address: "г. Мозырь, ул. Нагорная, д. 56А",
     phone: "+375 (236) 24-74-12",
-    email: "mozyr@mozyrdonor.by",
+    email: "mail@mozyrdonor.by",
     workingHours: "Пн-Пт: 08:00 - 15:00",
-    mapLink: "https://yandex.by/maps/-/CCUf68beDA",
+    mapLink: "https://yandex.by/maps/-/CPd3bI4G",
     eRegistrationLink: "https://mozyrdonor.by",
     createdAt: new Date().toISOString()
   },
   {
     id: 5,
     name: "УЗ «Рогачевская станция переливания крови»",
-    address: "г. Рогачев, ул. Октябрьская, д. 33",
-    phone: "+375 (233) 92-12-88",
-    email: "rspk@rogachev.by",
+    address: "г. Рогачев, ул. Октябрьская, д. 31",
+    phone: "+375 23 392-79-50",
+    email: "info@rspk.by",
     workingHours: "Пн-Пт: 08:00 - 16:00",
-    mapLink: "https://yandex.by/maps/-/CCUf68beDA",
+    mapLink: "https://yandex.by/maps/-/CPd3RCZR",
     eRegistrationLink: "http://rspk.by",
     createdAt: new Date().toISOString()
   },
@@ -77,10 +77,10 @@ const INITIAL_CENTERS: BloodCenter[] = [
     id: 6,
     name: "УЗ «Могилевская областная станция переливания крови»",
     address: "г. Могилев, ул. Пионерская, д. 17",
-    phone: "+375 (222) 25-30-24",
-    email: "mospk@mogilev.by",
+    phone: "+375 22 278-14-22",
+    email: "mospk@mospk.by",
     workingHours: "Пн-Пт: 08:00 - 16:00",
-    mapLink: "https://yandex.by/maps/-/CCUf68beDA",
+    mapLink: "https://yandex.by/maps/-/CPdxqOkz",
     eRegistrationLink: "https://mospk.by",
     createdAt: new Date().toISOString()
   },
@@ -88,76 +88,398 @@ const INITIAL_CENTERS: BloodCenter[] = [
     id: 7,
     name: "УЗ «Бобруйская зональная станция переливания крови»",
     address: "г. Бобруйск, ул. Пушкина, д. 206А",
-    phone: "+375 (225) 72-00-50",
-    email: "bzspk@bobruisk.by",
+    phone: "+375 22 573-46-70",
+    email: "info@bzspk.by",
     workingHours: "Пн-Пт: 08:00 - 15:30",
-    mapLink: "https://yandex.by/maps/-/CCUf68beDA",
+    mapLink: "https://yandex.by/profile/-/CPdxuJ20",
     eRegistrationLink: "http://bzspk.by",
     createdAt: new Date().toISOString()
   },
-  // Adding regional centers to complete 40+ medical centers of Belarus (6 oblasts)
-  // MINSK OBLAST
-  ...[
-    { id: 8, name: "Борисовская станция переливания крови", address: "г. Борисов, ул. Лопатина, д. 172", phone: "+375 (177) 76-21-42" },
-    { id: 9, name: "Молодечненская станция переливания крови", address: "г. Молодечно, ул. Чкалова, д. 3", phone: "+375 (176) 58-13-11" },
-    { id: 10, name: "Солигорская станция переливания крови", address: "г. Солигорск, ул. Козлова, д. 6", phone: "+375 (174) 26-38-09" },
-    { id: 11, name: "Слуцкая станция переливания крови", address: "г. Слуцк, ул. Чайковского, д. 21", phone: "+375 (179) 55-23-01" },
-  ].map((c, i) => ({ ...c, email: `c${8+i}@blood.by`, workingHours: "Пн-Пт: 08:00 - 15:00", mapLink: "https://yandex.by", createdAt: new Date().toISOString() })),
-  
-  // BREST OBLAST
-  ...[
-    { id: 12, name: "Барановичская станция переливания крови", address: "г. Барановичи, ул. 50-лет ВЛКСМ, д. 4А", phone: "+375 (163) 49-21-39" },
-    { id: 13, name: "Пинская станция переливания крови", address: "г. Пинск, ул. Горького, д. 43", phone: "+375 (165) 31-61-02" },
-    { id: 14, name: "Кобринская станция переливания крови", address: "г. Кобрин, ул. Советская, д. 111", phone: "+375 (164) 22-12-32" },
-  ].map((c, i) => ({ ...c, email: `c${12+i}@blood.by`, workingHours: "Пн-Пт: 08:00 - 15:30", mapLink: "https://yandex.by", createdAt: new Date().toISOString() })),
-
-  // VITEBSK OBLAST
-  ...[
-    { id: 15, name: "Оршанская станция переливания крови", address: "г. Орша, ул. Пионерская, д. 15", phone: "+375 (216) 51-24-11" },
-    { id: 16, name: "Новополоцкая станция переливания крови", address: "г. Новополоцк, ул. Больничная, д. 4", phone: "+375 (214) 50-11-20" },
-    { id: 17, name: "Полоцкая станция переливания крови", address: "г. Полоцк, ул. Коммунистическая, д. 23", phone: "+375 (214) 42-24-30" },
-  ].map((c, i) => ({ ...c, email: `c${15+i}@blood.by`, workingHours: "Пн-Пт: 08:00 - 16:00", mapLink: "https://yandex.by", createdAt: new Date().toISOString() })),
-
-  // GOMEL OBLAST
-  ...[
-    { id: 18, name: "Гомельский областной госпиталь ИВ - ОПК", address: "г. Гомель, ул. Ильича, д. 286", phone: "+375 (232) 36-12-88" },
-    { id: 19, name: "Гомельская областная станция переливания крови", address: "г. Гомель, ул. Демьяна Бедного, д. 2", phone: "+375 (232) 53-98-32" },
-    { id: 20, name: "Речицкая центральная районная больница - ОПК", address: "г. Речица, ул. Трифонова, д. 117", phone: "+375 (234) 06-23-45" },
-    { id: 21, name: "Светлогорская станция переливания крови", address: "г. Светлогорск, ул. Свердлова, д. 8", phone: "+375 (234) 27-09-10" },
-    { id: 22, name: "Жлобинская ЦРБ - Отделение переливания крови", address: "г. Жлобин, ул. Воровского, д. 1", phone: "+375 (233) 42-28-11" },
-  ].map((c, i) => ({ ...c, email: `c${18+i}@blood.by`, workingHours: "Пн-Пт: 08:30 - 14:30", mapLink: "https://yandex.by", createdAt: new Date().toISOString() })),
-
-  // GRODNO OBLAST
-  ...[
-    { id: 23, name: "Гродненская областная станция переливания крови", address: "г. Гродно, ул. Кабяка, д. 22", phone: "+375 (152) 31-54-04" },
-    { id: 24, name: "Лидская станция переливания крови", address: "г. Лида, ул. Черняховского, д. 1", phone: "+375 (154) 52-94-11" },
-    { id: 25, name: "Слонимская ЦРБ - ОПК", address: "г. Слоним, ул. Войкова, д. 51А", phone: "+375 (156) 22-10-14" },
-    { id: 26, name: "Волковысская ЦРБ - ОПК", address: "г. Волковыск, ул. Горбатова, д. 1", phone: "+375 (151) 25-90-23" },
-    { id: 27, name: "Сморгонская ЦРБ - ОПК", address: "г. Сморгонь, ул. Первомайская, д. 60", phone: "+375 (159) 23-89-21" },
-  ].map((c, i) => ({ ...c, email: `c${23+i}@blood.by`, workingHours: "Пн-Пт: 08:00 - 15:00", mapLink: "https://yandex.by", createdAt: new Date().toISOString() })),
-
-  // MOGILEV OBLAST + OTHER DISTRICTS TO FIT 40+ CLINICS IN BELARUS
-  ...[
-    { id: 28, name: "Горецкая центральная районная больница - ОПК", address: "г. Горки, ул. Кирова, д. 18", phone: "+375 (223) 37-12-32" },
-    { id: 29, name: "Кричевская ЦРБ - ОПК", address: "г. Кричев, ул. Ленинская, д. 72", phone: "+375 (224) 15-60-23" },
-    { id: 30, name: "Осиповичская ЦРБ - ОПК", address: "г. Осиповичи, ул. Октябрьская, д. 2", phone: "+375 (223) 57-19-14" },
-  ].map((c, i) => ({ ...c, email: `c${28+i}@blood.by`, workingHours: "Пн-Пт: 08:00 - 15:30", mapLink: "https://yandex.by", createdAt: new Date().toISOString() })),
-
-  // MORE REPRESENTATIVE CLINICS ACROSS MINSK AND REGIONS
-  ...[
-    { id: 31, name: "Минская областная клиническая больница - ОПК", address: "Минский р-н, пос. Лесной, д. 1", phone: "+375 (17) 265-22-26" },
-    { id: 32, name: "Городской трансфузиологический кабинет (Минск, 6-я ГКБ)", address: "г. Минск, ул. Уральская, д. 5", phone: "+375 (17) 398-90-67" },
-    { id: 33, name: "ОПК Минской ЦРБ (Минский р-н)", address: "г. Минск, ул. Фрунзе, д. 1", phone: "+375 (17) 508-11-23" },
-    { id: 34, name: "Жодинская ЦГБ - ОПК", address: "г. Жодино, ул. Радищева, д. 2", phone: "+375 (177) 56-38-04" },
-    { id: 35, name: "Несвижская ЦРБ - ОПК", address: "г. Несвиж, ул. Сырокомли, д. 29", phone: "+375 (177) 02-30-24" },
-    { id: 36, name: "Вилейская ЦРБ - ОПК", address: "г. Вилейка, ул. Маркова, д. 27", phone: "+375 (177) 15-51-11" },
-    { id: 37, name: "Речицкая ЦРБ - Филиал переливания крови", address: "г. Речица, ул. Пушкина, д. 45", phone: "+375 (234) 09-90-11" },
-    { id: 38, name: "Калинковичская ЦРБ - ОПК", address: "г. Калинковичи, ул. Князева, д. 3", phone: "+375 (234) 53-12-89" },
-    { id: 39, name: "Добрушская ЦРБ - ОПК", address: "г. Добруш, ул. Комарова, д. 10", phone: "+375 (233) 37-12-55" },
-    { id: 40, name: "Хойникская ЦРБ - ОПК", address: "г. Хойники, ул. Советская, д. 129", phone: "+375 (233) 02-12-78" },
-    { id: 41, name: "Лунинецкая ЦРБ - ОПК", address: "г. Лунинец, ул. Красная, д. 104", phone: "+375 (164) 73-12-80" },
-    { id: 42, name: "Берёзовская ЦРБ - ОПК", address: "г. Берёза, ул. Ленина, д. 1", phone: "+375 (164) 33-14-15" },
-  ].map((c) => ({ ...c, email: `c${c.id}@blood.by`, workingHours: "Пн-Пт: 08:30 - 15:30", mapLink: "https://yandex.by", createdAt: new Date().toISOString() }))
+  {
+    id: 8,
+    name: "Борисовская станция переливания крови",
+    address: "г. Борисов, ул. 8 Марта д.11",
+    phone: "+375 17 794-37-01",
+    email: "kancelaria@borisov-crb.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPdxBMlA",
+    eRegistrationLink: "https://borcrb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 9,
+    name: "Молодечненская станция переливания крови",
+    address: "Молодечно, ул. Чкалова, 2В",
+    phone: "+375 17 674-97-08",
+    email: "info@omispk.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPdxJP29",
+    eRegistrationLink: "https://omispk.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 10,
+    name: "Солигорская станция переливания крови",
+    address: "Солигорск, ул. Коржа, 1",
+    phone: "+375 17 424-92-61",
+    email: "solcrb@soligorskcrb.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPdxRHLa",
+    eRegistrationLink: "https://soligorskcrb.by/podrazdelenija-crb/medicisnkie-uchrezhdenija-g-soligorska/jendoskopicheskoe-otdelenie-s-uzi-diagnostikoj/otdelenie-perelivanija-krovi-transfuziologii/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 11,
+    name: "Слуцкая станция переливания крови",
+    address: "г. Слуцк, ул. Чайковского, д. 21",
+    phone: "+375 17 957-17-48",
+    email: "info@slcrb.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPdxZLoq",
+    eRegistrationLink: "https://slcrb.by/podrazdeleniya/stantsiya-perelivaniya-krovi/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 12,
+    name: "Барановичская станция переливания крови",
+    address: "г. Барановичи, ул. 50-лет ВЛКСМ, д. 4Д",
+    phone: "+375 16 364-48-28",
+    email: "spk@barcp.by",
+    workingHours: "Пн-Пт: 08:00 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPdxbQ86",
+    eRegistrationLink: "https://barcp.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 13,
+    name: "Пинская станция переливания крови",
+    address: "г. Пинск, ул. Горького, д. 43",
+    phone: "+375 16 565-32-05",
+    email: "cp_pinsk@pcp.by",
+    workingHours: "Пн-Пт: 08:00 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPdxb-I7",
+    eRegistrationLink: "https://pcp.by/stancija-perelivanija-krovi/obshhaja-informacija/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 14,
+    name: "Кобринская станция переливания крови",
+    address: "г. Кобрин, ул. Советская, д. 132",
+    phone: "+375 16 422-58-00",
+    email: "tmo@kobrincrb.by",
+    workingHours: "Пн-Пт: 08:00 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPdxj-kG",
+    eRegistrationLink: "https://kobrincrb.by/podrazdeleniya/bolnicza/otdelenie-transfuziologii/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 15,
+    name: "Оршанская станция переливания крови",
+    address: "г. Орша, ул. Оршично-Набережная, д. 1",
+    phone: "+375 21 651-60-73",
+    email: "o-voct@bankblood-vitebsk.by",
+    workingHours: "Пн-Пт: 08:00 - 16:00",
+    mapLink: "https://yandex.by/maps/-/CPdxnX6R",
+    eRegistrationLink: "https://bankblood-vitebsk.by/filial-2-g-orsha/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 16,
+    name: "Новополоцкая станция переливания крови",
+    address: "г. Новополоцк, ул. Гайдарова, д. 4В",
+    phone: "+375 21 450-62-60",
+    email: "n-voct@bankblood-vitebsk.by",
+    workingHours: "Пн-Пт: 08:00 - 16:00",
+    mapLink: "https://yandex.by/maps/-/CPdxr86R",
+    eRegistrationLink: "https://bankblood-vitebsk.by/filial-1-g-novopoloczk/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 17,
+    name: "Полоцкая станция переливания крови",
+    address: "г. Полоцк, ул. Нижне-Покровская, д. 41",
+    phone: "+375 21 443-63-75",
+    email: "p-voct@bankblood-vitebsk.by",
+    workingHours: "Пн-Пт: 08:00 - 16:00",
+    mapLink: "https://yandex.by/maps/-/CPdxv8OB",
+    eRegistrationLink: "https://bankblood-vitebsk.by/filial-3-g-poloczk/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 18,
+    name: "Гомельский областной госпиталь ИВ - ОПК",
+    address: "г. Гомель, ул. Ильича, д. 286Б",
+    phone: "+375 23 253-98-32",
+    email: "ggkb3@ggkb3.by",
+    workingHours: "Пн-Пт: 08:30 - 14:30",
+    mapLink: "https://yandex.by/maps/-/CPd3QW3~",
+    eRegistrationLink: "https://www.ggkb3.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 19,
+    name: "Гомельская областная станция переливания крови",
+    address: "г. Гомель, ул. Демьяна Бедного, д. 2",
+    phone: "+375 23 234-72-51",
+    email: "reghosp@gokb.by",
+    workingHours: "Пн-Пт: 08:30 - 14:30",
+    mapLink: "https://yandex.by/maps/-/CPd3YQoB",
+    eRegistrationLink: "https://gokb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 20,
+    name: "Речицкая центральная районная больница - ОПК",
+    address: "г. Речица, ул. Трифонова, д. 117",
+    phone: "+375 23 404-46-34",
+    email: "rcrb@rechitsa.by",
+    workingHours: "Пн-Пт: 08:30 - 14:30",
+    mapLink: "https://yandex.by/maps/-/CPd3mRJo",
+    eRegistrationLink: "https://www.med.rechitsa.by/index.php/struktura/drygie-otd/otdelenie-transfuziologii",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 21,
+    name: "Светлогорская станция переливания крови",
+    address: "г. Светлогорск, ул. Свердлова, д. 8",
+    phone: "+375 23 427-69-00",
+    email: "svetlcge@mail.gomel.by",
+    workingHours: "Пн-Пт: 08:30 - 14:30",
+    mapLink: "https://yandex.by/maps/-/CPd35GYH",
+    eRegistrationLink: "https://www.svetlcge.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 22,
+    name: "Жлобинская ЦРБ - Отделение переливания крови",
+    address: "г. Жлобин, ул. Воровского, д. 1",
+    phone: "+375 23 344-25-21",
+    email: "zhlcrb@zhlcrb.by",
+    workingHours: "Пн-Пт: 08:30 - 14:30",
+    mapLink: "https://yandex.by/maps/-/CPd3FAoZ",
+    eRegistrationLink: "https://zhlcrb.by/novost/1140-pamyatka-donoru",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 23,
+    name: "Гродненская областная станция переливания крови",
+    address: "г. Гродно, ул. Кабяка, д. 22",
+    phone: "+375 15 231-54-05",
+    email: "donor@mailgrodno.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPd3F84s",
+    eRegistrationLink: "https://donor.mailgrodno.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 24,
+    name: "Лидская станция переливания крови",
+    address: "г. Лида, ул. Кирова, д. 19",
+    phone: "+375 15 453-20-69",
+    email: "cancel@crblida.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPd3ZQ49",
+    eRegistrationLink: "https://crblida.by/index.php/informatsiya/donorstvo/prisoedinyajsya-k-donorskomu-dvizheniyu",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 25,
+    name: "Слонимская ЦРБ - ОПК",
+    address: "г. Слоним, ул. Войкова, д. 51А",
+    phone: "+375 15 626-59-68",
+    email: "c25@blood.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPd3jMNe",
+    eRegistrationLink: "https://slncrb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 26,
+    name: "Волковысская ЦРБ - ОПК",
+    address: "г. Волковыск, ул. Горбатова, д. 1",
+    phone: "+375 15 125-90-30",
+    email: "c26@blood.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPd3jK4U",
+    eRegistrationLink: "https://www.volrb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 27,
+    name: "Сморгонская ЦРБ - ОПК",
+    address: "г. Сморгонь, пер. Больничный, д. 13",
+    phone: "+375 15 922-49-07",
+    email: "c27@blood.by",
+    workingHours: "Пн-Пт: 08:00 - 15:00",
+    mapLink: "https://yandex.by/maps/-/CPd3vMz4",
+    eRegistrationLink: "http://smorgon-crb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 28,
+    name: "Горецкая центральная районная больница - ОПК",
+    address: "г. Горки, ул. Кирова, д. 18",
+    phone: "+375 22 335-40-11",
+    email: "c28@blood.by",
+    workingHours: "Пн-Пт: 08:00 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd3z2mQ",
+    eRegistrationLink: "https://gorkicrb.by/opkotdelenie-perelivaniya-krovi/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 29,
+    name: "Кричевская ЦРБ - ОПК",
+    address: "г. Кричев, ул. Ленинская, д. 70",
+    phone: "+375 22 412-72-80",
+    email: "c29@blood.by",
+    workingHours: "Пн-Пт: 08:00 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~AXlg",
+    eRegistrationLink: "https://krichev-crb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 30,
+    name: "Осиповичская ЦРБ - ОПК",
+    address: "г. Осиповичи, ул. Октябрьская, д. 2",
+    phone: "+375 22 357-05-80",
+    email: "c30@blood.by",
+    workingHours: "Пн-Пт: 08:00 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~IYLO",
+    eRegistrationLink: "https://ocrb.by/?ysclid=mq6bko9inj711418264",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 31,
+    name: "Минская областная клиническая больница - ОПК",
+    address: "Минский р-н, пос. Лесной, д. 1",
+    phone: "+375 17 265-25-58",
+    email: "c31@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~MHy0",
+    eRegistrationLink: "https://minsk-okb.by/otdelenia/hirurgia/perelivanie-krovi.html?ysclid=mq6bpffb8d321241165",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 32,
+    name: "Городской трансфузиологический кабинет (Минск, 6-я ГКБ)",
+    address: "г. Минск, ул. Уральская, д. 5",
+    phone: "+375 17 239-59-13",
+    email: "c32@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~UMM~",
+    eRegistrationLink: "https://mcct.by/?ysclid=mq6bq5498y845565086",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 33,
+    name: "ОПК Минской ЦРБ (Минский р-н)",
+    address: "д. Боровляны, ул. Фрунзенская, д. 1А, корп. 6",
+    phone: "+375 17 505-27-33",
+    email: "c33@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~YDJ7",
+    eRegistrationLink: "https://mcrb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 34,
+    name: "Жодинская ЦГБ - ОПК",
+    address: "г. Жодино, пр. Венисье, д. 1",
+    phone: "+375 17 753-49-05",
+    email: "c34@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~4W-v",
+    eRegistrationLink: "https://zhcgb.by/ru/otdelenie-transfuziologi?ysclid=mq6bvtjb81344566277",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 35,
+    name: "Несвижская ЦРБ - ОПК",
+    address: "г. Несвиж г.п. Городея, ул. Гагарина, д. 13",
+    phone: "+375 17 705-81-57",
+    email: "c35@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~aPjK",
+    eRegistrationLink: "https://nesvizh-hospital.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 36,
+    name: "Вилейская ЦРБ - ОПК",
+    address: "г. Вилейка, ул. Пионерская, д. 42",
+    phone: "+375 (177) 15-51-11",
+    email: "c36@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~mF6z",
+    eRegistrationLink: "https://vilcrb.by/",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 37,
+    name: "Речицкая ЦРБ - Филиал переливания крови",
+    address: "г. Речица, ул. Трифонова, д. 119",
+    phone: "+375 23 409-95-27",
+    email: "c37@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~qAJe",
+    eRegistrationLink: "https://med.rechitsa.by/index.php/struktura/drygie-otd/otdelenie-transfuziologii",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 38,
+    name: "Калинковичская ЦРБ - ОПК",
+    address: "г. Калинковичи, ул. Князева, д. 7",
+    phone: "+375 23 452-35-54",
+    email: "c38@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~uTLe",
+    eRegistrationLink: "https://kcrb.by/o-nas/otdeleniya?ysclid=mq6c3lswf9789109011",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 39,
+    name: "Добрушская ЦРБ - ОПК",
+    address: "г. Добруш, ул. Чапаева, д. 3",
+    phone: "+375 23 332-30-37",
+    email: "c39@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~y86y",
+    eRegistrationLink: "https://dcrb.by/o-nas/podrazdeleniya/okpp.html?view=article&id=29&catid=15&ysclid=mq6c5wtz9l30973914",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 40,
+    name: "Хойникская ЦРБ - ОПК",
+    address: "г. Хойники, ул. Мира, д. 1",
+    phone: "+375 23 464-13-25",
+    email: "c40@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~5T~n",
+    eRegistrationLink: "https://khoiniki-crb.by//ysclid=mq6c799ww2888243320",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 41,
+    name: "Лунинецкая ЦРБ - ОПК",
+    address: "г. Лунинец, ул. Максима Богдановича, д. 4",
+    phone: "+375 16 476-27-82",
+    email: "c41@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~FQpu",
+    eRegistrationLink: "https://lncrb.by/kontakty/vse-kontaktnye-nomera-telefonov?ysclid=mq6c9gw3zj347592647",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 42,
+    name: "Берёзовская ЦРБ - ОПК",
+    address: "г. Берёза, ул. Ленина, д. 1",
+    phone: "+375 16 433-00-69",
+    email: "c42@blood.by",
+    workingHours: "Пн-Пт: 08:30 - 15:30",
+    mapLink: "https://yandex.by/maps/-/CPd~F2Mp",
+    eRegistrationLink: "http://www.crbbrz.by/",
+    createdAt: new Date().toISOString()
+  },
 ];
 
 // Seed initial users

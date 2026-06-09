@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, FileText, Phone, MapPin, Calendar, 
-  ChevronRight, LogIn, UserPlus, HelpCircle, Check, Search, Download
+  ChevronRight, LogIn, UserPlus, HelpCircle, Check, Search, Download, User,
+  Bell, Send
 } from 'lucide-react';
 import { BloodCenter, News, BloodGroup, RhFactor, Gender } from '../types';
 
@@ -185,7 +186,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                           c.address.toLowerCase().includes(centerSearch.toLowerCase());
     
     if (regionFilter === 'all') return matchesSearch;
-    if (regionFilter === 'minsk') return matchesSearch && (c.address.includes('Минск') || c.name.includes('Минск') || c.id === 1 || c.id === 31 || c.id === 32 || c.id === 33);
+    if (regionFilter === 'minsk') return matchesSearch && [1, 32].includes(c.id);
+    if (regionFilter === 'minsk-region') return matchesSearch && [8, 9, 10, 11, 31, 33, 34, 35, 36].includes(c.id);
     if (regionFilter === 'brest') return matchesSearch && (c.address.includes('Брест') || c.name.includes('Брест') || c.id === 3 || (c.id >= 12 && c.id <= 14) || c.id === 41 || c.id === 42);
     if (regionFilter === 'vitebsk') return matchesSearch && (c.address.includes('Витебск') || c.name.includes('Витебск') || c.id === 2 || (c.id >= 15 && c.id <= 17));
     if (regionFilter === 'gomel') return matchesSearch && (c.address.includes('Гомель') || c.name.includes('Мозырь') || c.name.includes('Рогачев') || c.id === 4 || c.id === 5 || (c.id >= 18 && c.id <= 22) || (c.id >= 37 && c.id <= 40));
@@ -205,9 +207,9 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
               Спаси жизнь — стань <strong className="font-semibold">донором крови</strong> в Беларуси
             </h1>
             <p className="text-lg text-rose-100 font-light mb-8 max-w-2xl">
-              «Донор-Алерт» — современная система оповещения доноров. Мы связываем региональные центры переливания крови РБ с донорами для мгновенного закрытия экстренных дефицитов.
+              «Донор-Алерт» – современная система оповещения доноров. Мы связываем региональные центры переливания крови РБ с донорами для мгновенного закрытия экстренных дефицитов.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 mb-8">
               <button 
                 onClick={() => {
                   setRegStep(1);
@@ -220,16 +222,68 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                 }}
                 className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
               >
-                <UserPlus className="w-5 h-5 mr-2" />
-                Зарегистрироваться как донор
+                <Heart className="w-5 h-5 mr-2" />
+                Стать донором
               </button>
               <button 
                 onClick={() => setShowAuthModal('login')}
                 className="bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:border-white/60 hover:shadow-lg flex items-center"
               >
-                <LogIn className="w-5 h-5 mr-2" />
+                <User className="w-5 h-5 mr-2" />
                 Личный кабинет
               </button>
+            </div>
+
+            <hr className="border-white/20 mb-8" />
+
+            <div className="flex flex-wrap gap-8 md:gap-12">
+              <div>
+                <motion.span 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="text-3xl md:text-4xl font-bold whitespace-nowrap block mb-1"
+                >
+                  {totalDonorsCount}+
+                </motion.span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Доноров</span>
+              </div>
+              
+              <div>
+                <motion.span 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  className="text-3xl md:text-4xl font-bold whitespace-nowrap block mb-1"
+                >
+                  42
+                </motion.span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Центра РБ</span>
+              </div>
+              
+              <div>
+                <motion.span 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  transition={{ delay: 0.4, duration: 0.5 }}
+                  className="text-3xl md:text-4xl font-bold whitespace-nowrap block mb-1"
+                >
+                  3
+                </motion.span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Канала связи</span>
+              </div>
+
+              <div>
+                <motion.span 
+                  initial={{ opacity: 0 }} 
+                  animate={{ opacity: 1 }} 
+                  transition={{ delay: 0.5, duration: 0.5 }}
+                  className="text-3xl md:text-4xl font-bold whitespace-nowrap block mb-1"
+                >
+                  100%
+                </motion.span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Нормы МЗ РБ</span>
+              </div>
             </div>
           </div>
         </div>
@@ -331,58 +385,51 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Sidebar panel */}
-          <div className="w-full space-y-6">
-
-            {/* Quick Stats sidebar widget */}
-            <motion.div 
-              className="bg-red-50 border border-red-100 p-6 rounded-2xl shadow-sm transition-all duration-500 ease-out hover:bg-red-100"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h4 className="text-xs uppercase tracking-wider text-red-600 font-semibold mb-4">Статистика системы</h4>
+            {/* Communication Channels */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-slate-800 mb-1 flex items-center">
+                <Heart className="w-5 h-5 text-red-500 mr-2" />
+                  Трёхканальная система оповещений
+                </h2>
+                
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div>
-                  <motion.span 
-                    initial={{ opacity: 0 }} 
-                    whileInView={{ opacity: 1 }} 
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="text-2xl font-semibold text-slate-900 block mb-1"
-                  >
-                    {totalDonorsCount}
-                  </motion.span>
-                  <span className="text-xs text-slate-700 font-medium leading-relaxed block">Доноров крови в экосистеме</span>
+                <div className="space-y-2 group cursor-default">
+                  <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
+                    <Bell className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-blue-700">Push-уведомления</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Мгновенно в браузер или на экран смартфона.
+                  </p>
                 </div>
                 
-                <div>
-                  <motion.span 
-                    initial={{ opacity: 0 }} 
-                    whileInView={{ opacity: 1 }} 
-                    transition={{ delay: 0.3, duration: 0.5 }}
-                    className="text-2xl font-semibold text-slate-900 block mb-1"
-                  >
-                    42
-                  </motion.span>
-                  <span className="text-xs text-slate-700 font-medium leading-relaxed block">Центров переливания по всей РБ</span>
+                <div className="space-y-2 group cursor-default">
+                  <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-green-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-green-700">SMS-сообщения</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Работает без интернета на любом телефоне.
+                  </p>
                 </div>
                 
-                <div>
-                  <motion.span 
-                    initial={{ opacity: 0 }} 
-                    whileInView={{ opacity: 1 }} 
-                    transition={{ delay: 0.4, duration: 0.5 }}
-                    className="text-2xl font-semibold text-slate-900 block mb-1"
-                  >
-                    100%
-                  </motion.span>
-                  <span className="text-xs text-slate-700 font-medium leading-relaxed block">Соответствие законодательству РБ</span>
+                <div className="space-y-2 group cursor-default">
+                  <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-rose-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
+                    <Send className="w-5 h-5" />
+                  </div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-rose-700">Email-рассылка</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Полные письма с деталями и ссылками.
+                  </p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
+
+
         </div>
       )}
 
@@ -444,7 +491,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                     <p><strong>Режим питания:</strong></p>
                     <p>Исключить: жирную, жареную, острую, копчёную пищу, молочные продукты, яйца, масло, бананы, цитрусовые, орехи, семечки.</p>
                     <p>Разрешено: сладкий чай, варенье, хлеб, сухари, сушки, отварные крупы, макароны на воде без масла, рыба на пару, соки, морсы, компоты, минеральная вода, овощи, фрукты (кроме цитрусовых и бананов).</p>
-                    <p>На голодный желудок проходить донацию не рекомендуется.</p>
+                    <p><strong className="font-semibold">На голодный желудок проходить донацию не рекомендуется.</strong></p>
                     <p>Не планировать донацию перед экзаменами, соревнованиями, интенсивной работой, перед/после работы в горячих цехах и ночью.</p>
                 </div>
             </AccordionItem>
@@ -581,7 +628,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
           <div className="flex flex-wrap gap-2 border-b pb-4 border-slate-100">
             {[
               { id: 'all', label: 'Все области' },
-              { id: 'minsk', label: 'Минск и обл.' },
+              { id: 'minsk', label: 'Минск' },
+              { id: 'minsk-region', label: 'Минская область' },
               { id: 'brest', label: 'Брестская область' },
               { id: 'vitebsk', label: 'Витебская область' },
               { id: 'gomel', label: 'Гомельская область' },
@@ -634,7 +682,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                   <a 
                     href={center.mapLink || "https://yandex.by/maps"} 
                     target="_blank" 
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline flex items-center"
                   >
                     Посмотреть на карте
