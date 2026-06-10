@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Calendar, Award, ShieldAlert, Clock, AlertTriangle, 
-  Settings, Check, Bell, RefreshCw, X, Plus, ExternalLink
+  Settings, Check, Bell, RefreshCw, X, Plus, ExternalLink,
+  Home, User, Link, Pause, MapPin, Download
 } from 'lucide-react';
 import { Donor, DonorCenter, Donation, MedicalNote, BloodCenter, formatBloodGroup, formatRhFactor, getGamificationStatus } from '../types';
 
@@ -18,7 +20,7 @@ interface DonorSectionProps {
 }
 
 export default function DonorSection({ donor, links, donations, medicalNotes, readiness, centers, onRefresh, apiBase, token }: DonorSectionProps) {
-  const [activeMenu, setActiveMenu] = useState<'dashboard' | 'history' | 'pause' | 'links' | 'settings'>('dashboard');
+  const [activeMenu, setActiveMenu] = useState<'dashboard' | 'profile' | 'history' | 'links' | 'pause' | 'notifications' | 'account'>('dashboard');
   const [refreshing, setRefreshing] = useState(false);
 
   // Set local pause states
@@ -153,6 +155,17 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   };
 
   // Calculate stats
+  const calcAge = (birthDateString: string) => {
+    const today = new Date();
+    const birthDate = new Date(birthDateString);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+  };
+
   const gameStatus = getGamificationStatus(donor.bloodDonationsCount);
   const homeCenter = centers.find(c => {
     const primaryLink = links.find(l => l.donorId === donor.id && l.isPrimary);
@@ -163,67 +176,64 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-8">
       {/* Side Profile Card & Inner Panel Menu */}
       <div className="md:col-span-1 space-y-6">
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative text-center">
+        <div className="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm relative text-center">
           {/* Avatar simulation icon */}
-          <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center font-bold text-lg mx-auto mb-3 border border-red-100">
+          <div className="w-[5rem] h-[5rem] bg-[#c23e2b] text-white rounded-[1.25rem] flex items-center justify-center font-extrabold text-[1.8rem] mx-auto mb-5 tracking-tight shadow-[0_8px_20px_rgba(194,62,43,0.15)] select-none">
             {donor.firstName[0]}{donor.lastName[0]}
           </div>
-          <h2 className="font-semibold text-slate-800 text-sm leading-tight">
-            {donor.lastName} {donor.firstName} {donor.middleName}
+          <h2 className="font-extrabold text-slate-800 text-[1.2rem] leading-tight mb-1 tracking-tight">
+            {donor.lastName} {donor.firstName}
           </h2>
-          <p className="text-[10px] text-slate-400 mt-0.5">В системе с {new Date(donor.createdAt).toLocaleDateString('ru-RU')}</p>
+          <p className="text-[13px] text-slate-400 font-medium">Статус: <span className={readiness.ready ? 'text-[#10b981]' : 'text-[#c23e2b]'}>{readiness.ready ? 'Активен' : 'Отвод'}</span></p>
 
-          <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-50">
-            <div className="bg-red-50/50 p-2 rounded-xl text-center">
-              <span className="text-xs text-rose-500 block">Группа крови</span>
-              <span className="font-bold text-red-700 text-sm">{formatBloodGroup(donor.bloodGroup)}</span>
+          <div className="grid grid-cols-2 gap-3.5 mt-6 mb-2">
+            <div className="bg-[#f8fafc] border border-slate-100 py-4 rounded-[1rem] flex flex-col items-center justify-center transition-colors hover:bg-[#f1f5f9]">
+              <span className="font-extrabold text-[#c23e2b] text-[1.4rem] tracking-tighter leading-none">{formatBloodGroup(donor.bloodGroup)}</span>
+              <span className="text-slate-400 text-[10px] font-extrabold uppercase mt-2 tracking-widest leading-none">Группа</span>
             </div>
-            <div className="bg-red-50/50 p-2 rounded-xl text-center">
-              <span className="text-xs text-rose-500 block">Резус</span>
-              <span className="font-bold text-red-700 text-sm">{formatRhFactor(donor.rhFactor)}</span>
+            <div className="bg-[#f8fafc] border border-slate-100 py-4 rounded-[1rem] flex flex-col items-center justify-center transition-colors hover:bg-[#f1f5f9]">
+              <span className="font-extrabold text-[#c23e2b] text-[1.4rem] tracking-tighter leading-none">{formatRhFactor(donor.rhFactor)}</span>
+              <span className="text-slate-400 text-[10px] font-extrabold uppercase mt-2 tracking-widest leading-none">Резус</span>
             </div>
           </div>
 
-          <div className="mt-4 space-y-2 text-left text-xs text-slate-600">
-            <div className="flex justify-between">
-              <span className="text-slate-400">Вес:</span>
-              <span className="font-medium text-slate-800">{donor.weight} кг</span>
+          <div className="mt-8 space-y-4 text-left text-[14px] border-t border-slate-50 pt-6">
+            <div className="flex justify-between items-center group">
+              <span className="font-bold text-[#64748b] group-hover:text-slate-800 transition-colors">Вес</span>
+              <span className="font-extrabold text-slate-700 bg-slate-50 px-2.5 py-0.5 rounded-lg">{donor.weight || 0} кг</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Рождение:</span>
-              <span className="font-medium text-slate-800">{new Date(donor.birthDate).toLocaleDateString('ru-RU')}</span>
+            <div className="flex justify-between items-center group">
+              <span className="font-bold text-[#64748b] group-hover:text-slate-800 transition-colors">Возраст</span>
+              <span className="font-extrabold text-slate-700 bg-slate-50 px-2.5 py-0.5 rounded-lg">{calcAge(donor.birthDate)} лет</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Телефон:</span>
-              <span className="font-medium text-slate-800">{donor.phone}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-400">Основной центр:</span>
-              <span className="font-medium text-slate-800 truncate max-w-[120px]" title={homeCenter?.name}>
-                {homeCenter ? homeCenter.name : 'Не привязан'}
-              </span>
+            <div className="flex justify-between items-center group">
+              <span className="font-bold text-[#64748b] group-hover:text-slate-800 transition-colors">Донаций</span>
+              <span className="font-extrabold text-slate-700 bg-slate-50 px-2.5 py-0.5 rounded-lg">{donor.bloodDonationsCount + donor.plasmaDonationsCount + donor.plateletsDonationsCount}</span>
             </div>
           </div>
         </div>
 
         {/* Vertical menu navigation */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-2 flex flex-col gap-1">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-1.5">
           {[
-            { id: 'dashboard', label: 'Рабочий стол (Карта)', icon: Heart },
-            { id: 'history', label: 'История донаций', icon: Calendar },
-            { id: 'pause', label: 'Личная пауза', icon: Clock },
-            { id: 'links', label: 'Мои центры привязки', icon: RefreshCw },
-            { id: 'settings', label: 'Настройки оповещений', icon: Settings },
+            { id: 'dashboard', label: 'Рабочий стол', icon: Home },
+            { id: 'profile', label: 'Профиль', icon: User },
+            { id: 'history', label: 'История сдач', icon: Calendar },
+            { id: 'links', label: 'Мои центры', icon: Link },
+            { id: 'pause', label: 'Пауза', icon: Pause },
+            { id: 'notifications', label: 'Уведомления', icon: Bell },
+            { id: 'account', label: 'Аккаунт', icon: Settings }
           ].map(it => {
             const Icon = it.icon;
+            const isActive = activeMenu === it.id;
             return (
               <button
                 key={it.id}
                 onClick={() => { setActiveMenu(it.id as any); }}
-                className={`w-full flex items-center px-4 py-3 rounded-xl text-left text-xs font-semibold transition Duration-100 ${activeMenu === it.id ? 'bg-red-50 text-red-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                className={`w-full flex items-center px-4 py-3 rounded-[0.85rem] text-left transition duration-150 ${isActive ? 'bg-[#fdf1f0] text-[#c23e2b] font-extrabold' : 'text-[#475569] font-bold hover:bg-slate-50'}`}
               >
-                <Icon className="w-4 h-4 mr-2.5" />
-                {it.label}
+                <Icon className={`w-[1.1rem] h-[1.1rem] mr-3 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+                <span className="text-[14.5px] leading-none">{it.label}</span>
               </button>
             );
           })}
@@ -231,90 +241,187 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       </div>
 
       {/* Main Context panels dynamically switched */}
-      <div className="md:col-span-3 space-y-6">
+      <div className="md:col-span-3">
+        <AnimatePresence mode="wait">
+          {/* Profile Details Page */}
+          {activeMenu === 'profile' && (
+            <motion.div 
+              key="profile"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="space-y-6"
+            >
+            <div className="bg-white p-6 md:p-8 rounded-[1.25rem] border border-slate-100 shadow-sm">
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight">Личная информация</h3>
+                <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-[0.85rem] hover:bg-slate-50 transition-colors">
+                  <User className="w-4 h-4" /> {/* Or Edit icon, but using user/edit for simplicity */}
+                  Редактировать
+                </button>
+              </div>
+
+              <div className="divide-y divide-slate-100/80 text-[14px]">
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">ФИО</span>
+                  <span className="font-bold text-slate-800 text-right">{donor.lastName} {donor.firstName} {donor.middleName}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Дата рождения</span>
+                  <span className="font-bold text-slate-800 text-right">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Пол</span>
+                  <span className="font-bold text-slate-800 text-right">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Телефон</span>
+                  <span className="font-bold text-slate-800 text-right">{donor.phone}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">E-mail</span>
+                  <span className="font-bold text-slate-800 text-right">{donor.email}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Вес</span>
+                  <span className="font-bold text-slate-800 text-right">{donor.weight} кг</span>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Группа / Резус</span>
+                  <div className="flex gap-2">
+                    <span className="bg-[#fdf1f0] text-[#c23e2b] font-bold px-3 py-1 rounded-full text-xs">{formatBloodGroup(donor.bloodGroup)}</span>
+                    <span className="text-slate-800 font-bold px-1 py-1 text-sm">{formatRhFactor(donor.rhFactor)}</span>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Всего донаций</span>
+                  <span className="font-bold text-slate-800 text-right">{donor.bloodDonationsCount + donor.plasmaDonationsCount + donor.plateletsDonationsCount}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Донации крови</span>
+                  <span className="font-bold text-slate-800 text-right">{donor.bloodDonationsCount}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">Последняя сдача</span>
+                  <span className="font-bold text-slate-800 text-right">
+                    {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                  <span className="text-slate-500 font-medium">В системе с</span>
+                  <span className="font-bold text-slate-800 text-right">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Dashboard Menu Section */}
         {activeMenu === 'dashboard' && (
-          <div className="space-y-6">
+          <motion.div 
+            key="dashboard"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="space-y-6"
+          >
             
             {/* Health readiness badge indicator */}
-            <div className={`p-6 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${readiness.ready ? 'bg-emerald-50 border-emerald-100 text-emerald-950' : 'bg-amber-50 border-amber-100 text-amber-950'}`}>
-              <div className="space-y-1">
-                <span className="uppercase text-[10px] tracking-wider font-bold text-slate-400 block mb-1">Ваш текущий статус готовности к сдаче</span>
-                <div className="flex items-center gap-2">
-                  <span className={`w-3.5 h-3.5 rounded-full inline-block ${readiness.ready ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
-                  <h3 className="font-bold text-lg">{readiness.ready ? 'Вы полностью готовы к сдаче цельной крови!' : 'Временно не допущены к сдаче'}</h3>
+            <div className={`p-6 md:p-8 rounded-[1.5rem] border flex flex-col sm:flex-row sm:items-center justify-between gap-6 transition-all duration-500 ${readiness.ready ? 'bg-[#f0fdf4] border-[#bbf7d0]' : 'bg-[#fff7ed] border-[#fed7aa]'}`}>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`w-2.5 h-2.5 rounded-full inline-block ${readiness.ready ? 'bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-[#f59e0b]'}`}></span>
+                  <span className="uppercase text-[10px] tracking-[0.15em] font-extrabold text-slate-400 block">Статус готовности</span>
                 </div>
-                {!readiness.ready && (
-                  <p className="text-xs font-light text-amber-900 pr-4 mt-2">
-                    <strong>Причина:</strong> {readiness.reason}
+                <h3 className={`font-extrabold text-xl md:text-2xl tracking-tight leading-tight ${readiness.ready ? 'text-[#064e3b]' : 'text-[#7c2d12]'}`}>
+                  {readiness.ready ? 'Вы готовы к сдаче крови' : 'Временное отстранение'}
+                </h3>
+                {readiness.ready ? (
+                  <p className="text-[14px] font-medium text-[#059669]/80 max-w-md">Все показатели в норме. Вы можете записаться на процедуру в ваш центр.</p>
+                ) : (
+                  <p className="text-[14px] font-medium text-[#c2410c] max-w-md">
+                    <strong className="font-extrabold">Причина:</strong> {readiness.reason}
                   </p>
                 )}
               </div>
               {readiness.ready && (
                 <button 
                   onClick={() => alert(`Ваш домашний центр: ${homeCenter?.name || 'не привязан'}. Пожалуйста, позвоните по номеру ${homeCenter?.phone || donor.phone} и запишитесь на удобный день!`)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition duration-150 inline-flex items-center shadow-sm"
+                  className="bg-[#10b981] hover:bg-[#059669] hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-[14px] px-7 py-3.5 rounded-[1rem] transition-all duration-200 inline-flex items-center shadow-[0_4px_12px_rgba(16,185,129,0.2)] shrink-0"
                 >
-                  <Calendar className="w-4 h-4 mr-2" />
+                  <Calendar className="w-[1.1rem] h-[1.1rem] mr-2.5" />
                   Записаться на сдачу
                 </button>
               )}
             </div>
 
             {/* Gamification progress card */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                <div>
-                  <h3 className="font-bold text-slate-800 text-base">Геймификация донорства</h3>
-                  <p className="text-xs text-slate-500 leading-tight">Система мотивации — накапливайте кроводачи и повышайте ваш донорский ранг!</p>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-8">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
+                <div className="space-y-1">
+                  <h3 className="font-extrabold text-slate-800 text-xl tracking-tight leading-tight">Прогресс донорства</h3>
+                  <p className="text-[14px] text-slate-500 font-medium">Ваш текущий ранг и путь к следующему уровню</p>
                 </div>
-                <span className={`px-4 py-1.5 rounded-full text-xs font-bold border ${gameStatus.color}`}>
-                  {gameStatus.title} ({donor.bloodDonationsCount} сд.)
+                <span className={`px-5 py-2 rounded-full text-[11px] font-extrabold border uppercase tracking-[0.1em] shadow-sm ${gameStatus.color}`}>
+                  {gameStatus.title}
                 </span>
               </div>
 
               {/* Progress bar estimation slider */}
               {donor.bloodDonationsCount < gameStatus.nextAt && (
-                <div className="space-y-1.5 pt-2">
-                  <div className="flex justify-between text-xs text-slate-600">
-                    <span>До нового ранга:</span>
-                    <span>{donor.bloodDonationsCount} / {gameStatus.nextAt} кроводач</span>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-end">
+                    <div className="space-y-0.5">
+                      <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">До цели осталось: {gameStatus.nextAt - donor.bloodDonationsCount}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[1.5rem] font-extrabold text-slate-800 leading-none">{donor.bloodDonationsCount}</span>
+                      <span className="text-slate-400 text-sm font-bold ml-1">/ {gameStatus.nextAt}</span>
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-50 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-100">
                     <div 
-                      className="bg-gradient-to-r from-red-500 to-rose-600 h-full rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-[#c23e2b] to-[#e11d48] h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(194,62,43,0.3)]"
                       style={{ width: `${(donor.bloodDonationsCount / gameStatus.nextAt) * 100}%` }}
                     ></div>
                   </div>
-                  <p className="text-[10px] text-slate-400">
-                    *В зачет идут только донации цельной крови. 1 донация крови приравнивается к 4 донациям плазмы / тромбоцитов.
-                  </p>
+                  <div className="flex items-start gap-3 p-4 bg-[#f8fafc] rounded-[1rem] border border-slate-100/50">
+                    <AlertTriangle className="w-4 h-4 text-[#c23e2b] shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-slate-500 font-medium leading-relaxed uppercase tracking-wide">
+                      В зачете только донации цельной крови. Официальные звания присваиваются Министерством Здравоохранения при достижении 20+ кроводач.
+                    </p>
+                  </div>
                 </div>
               )}
 
               {/* Real benefits info alerts */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-50">
-                <div className="bg-indigo-50/50 p-3.5 rounded-xl border border-indigo-100/50">
-                  <Award className="w-4.5 h-4.5 text-indigo-700 mb-1" />
-                  <h4 className="text-xs font-semibold text-indigo-950 mb-0.5">Временная нетрудоспособность (100%):</h4>
-                  <p className="text-[11px] font-light text-indigo-900 leading-snug">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="group bg-[#f0f9ff] p-6 rounded-[1.25rem] border border-[#bae6fd] transition-all hover:shadow-md hover:scale-[1.01]">
+                  <Award className="w-6 h-6 text-[#0369a1] mb-3 transition-transform group-hover:scale-110" />
+                  <h4 className="text-[15px] font-extrabold text-[#0c4a6e] mb-1.5">Больничный (100%):</h4>
+                  <p className="text-[13px] font-medium text-[#075985] leading-relaxed">
                     {donor.bloodDonationsCount >= 4 ? (
-                      <span className="text-emerald-700 font-semibold flex items-center">✓ Право подтверждено! (4+ кроводачи за 12 мес.)</span>
+                      <span className="text-[#059669] font-bold flex items-center gap-1.5">
+                        <Check className="w-4 h-4 stroke-[3px]" /> Льгота активирована
+                      </span>
                     ) : (
-                      `Вам нужно совершить еще ${Math.max(0, 4 - donor.bloodDonationsCount)} донации в этом году, чтобы получить право на 100% оплату больничного`
+                      `Необходимо еще ${Math.max(0, 4 - donor.bloodDonationsCount)} донации для оплаты в размере 100% среднего заработка.`
                     )}
                   </p>
                 </div>
 
-                <div className="bg-amber-50/50 p-3.5 rounded-xl border border-amber-100/50">
-                  <Award className="w-4.5 h-4.5 text-amber-700 mb-1" />
-                  <h4 className="text-xs font-semibold text-amber-950 mb-0.5">Почетный донор РБ:</h4>
-                  <p className="text-[11px] font-light text-amber-900 leading-snug">
+                <div className="group bg-[#fdf2f2] p-6 rounded-[1.25rem] border border-[#fecaca] transition-all hover:shadow-md hover:scale-[1.01]">
+                  <Heart className="w-6 h-6 text-[#c23e2b] mb-3 transition-transform group-hover:scale-110" />
+                  <h4 className="text-[15px] font-extrabold text-[#7f1d1d] mb-1.5">Почетный донор:</h4>
+                  <p className="text-[13px] font-medium text-[#991b1b] leading-relaxed">
                     {donor.bloodDonationsCount >= 20 ? (
-                      <span className="text-rose-700 font-bold flex items-center">✓ Вы кандидат на звание «Ганаровы донар»!</span>
+                      <span className="text-[#c23e2b] font-bold flex items-center gap-1.5">
+                        <Check className="w-4 h-4 stroke-[3px]" /> Звание подтверждено
+                      </span>
                     ) : (
-                      `Совершите еще ${20 - donor.bloodDonationsCount} кроводач (безвозмездно) за всё время до получения нагрудного знака отличия.`
+                      `До звания осталось ${20 - donor.bloodDonationsCount} кроводач. Дает право на ежегодные выплаты и льготный проезд.`
                     )}
                   </p>
                 </div>
@@ -322,357 +429,445 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             </div>
 
             {/* Next available dates per donation type in RBP */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-              <h3 className="font-bold text-slate-800 text-base">Планируемые интервалы следующих сдач</h3>
-              <p className="text-xs text-slate-500">Следующий возможный визит на станцию переливания рассчитывается в зависимости от истории предыдущей донации:</p>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-6">
+              <div className="space-y-1">
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight leading-tight">График восстановления</h3>
+                <p className="text-[14px] text-slate-500 font-medium">Рекомендованные даты по нормативам Минздрава РБ</p>
+              </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-3 bg-rose-50/20 border border-slate-100 rounded-xl">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Цельная кровь</span>
-                  <span className="font-mono text-sm font-semibold text-slate-800">{donor.nextAvailableDate || 'Доступно сейчас'}</span>
-                  <span className="text-[10px] text-slate-500 block mt-1">Интервал: 60 дн. (каждая 5-я — 90 дн.)</span>
-                </div>
-                <div className="p-3 bg-amber-50/20 border border-slate-100 rounded-xl">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Плазма (Аферез)</span>
-                  <span className="font-mono text-sm font-semibold text-slate-800">
-                    {donor.lastDonationDate ? new Date(new Date(donor.lastDonationDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : 'Доступно сейчас'}
-                  </span>
-                  <span className="text-[10px] text-slate-500 block mt-1">Интервал: 14 дней восстановление</span>
-                </div>
-                <div className="p-3 bg-blue-50/20 border border-slate-100 rounded-xl">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Тромбоциты</span>
-                  <span className="font-mono text-sm font-semibold text-slate-800">
-                    {donor.lastDonationDate ? new Date(new Date(donor.lastDonationDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : 'Доступно сейчас'}
-                  </span>
-                  <span className="text-[10px] text-slate-500 block mt-1">Интервал: 14 дней восстановление</span>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                {[
+                  { label: 'Цельная кровь', date: donor.nextAvailableDate, interval: '60-90 дней', active: true },
+                  { label: 'Плазма', date: donor.lastDonationDate ? new Date(new Date(donor.lastDonationDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null, interval: '14 дней', active: false },
+                  { label: 'Тромбоциты', date: donor.lastDonationDate ? new Date(new Date(donor.lastDonationDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null, interval: '14 дней', active: false },
+                ].map((item, idx) => (
+                  <div key={idx} className={`p-5 rounded-[1.25rem] border transition-all ${item.active ? 'bg-[#fdf1f0] border-[#fbd5d1] shadow-sm' : 'bg-slate-50 border-slate-100'}`}>
+                    <span className={`text-[10px] uppercase font-extrabold block mb-2 tracking-[0.15em] ${item.active ? 'text-[#c23e2b]' : 'text-slate-400'}`}>{item.label}</span>
+                    <span className="font-mono text-[16px] font-extrabold text-slate-800 block mb-1">{item.date ? new Date(item.date).toLocaleDateString('ru-RU') : 'Доступно'}</span>
+                    <span className={`text-[11px] font-bold ${item.active ? 'text-[#c23e2b]/60' : 'text-slate-400/80'}`}>{item.interval}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* List of active medical notes (медотводы) if any */}
             {medicalNotes.some(m => m.isActive) && (
-              <div className="bg-red-50 p-5 rounded-2xl border border-red-100 space-y-2">
-                <h4 className="font-semibold text-red-950 text-sm flex items-center">
-                  <ShieldAlert className="w-5 h-5 mr-2 text-red-700" />
-                  У вас есть активный медицинский отвод (медотвод):
-                </h4>
-                <div className="text-xs text-red-900 space-y-1">
+              <div className="bg-[#fef2f2] p-6 md:p-8 rounded-[1.5rem] border border-[#fecaca]/60 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                    <ShieldAlert className="w-6 h-6 text-[#dc2626]" />
+                  </div>
+                  <h4 className="font-extrabold text-[#991b1b] text-lg tracking-tight">Важные ограничения</h4>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {medicalNotes.filter(m => m.isActive).map(note => (
-                    <div key={note.id} className="p-3 bg-white/50 border border-red-100/50 rounded-xl">
-                      <p><strong>Причина отвода:</strong> {note.reason}</p>
-                      <p className="mt-1">Срок действия: с {note.startDate} по {note.endDate || 'Постоянный отвод'}</p>
+                    <div key={note.id} className="p-5 bg-white border border-[#fecaca]/50 rounded-[1.25rem] shadow-sm flex flex-col justify-between">
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] uppercase font-extrabold text-[#b91c1c] tracking-widest block">Медотвод</span>
+                        <p className="text-[14px] text-slate-800 font-bold leading-tight">{note.reason}</p>
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-slate-50">
+                        <p className="text-[12px] text-[#b91c1c] font-extrabold flex items-center gap-2">
+                          <Clock className="w-3.5 h-3.5" />
+                          До {note.endDate ? new Date(note.endDate).toLocaleDateString('ru-RU') : 'бессрочно'}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Donations history view */}
         {activeMenu === 'history' && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
-            <div className="flex justify-between items-center">
+          <motion.div 
+            key="history"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="space-y-6"
+          >
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-6">
+            <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-bold text-slate-800 text-base">История ваших донаций</h3>
-                <p className="text-xs text-slate-500">Полный перечень медицинских донорских процедур в системе:</p>
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight">История донаций</h3>
+                <p className="text-[14px] text-slate-500 mt-1">Все зарегистрированные процедуры</p>
               </div>
-              <button 
-                onClick={triggerRefresh}
-                className="p-2 border border-slate-100 hover:bg-slate-50 rounded-lg text-slate-600 flex items-center text-xs font-semibold gap-1"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                Обновить данные
-              </button>
+              <span className="bg-[#fdf1f0] text-[#c23e2b] font-bold px-3 py-1 rounded-full text-xs">
+                {donations.length} записей
+              </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto border border-slate-100 rounded-[1rem]">
+              <table className="w-full text-left text-[14px] border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 text-slate-500">
-                    <th className="pb-3 font-medium">Дата донации</th>
-                    <th className="pb-3 font-medium">Медицинский центр (Филиал)</th>
-                    <th className="pb-3 font-medium">Тип заготовки</th>
-                    <th className="pb-3 font-medium">Объем (мл)</th>
-                    <th className="pb-3 font-medium">Примечания вожатого</th>
+                  <tr className="bg-[#f8fafc] text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">
+                    <th className="px-5 py-4 font-extrabold">Дата</th>
+                    <th className="px-5 py-4 font-extrabold">Тип</th>
+                    <th className="px-5 py-4 font-extrabold">Центр</th>
+                    <th className="px-5 py-4 font-extrabold">Объём</th>
+                    <th className="px-5 py-4 font-extrabold">Примечание</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-600">
+                <tbody className="divide-y divide-slate-100 text-slate-600 bg-white">
                   {donations.map(don => {
-                    const centerName = centers.find(c => c.id === don.centerId)?.name || `Центр #${don.centerId}`;
+                    const center = centers.find(c => c.id === don.centerId);
                     return (
-                      <tr key={don.id}>
-                        <td className="py-3 font-mono font-medium">{don.donationDate}</td>
-                        <td className="py-3 font-medium text-slate-800">{centerName}</td>
-                        <td className="py-3">
-                          <span className="bg-red-50 text-red-700 font-semibold px-2 py-0.5 rounded-full">
-                            {don.donationType === 'blood' ? 'Цельная кровь' : 
-                             don.donationType === 'plasma' ? 'Плазма' :
-                             don.donationType === 'platelets' ? 'Тромбоциты' : 'Гранулоциты'}
+                      <tr key={don.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-5 py-4 font-bold text-slate-700">{new Date(don.date).toLocaleDateString('ru-RU')}</td>
+                        <td className="px-5 py-4">
+                          <span className="bg-[#fef2f2] text-[#ef4444] px-2.5 py-1 rounded-full text-xs font-bold border border-red-100/50">
+                            {don.type === 'blood' ? 'Цельная кровь' : don.type === 'plasma' ? 'Плазма' : 'Тромбоциты'}
                           </span>
                         </td>
-                        <td className="py-3 text-slate-800 font-semibold">{don.volumeMl || '—'}</td>
-                        <td className="py-3 text-slate-500 leading-snug">{don.note || '—'}</td>
+                        <td className="px-5 py-4 font-medium text-slate-600">{center?.shortName || 'Центр крови'}</td>
+                        <td className="px-5 py-4 font-bold text-[#c23e2b]">{don.volume} мл</td>
+                        <td className="px-5 py-4 text-xs text-slate-400 italic max-w-[200px] truncate">{don.note || '—'}</td>
                       </tr>
                     );
                   })}
                   {donations.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="text-sm py-12 text-center text-slate-400">У вас пока нет зарегистрированных донаций. Обратитесь к медсестре центра переливания при следующем визите для занесения процедуры в базу!</td>
+                      <td colSpan={5} className="px-5 py-12 text-center text-slate-400 italic">
+                        У вас пока нет зарегистрированных донаций.
+                      </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-          </div>
+            </div>
+          </motion.div>
         )}
 
         {/* Change personal pause settings */}
         {activeMenu === 'pause' && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm max-w-xl space-y-6">
-            <div>
-              <h3 className="font-bold text-slate-800 text-base">Личная пауза донора</h3>
-              <p className="text-xs text-slate-500">Если вы временно не можете сдавать кровь (отпуск, личные обстоятельства, простуда), установите паузу, чтобы центры не беспокоили вас напрасно.</p>
-            </div>
-
-            {pauseSuccess && (
-              <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-700">
-                {pauseSuccess}
+          <motion.div 
+            key="pause"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="space-y-6"
+          >
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm max-w-xl space-y-6">
+              <div>
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight">Личная пауза</h3>
+                <p className="text-[14px] text-slate-500 mt-1">Временно исключает вас из всех рассылок. Никто не потревожит.</p>
               </div>
-            )}
 
-            <form onSubmit={handlePauseSubmit} className="space-y-4">
-              <label className="flex items-start text-xs text-slate-700 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={pauseForm.personalPause}
-                  onChange={(e) => setPauseForm({ ...pauseForm, personalPause: e.target.checked })}
-                  className="mr-3 rounded text-red-600 focus:ring-red-500 border-slate-300 mt-1"
-                />
-                <div>
-                  <span className="font-semibold text-slate-800 text-sm block">Включить временную личную паузу</span>
-                  <span className="text-slate-400">Вы будете автоматически исключены из всех массовых рассылок центров переливания РБ</span>
+              {pauseSuccess && (
+                <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-[0.85rem] text-sm text-emerald-700 font-medium">
+                  {pauseSuccess}
                 </div>
-              </label>
-
-              {pauseForm.personalPause && (
-                <>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-700">Действует до (дата):</label>
-                    <input 
-                      type="date"
-                      value={pauseForm.personalPauseUntil}
-                      onChange={(e) => setPauseForm({ ...pauseForm, personalPauseUntil: e.target.value })}
-                      className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                    />
-                    <span className="text-[10px] text-slate-400 block">*Если оставить пустым, пауза будет считаться бессрочной</span>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-700">Причина (только для себя):</label>
-                    <textarea 
-                      value={pauseForm.personalPauseNote}
-                      onChange={(e) => setPauseForm({ ...pauseForm, personalPauseNote: e.target.value })}
-                      placeholder="Отпуск у коров, командировка..."
-                      rows={3}
-                      className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                    />
-                  </div>
-                </>
               )}
 
-              <button 
-                type="submit"
-                className="bg-red-650 hover:bg-red-700 bg-red-600 text-white text-xs font-semibold px-6 py-2.5 rounded-xl transition duration-150 shadow-sm"
-              >
-                Сохранить параметры
-              </button>
-            </form>
-          </div>
+              <form onSubmit={handlePauseSubmit} className="space-y-6">
+                <div className="flex items-center justify-between py-2">
+                  <div className="space-y-1 pr-4">
+                    <h4 className="text-[15px] font-bold text-[#c23e2b]">Включить паузу</h4>
+                    <p className="text-[13px] text-slate-500">Вы исчезнете из фильтров рассылки</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={pauseForm.personalPause} 
+                      onChange={(e) => setPauseForm({...pauseForm, personalPause: e.target.checked})} 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c23e2b]"></div>
+                  </label>
+                </div>
+
+                {pauseForm.personalPause && (
+                  <div className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-2">
+                      <label className="text-[14px] font-bold text-slate-800">Действует до (дата):</label>
+                      <input 
+                        type="date"
+                        value={pauseForm.personalPauseUntil}
+                        onChange={(e) => setPauseForm({ ...pauseForm, personalPauseUntil: e.target.value })}
+                        className="w-full px-4 py-3 text-[15px] border border-slate-200 rounded-[0.85rem] focus:border-[#c23e2b] focus:outline-none"
+                      />
+                      <span className="text-[11px] text-slate-400 block font-medium">*Если оставить пустым, пауза будет считаться бессрочной</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[14px] font-bold text-slate-800">Причина (только для вас):</label>
+                      <textarea 
+                        value={pauseForm.personalPauseNote}
+                        onChange={(e) => setPauseForm({ ...pauseForm, personalPauseNote: e.target.value })}
+                        placeholder="Командировка, личные обстоятельства..."
+                        rows={3}
+                        className="w-full px-4 py-3 text-[15px] border border-slate-200 rounded-[0.85rem] focus:border-[#c23e2b] focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-2 border-t border-slate-100">
+                  <button 
+                    type="submit"
+                    className="bg-[#c23e2b] hover:bg-[#a83321] text-white text-[15px] font-bold px-8 py-3 rounded-[0.85rem] transition duration-150 shadow-sm flex items-center gap-2"
+                  >
+                    <Check className="w-[1.1rem] h-[1.1rem]" />
+                    Сохранить
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
         )}
 
         {/* Association Link ties page */}
         {activeMenu === 'links' && (
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-              <div>
-                <h3 className="font-bold text-slate-800 text-base">Связи с медицинскими центрами крови РБ</h3>
-                <p className="text-xs text-slate-500">Доноры в Беларуси могут быть зарегистрированы или привязаны к разным центрам для сдачи. Каждая привязка требует подтверждения уполномоченными координаторами центра переливания.</p>
+          <motion.div 
+            key="links"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="space-y-6"
+          >
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-8">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
+                <div className="space-y-1">
+                  <h3 className="font-extrabold text-slate-800 text-xl tracking-tight leading-tight">Мои центры переливания</h3>
+                  <p className="text-[14px] text-slate-500 font-medium">Станции, к которым вы привязаны в системе</p>
+                </div>
+                <button 
+                  onClick={() => { const el = document.getElementById('link-form'); el?.scrollIntoView({ behavior: 'smooth' }); }}
+                  className="bg-[#c23e2b] hover:bg-[#a83321] text-white font-bold text-[14px] px-6 py-3 rounded-[1rem] transition-all shadow-[0_4px_12px_rgba(194,62,43,0.15)] flex items-center gap-2 self-start"
+                >
+                  <Plus className="w-4 h-4" /> Добавить центр
+                </button>
               </div>
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-5">
                 {links.map(link => {
                   const center = centers.find(c => c.id === link.centerId);
+                  const isConfirmed = link.status === 'confirmed';
                   return (
-                    <div key={link.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200/60 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-slate-800">{center ? center.name : `Центр #${link.centerId}`}</span>
-                          {link.isPrimary && (
-                            <span className="text-[9px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded-full border border-red-200 uppercase tracking-wide">Домашний</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-600 mt-1">{center?.address}</p>
-                        
-                        {link.status === 'rejected' && link.rejectionReason && (
-                          <div className="p-2.5 bg-red-50 text-red-900 border border-red-100 rounded-lg text-xs mt-3 leading-snug">
-                            <strong>Причина отклонения врачом:</strong> {link.rejectionReason}
-                            <div className="mt-2 text-right">
-                              <button 
-                                onClick={() => handleResubmit(link.centerId)}
-                                className="text-xs font-bold text-red-700 hover:underline flex items-center justify-end ml-auto"
-                              >
-                                Исправить и отправить анкету повторно <RefreshCw className="w-3 h-3 ml-1" />
-                              </button>
-                            </div>
+                    <div key={link.id} className={`p-6 rounded-[1.5rem] border transition-all duration-300 ${link.isPrimary ? 'bg-[#fdf1f0] border-[#fbd5d1] shadow-sm' : 'bg-[#f8fafc] border-slate-100/80 hover:border-slate-300'}`}>
+                      <div className="flex flex-col sm:flex-row justify-between items-start gap-5">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h4 className="font-extrabold text-slate-800 text-[17px] tracking-tight">{center ? center.name : `Центр #${link.centerId}`}</h4>
+                            {link.isPrimary && (
+                              <span className="text-[9px] bg-[#c23e2b] text-white font-extrabold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">домашний</span>
+                            )}
                           </div>
-                        )}
-                        {link.status === 'pending' && (
-                          <span className="text-[10px] text-slate-400 block mt-2">
-                            *Заявка отправлена. Координатор рассмотрит ваши данные в течение 24 часов. {link.resubmissionCount > 0 && `(Повторная подача #${link.resubmissionCount})`}
-                          </span>
-                        )}
-                      </div>
+                          <div className="flex items-center gap-2 text-[13px] text-slate-500 font-medium bg-white/50 w-fit px-3 py-1 rounded-lg border border-white/50">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                            {center?.address}
+                          </div>
+                          <div className="text-[11px] text-slate-400 font-extrabold uppercase tracking-[0.1em] mt-2 flex items-center gap-2">
+                            <Calendar className="w-3 h-3" />
+                            {isConfirmed ? `Подтверждён: ${new Date(link.updatedAt).toLocaleDateString('ru-RU')}` : `Подан: ${new Date(link.createdAt).toLocaleDateString('ru-RU')}`}
+                          </div>
+                        </div>
 
-                      <div className="text-right">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${link.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : link.status === 'pending' ? 'bg-amber-55 text-amber-900 bg-amber-50 border border-amber-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-                          {link.status === 'confirmed' ? 'Подтвержден' : link.status === 'pending' ? 'Ожидает одобрения' : 'Отклонен'}
-                        </span>
+                        <div className="self-end sm:self-start">
+                          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-[12px] font-extrabold border transition-colors ${isConfirmed ? 'bg-white text-[#10b981] border-[#10b981]/30 shadow-sm' : link.status === 'pending' ? 'bg-white text-amber-600 border-amber-600/30' : 'bg-white text-red-600 border-red-600/30 shadow-sm'}`}>
+                            {isConfirmed && <Check className="w-4 h-4 stroke-[3px]" />}
+                            {link.status === 'confirmed' ? 'Подтверждён' : link.status === 'pending' ? 'На модерации' : 'Отклонено'}
+                          </div>
+                        </div>
                       </div>
+                      
+                      {link.status === 'rejected' && link.rejectionReason && (
+                        <div className="p-5 bg-red-50/50 text-red-900 border border-red-100 rounded-[1.25rem] text-[13px] mt-5 leading-relaxed font-medium shadow-inner">
+                          <div className="flex gap-3">
+                            <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+                            <p><strong>Причина отклонения:</strong> {link.rejectionReason}</p>
+                          </div>
+                          <div className="mt-4 pt-4 border-t border-red-100 flex justify-end">
+                            <button 
+                              onClick={() => handleResubmit(link.centerId)}
+                              className="text-[13px] font-extrabold text-[#c23e2b] hover:text-[#a83321] transition-colors flex items-center gap-2"
+                            >
+                              Отправить анкету повторно <RefreshCw className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Request link with third party medical clinic */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 max-w-xl">
-              <div>
-                <h3 className="font-bold text-slate-800 text-sm">Связаться с дополнительной станцией</h3>
-                <p className="text-xs text-slate-500">Добавьте новую станцию переливания (например, если переехали или хотите сдать кровь в соседнем регионе Кобрина, Барановичей или Полоцка).</p>
+            {/* Request link form */}
+            <div id="link-form" className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-8 max-w-2xl">
+              <div className="space-y-1">
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight leading-tight">Привязать новый центр</h3>
+                <p className="text-[14px] text-slate-500 font-medium">Станьте донором в другом учреждении</p>
               </div>
 
-              {linkError && <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100">{linkError}</p>}
-              {linkSuccess && <p className="text-xs text-emerald-700 bg-emerald-50 p-2.5 rounded-lg border border-emerald-100">{linkSuccess}</p>}
+              {linkError && <p className="text-[13px] text-red-600 bg-red-50 p-4 rounded-[1rem] border border-red-100 font-medium leading-relaxed">{linkError}</p>}
+              {linkSuccess && <p className="text-[13px] text-emerald-700 bg-emerald-50 p-4 rounded-[1rem] border border-emerald-100 font-medium leading-relaxed">{linkSuccess}</p>}
 
-              <form onSubmit={handleCenterLink} className="space-y-4 flex flex-col sm:flex-row items-end gap-3">
-                <div className="space-y-1 w-full sm:flex-1">
-                  <label className="text-xs font-semibold text-slate-700 block">Медицинское учреждение:</label>
+              <form onSubmit={handleCenterLink} className="space-y-6">
+                <div className="space-y-2.5">
+                  <label className="text-[13px] font-extrabold text-slate-400 uppercase tracking-widest pl-1">Выберите учреждение:</label>
                   <select 
                     value={selectedCenterId}
                     onChange={(e) => setSelectedCenterId(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white font-medium"
+                    className="w-full px-5 py-4 text-[15px] border border-slate-200 rounded-[1rem] focus:border-[#c23e2b] focus:ring-4 focus:ring-red-50 transition-all focus:outline-none bg-slate-50/50 font-bold text-slate-700 cursor-pointer shadow-sm appearance-none"
                   >
-                    <option value="">-- Выбрать из списка --</option>
+                    <option value="">-- Список центров переливания --</option>
                     {centers.map(center => {
-                      if (links.some(l => l.centerId === center.id)) return null; // already tied
+                      if (links.some(l => l.centerId === center.id)) return null;
                       return <option key={center.id} value={center.id}>{center.name}</option>;
                     })}
                   </select>
                 </div>
                 <button 
                   type="submit"
-                  className="bg-slate-800 hover:bg-slate-950 text-white font-semibold text-xs px-5 py-2.5 rounded-xl transition duration-150 inline-flex items-center gap-1 shrink-0"
+                  className="bg-slate-800 hover:bg-slate-900 text-white font-extrabold text-[15px] px-10 py-4 rounded-[1rem] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 shadow-[0_4px_12px_rgba(30,41,59,0.15)]"
                 >
-                  <Plus className="w-4 h-4" /> Отправить анкету
+                  <Plus className="w-5 h-5" /> Отправить анкету
                 </button>
               </form>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Channels adjusters toggle page */}
-        {activeMenu === 'settings' && (
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm max-w-xl space-y-6">
-              <div>
-                <h3 className="font-bold text-slate-800 text-base">Предпочитаемые каналы оповещений</h3>
-                <p className="text-xs text-slate-500">При критических дефицитах крови центры будут отправлять экстренные вызовы. Выберите, где хотите их получать:</p>
+        {activeMenu === 'notifications' && (
+          <motion.div 
+            key="notifications"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="space-y-6"
+          >
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-8">
+              <div className="space-y-1">
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight leading-tight">Настройки оповещений</h3>
+                <p className="text-[14px] text-slate-500 font-medium">Выберите удобные каналы связи для вызова на донацию</p>
               </div>
 
               {notifSuccess && (
-                <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-700">
+                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-[1rem] text-[13px] text-emerald-700 font-bold flex items-center gap-3">
+                  <Check className="w-4 h-4" />
                   {notifSuccess}
                 </div>
               )}
 
-              <form onSubmit={handleNotifSubmit} className="space-y-4">
-                <div className="space-y-3">
-                  <label className="flex items-center text-xs text-slate-700 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={notifForm.pushEnabled}
-                      onChange={(e) => setNotifForm({ ...notifForm, pushEnabled: e.target.checked })}
-                      className="mr-3 rounded text-red-600 focus:ring-red-500 border-slate-300"
-                    />
-                    <div>
-                      <span className="font-semibold text-slate-800 block">Браузерные всплывающие Push-оповещения</span>
-                      <span className="text-slate-400">Появляются автоматически в углу вашего ПК или смартфона</span>
+              <form onSubmit={handleNotifSubmit} className="space-y-8">
+                <div className="space-y-4">
+                  {[
+                    { id: 'push', title: 'Push-уведомления', desc: 'Всплывающие окна в браузере или приложении', enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
+                    { id: 'sms', title: 'SMS-оповещения', desc: `Экстренные сообщения на номер ${donor.phone}`, enabled: notifForm.smsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, smsEnabled: val}) },
+                    { id: 'email', title: 'Email-рассылки', desc: 'Письма с приглашениями и результатами анализов', enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
+                  ].map((notif, idx) => (
+                    <div key={notif.id} className="flex items-center justify-between p-5 bg-slate-50/50 rounded-[1.25rem] border border-slate-100 transition-hover hover:border-slate-200">
+                      <div className="space-y-1 pr-4">
+                        <h4 className="text-[15px] font-extrabold text-[#c23e2b] tracking-tight">{notif.title}</h4>
+                        <p className="text-[13px] text-slate-500 font-medium leading-tight">{notif.desc}</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input type="checkbox" className="sr-only peer" checked={notif.enabled} onChange={(e) => notif.toggle(e.target.checked)} />
+                        <div className="w-12 h-6.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[22px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c23e2b] shadow-inner"></div>
+                      </label>
                     </div>
-                  </label>
-
-                  <label className="flex items-center text-xs text-slate-700 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={notifForm.smsEnabled}
-                      onChange={(e) => setNotifForm({ ...notifForm, smsEnabled: e.target.checked })}
-                      className="mr-3 rounded text-red-600 focus:ring-red-500 border-slate-300"
-                    />
-                    <div>
-                      <span className="font-semibold text-slate-800 block">Экстренные сотовые SMS-уведомления</span>
-                      <span className="text-slate-400">Отправляются при нехватке на ваш сотовый номер: {donor.phone}</span>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center text-xs text-slate-700 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={notifForm.emailNotificationsEnabled}
-                      onChange={(e) => setNotifForm({ ...notifForm, emailNotificationsEnabled: e.target.checked })}
-                      className="mr-3 rounded text-red-600 focus:ring-red-500 border-slate-300"
-                    />
-                    <div>
-                      <span className="font-semibold text-slate-800 block">Электронные транзакционные письма (E-mail)</span>
-                      <span className="text-slate-400">Полные HTML-бланки новостей и уведомлений на вашу почту</span>
-                    </div>
-                  </label>
+                  ))}
                 </div>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-150 text-xs text-slate-600 space-y-1">
-                  <p><strong>Ваш OneSignal ID в системе:</strong></p>
-                  <code className="font-mono bg-white border px-1.5 py-0.5 rounded text-red-700 inline-block mt-1 font-semibold select-all">
-                    {donor.onesignalPlayerId || 'onesignal-temp-not-active-id'}
-                  </code>
-                  <p className="text-[10px] text-slate-400 mt-2">*Используется для отправки push-уведомлений на ваше устройство.</p>
+                <div className="bg-slate-50 p-6 rounded-[1.25rem] border border-slate-100/80 shadow-inner group">
+                  <label className="block text-[11px] font-extrabold text-slate-400 uppercase mb-2 tracking-widest leading-none">Системный идентификатор (OneSignal)</label>
+                  <div className="flex items-center gap-3">
+                    <Check className="w-4 h-4 text-[#10b981]" />
+                    <code className="text-[#c23e2b] text-[14px] font-mono font-bold tracking-tight bg-white px-3 py-1 rounded-md border border-slate-200 group-hover:border-[#c23e2b]/30 transition-colors">
+                      {donor.onesignalPlayerId || 'not-assigned-yet'}
+                    </code>
+                  </div>
                 </div>
 
-                <button 
-                  type="submit"
-                  className="bg-red-650 hover:bg-red-700 bg-red-600 text-white text-xs font-semibold px-6 py-2.5 rounded-xl transition duration-150 shadow-sm"
-                >
-                  Сохранить предпочтения
-                </button>
+                <div className="pt-2">
+                  <button 
+                    type="submit"
+                    className="bg-[#c23e2b] hover:bg-[#a83321] text-white text-[15px] font-bold px-10 py-4 rounded-[1rem] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_6px_20px_rgba(194,62,43,0.2)] flex items-center gap-2.5"
+                  >
+                    <Check className="w-[1.2rem] h-[1.2rem] stroke-[3px]" />
+                    Обновить настройки
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Account Menu Section */}
+        {activeMenu === 'account' && (
+          <motion.div 
+            key="account"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="space-y-6"
+          >
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-8">
+              <div className="space-y-1">
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight leading-tight">Безопасность аккаунта</h3>
+                <p className="text-[14px] text-slate-500 font-medium">Управление доступом и паролями</p>
+              </div>
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert("Функция изменения пароля в демо-режиме!"); }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2.5">
+                    <label className="text-[13px] font-extrabold text-slate-400 uppercase tracking-widest pl-1">Текущий пароль</label>
+                    <input type="password" required placeholder="••••••••" className="w-full px-5 py-4 text-[15px] bg-slate-50 border border-slate-200 rounded-[1rem] focus:border-[#c23e2b] focus:ring-4 focus:ring-red-50 focus:outline-none transition-all placeholder:text-slate-300 font-mono" />
+                  </div>
+                  <div className="hidden md:block"></div>
+                  <div className="space-y-2.5">
+                    <label className="text-[13px] font-extrabold text-slate-400 uppercase tracking-widest pl-1">Новый пароль</label>
+                    <input type="password" required placeholder="Минимум 8 символов" className="w-full px-5 py-4 text-[15px] bg-slate-50 border border-slate-200 rounded-[1rem] focus:border-[#c23e2b] focus:ring-4 focus:ring-red-50 focus:outline-none transition-all placeholder:text-slate-300 font-mono" />
+                  </div>
+                  <div className="space-y-2.5">
+                    <label className="text-[13px] font-extrabold text-slate-400 uppercase tracking-widest pl-1">Повторите пароль</label>
+                    <input type="password" required placeholder="••••••••" className="w-full px-5 py-4 text-[15px] bg-slate-50 border border-slate-200 rounded-[1rem] focus:border-[#c23e2b] focus:ring-4 focus:ring-red-50 focus:outline-none transition-all placeholder:text-slate-300 font-mono" />
+                  </div>
+                </div>
+                <div className="pt-4 border-t border-slate-50">
+                  <button type="submit" className="bg-[#c23e2b] hover:bg-[#a83321] text-white font-extrabold py-4 px-10 rounded-[1rem] shadow-[0_4px_12px_rgba(194,62,43,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
+                    <Check className="w-[1.2rem] h-[1.2rem] stroke-[3px]" />
+                    Обновить пароль
+                  </button>
+                </div>
               </form>
             </div>
 
-            {/* Instruction on how to install to Mobile as PWA */}
-            <div className="bg-slate-900 text-white p-6 rounded-2xl max-w-xl space-y-4">
-              <h4 className="font-bold text-sm text-rose-300">Инструкция по установке приложения на телефон (PWA)</h4>
-              <div className="text-xs font-light text-slate-300 space-y-3 leading-relaxed">
-                <div>
-                  <p className="font-semibold text-white">Для устройств Apple iPhone (Safari):</p>
-                  <p>1. Откройте сайт в Safari, нажмите кнопку «Поделиться» (иконка со стрелочкой из квадрата) на нижней панели.</p>
-                  <p>2. Прокрутите меню и выберите «На экран „Домой“». Нажмите «Добавить».</p>
+            <div className="bg-white p-6 md:p-8 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#fdf1f0] rounded-xl flex items-center justify-center">
+                  <Download className="w-6 h-6 text-[#c23e2b]" />
                 </div>
-                <div>
-                  <p className="font-semibold text-white">Для смартфонов на базе Android (Chrome):</p>
-                  <p>1. Сайт покажет всплывающий баннер «Установить Донор-Алерт» или нажмите на три вертикальные точки в углу браузера.</p>
-                  <p>2. Нажмите «Установить приложение» / «Добавить на главный экран».</p>
+                <h3 className="font-extrabold text-slate-800 text-xl tracking-tight leading-tight">Установка приложения (PWA)</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="bg-slate-50 p-6 rounded-[1.25rem] border border-slate-100/80 hover:border-slate-200 transition-colors">
+                  <h4 className="font-extrabold text-slate-800 text-[15px] mb-2 flex items-center gap-2 uppercase tracking-wide text-xs">
+                    <span className="w-2 h-2 rounded-full bg-blue-500"></span> iPhone / Safari
+                  </h4>
+                  <p className="text-[13px] text-slate-500 font-medium leading-relaxed">Нажмите иконку <span className="bg-white px-2 py-0.5 rounded border border-slate-200 inline-block font-bold">«Поделиться»</span>, затем выберите пункт <span className="text-slate-800 font-bold">«На экран Домой»</span> и нажмите <span className="text-[#c23e2b] font-extrabold">«Добавить»</span>.</p>
+                </div>
+                <div className="bg-slate-50 p-6 rounded-[1.25rem] border border-slate-100/80 hover:border-slate-200 transition-colors">
+                  <h4 className="font-extrabold text-slate-800 text-[15px] mb-2 flex items-center gap-2 uppercase tracking-wide text-xs">
+                    <span className="w-2 h-2 rounded-full bg-green-500"></span> Android / Chrome
+                  </h4>
+                  <p className="text-[13px] text-slate-500 font-medium leading-relaxed">Нажмите на значок <span className="bg-white px-2 py-0.5 rounded border border-slate-200 inline-block font-bold">⋮</span> в строке браузера, выберите <span className="text-slate-800 font-bold">«Установить приложение»</span> или <span className="text-[#c23e2b] font-extrabold">«На главный экран»</span>.</p>
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
+      </AnimatePresence>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { Heart, LogOut, HelpCircle, User, Bell, Activity, Layers, Sun, Moon } from 'lucide-react';
 import { BloodCenter, News, Donor, DonorCenter, MedicalNote, Donation } from './types.ts';
 import GuestSection from './components/GuestSection.tsx';
@@ -278,7 +279,13 @@ export default function App() {
       </header>
 
       {/* Primary Context Section area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
+      <motion.main 
+        key={view}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8"
+      >
         {(view === 'home' || !session) && (
           <GuestSection 
             centers={centers}
@@ -311,7 +318,7 @@ export default function App() {
             token={session.token}
           />
         )}
-      </main>
+      </motion.main>
 
       {/* Aesthetic human footer layout */}
       <footer className="bg-white border-t border-slate-100 py-6 px-6 text-center text-xs text-slate-400 font-light select-none">
