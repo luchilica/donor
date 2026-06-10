@@ -51,6 +51,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
   const [activeTab, setActiveTab] = useState<'home' | 'info' | 'docs' | 'centers' | 'news'>('home');
   const [regionFilter, setRegionFilter] = useState<string>('all');
   const [centerSearch, setCenterSearch] = useState<string>('');
+  
+  // News filter states
+  const [newsSearch, setNewsSearch] = useState<string>('');
+  const [newsDateFilter, setNewsDateFilter] = useState<string>('');
+  const [newsCenterFilter, setNewsCenterFilter] = useState<string>('all');
 
   // Auth States
   const [showAuthModal, setShowAuthModal] = useState<'login' | 'register' | null>(null);
@@ -194,6 +199,32 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
     if (regionFilter === 'grodno') return matchesSearch && (c.address.includes('Гродно') || c.name.includes('Гродно') || (c.id >= 23 && c.id <= 27));
     if (regionFilter === 'mogilev') return matchesSearch && (c.address.includes('Могилев') || c.name.includes('Бобруйск') || c.id === 6 || c.id === 7 || (c.id >= 28 && c.id <= 30));
     return matchesSearch;
+  });
+
+  const filteredNews = news.filter(item => {
+    const center = centers.find(c => c.id === item.centerId);
+    const centerName = center?.name || 'Центр переливания крови';
+    
+    const matchesSearch = item.title.toLowerCase().includes(newsSearch.toLowerCase()) || 
+                          item.content.toLowerCase().includes(newsSearch.toLowerCase()) ||
+                          centerName.toLowerCase().includes(newsSearch.toLowerCase());
+    
+    let matchesCenter = true;
+    if (newsCenterFilter !== 'all') {
+      matchesCenter = item.centerId.toString() === newsCenterFilter;
+    }
+
+    let matchesDate = true;
+    if (newsDateFilter) {
+      if (item.publishedAt) {
+          const pubDate = new Date(item.publishedAt).toISOString().split('T')[0];
+          matchesDate = pubDate === newsDateFilter;
+      } else {
+          matchesDate = false;
+      }
+    }
+
+    return matchesSearch && matchesCenter && matchesDate;
   });
 
   return (
@@ -605,7 +636,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-2xl font-semibold text-slate-800">Адреса и контакты центров переливания</h2>
-              <p className="text-sm text-slate-500">Все 42 действующих центра переливания крови Республики Беларусь по 6 областям.</p>
+              <p className="text-sm text-slate-500">Все действующие центры переливания крови Республики Беларусь.</p>
             </div>
             
             {/* Search Input */}
@@ -646,7 +677,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
           {/* Grid list of centers */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredCenters.map(center => (
-              <div key={center.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition duration-150 flex flex-col justify-between">
+              <div key={center.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5 hover:border-red-100 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider"></span>
@@ -714,45 +745,78 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
       {/* NEWS TAB */}
       {activeTab === 'news' && (
-        <div>
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
               <h2 className="text-2xl font-semibold text-slate-800">Сводка новостей центров переливания</h2>
               <p className="text-sm text-slate-500">Свежая информация об акциях безвозмездных кроводач, выездах мобильных комплексов заготовки и дефицитах плазмы.</p>
             </div>
           </div>
 
-          {news.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {news.map(item => {
-                const centerName = centers.find(c => c.id === item.centerId)?.name || 'Центр переливания крови';
+          
+             <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Поиск по новостям..."
+                  value={newsSearch}
+                  onChange={e => setNewsSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 transition-colors"
+                />
+              </div>
+              <div className="flex gap-4 flex-col sm:flex-row flex-1 sm:flex-none">
+                <select
+                  value={newsCenterFilter}
+                  onChange={e => setNewsCenterFilter(e.target.value)}
+                  className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 min-w-[200px]"
+                >
+                  <option value="all">Все центры</option>
+                  {centers.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <input
+                  type="date"
+                  value={newsDateFilter}
+                  onChange={e => setNewsDateFilter(e.target.value)}
+                  className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400"
+                />
+              </div>
+          
+
+          {filteredNews.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 w-full">
+              {filteredNews.map(item => {
+                const center = centers.find(c => c.id === item.centerId);
+                let centerName = center?.name || 'Центр переливания крови';
+                // try to shorten centerName if it's very long and starts with ГУ
+                if (centerName.includes('РНПЦ трансфузиологии')) {
+                  centerName = 'РНПЦ трансфузиологии';
+                } else if (centerName.includes('Оршанская')) {
+                  centerName = 'Оршанская СПК';
+                } else if (centerName.includes('Витебский ОЦТ')) {
+                   centerName = 'Витебский ОЦТ';
+                }
+
                 return (
-                  <div key={item.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-red-100 hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-3">
-                    <div>
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Новость</span>
-                        <span className="bg-slate-50 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200">
-                          {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Свежая новость'}
-                        </span>
-                      </div>
-                      <h3 className="font-semibold text-slate-800 text-sm mb-3 text-red-950">{item.title}</h3>
-                      <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">{item.content}</p>
-                    </div>
-                    <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-4">
-                      <span className="text-xs text-slate-500 font-medium">Центр:</span>
-                      <span className="text-[10px] text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                  <div key={item.id} className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5 hover:border-red-100 w-full">
+                    <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 mb-4">
+                      <span className="bg-slate-100/80 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200/60 whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
                         {centerName}
                       </span>
+                      <span className="text-xs text-slate-500 whitespace-nowrap">
+                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Свежая новость'}
+                      </span>
                     </div>
+                    <h3 className="font-bold text-slate-900 text-[17px] mb-2 leading-snug">{item.title}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap">{item.content}</p>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-sm text-slate-500 text-center py-12">Извещения и новости отсутствуют.</p>
-          )}
-        </div>
+                 );
+               })}
+             </div>
+           ) : (
+             <p className="text-sm text-slate-500 text-center py-12">По вашему запросу новости не найдены.</p>
+           )}
         </div>
       )}
 
