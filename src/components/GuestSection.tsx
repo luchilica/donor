@@ -388,39 +388,36 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
             {/* Communication Channels */}
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-slate-800 mb-1 flex items-center">
+              <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center">
                 <Heart className="w-5 h-5 text-red-500 mr-2" />
-                  Трёхканальная система оповещений
-                </h2>
-                
-              </div>
+                Трёхканальная система оповещений
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-blue-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
                     <Bell className="w-5 h-5" />
                   </div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-blue-700">Push-уведомления</h3>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Push-уведомления</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Мгновенно в браузер или на экран смартфона.
                   </p>
                 </div>
                 
                 <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-green-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
                     <Phone className="w-5 h-5" />
                   </div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-green-700">SMS-сообщения</h3>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">SMS-сообщения</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Работает без интернета на любом телефоне.
                   </p>
                 </div>
                 
                 <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-rose-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
                     <Send className="w-5 h-5" />
                   </div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-rose-700">Email-рассылка</h3>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Email-рассылка</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Полные письма с деталями и ссылками.
                   </p>

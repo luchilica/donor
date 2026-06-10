@@ -9,7 +9,7 @@
       "workingHours": "Пн-Пт: 08:00 - 16:00, Сб: 08:30 - 13:00",
       "mapLink": "https://yandex.by/maps/-/CPdxaM7D",
       "eRegistrationLink": "https://form.blood.by",
-      "createdAt": "2026-06-09T08:13:04.051Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 2,
@@ -20,7 +20,7 @@
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPdxa0Pb",
       "eRegistrationLink": "https://bankblood-vitebsk.by",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 3,
@@ -31,7 +31,7 @@
       "workingHours": "Пн-Пт: 08:00 - 16:30",
       "mapLink": "https://yandex.by/maps/-/CPdxmYnF",
       "eRegistrationLink": "https://bospk.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 4,
@@ -42,7 +42,7 @@
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPd3bI4G",
       "eRegistrationLink": "https://mozyrdonor.by",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 5,
@@ -53,7 +53,7 @@
       "workingHours": "Пн-Пт: 08:00 - 16:00",
       "mapLink": "https://yandex.by/maps/-/CPd3RCZR",
       "eRegistrationLink": "http://rspk.by",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 6,
@@ -64,7 +64,7 @@
       "workingHours": "Пн-Пт: 08:00 - 16:00",
       "mapLink": "https://yandex.by/maps/-/CPdxqOkz",
       "eRegistrationLink": "https://mospk.by",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 7,
@@ -75,7 +75,7 @@
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/profile/-/CPdxuJ20",
       "eRegistrationLink": "http://bzspk.by",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 8,
@@ -86,7 +86,7 @@
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPdxBMlA",
       "eRegistrationLink": "https://borcrb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 9,
@@ -97,7 +97,7 @@
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPdxJP29",
       "eRegistrationLink": "https://omispk.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 10,
@@ -108,359 +108,359 @@
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPdxRHLa",
       "eRegistrationLink": "https://soligorskcrb.by/podrazdelenija-crb/medicisnkie-uchrezhdenija-g-soligorska/jendoskopicheskoe-otdelenie-s-uzi-diagnostikoj/otdelenie-perelivanija-krovi-transfuziologii/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 11,
       "name": "Слуцкая станция переливания крови",
       "address": "г. Слуцк, ул. Чайковского, д. 21",
       "phone": "+375 17 957-17-48",
-      "email": "c11@blood.by",
+      "email": "info@slcrb.by",
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPdxZLoq",
       "eRegistrationLink": "https://slcrb.by/podrazdeleniya/stantsiya-perelivaniya-krovi/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 12,
       "name": "Барановичская станция переливания крови",
       "address": "г. Барановичи, ул. 50-лет ВЛКСМ, д. 4Д",
       "phone": "+375 16 364-48-28",
-      "email": "c12@blood.by",
+      "email": "spk@barcp.by",
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPdxbQ86",
       "eRegistrationLink": "https://barcp.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 13,
       "name": "Пинская станция переливания крови",
       "address": "г. Пинск, ул. Горького, д. 43",
       "phone": "+375 16 565-32-05",
-      "email": "c13@blood.by",
+      "email": "cp_pinsk@pcp.by",
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPdxb-I7",
       "eRegistrationLink": "https://pcp.by/stancija-perelivanija-krovi/obshhaja-informacija/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 14,
       "name": "Кобринская станция переливания крови",
       "address": "г. Кобрин, ул. Советская, д. 132",
       "phone": "+375 16 422-58-00",
-      "email": "c14@blood.by",
+      "email": "tmo@kobrincrb.by",
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPdxj-kG",
       "eRegistrationLink": "https://kobrincrb.by/podrazdeleniya/bolnicza/otdelenie-transfuziologii/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 15,
       "name": "Оршанская станция переливания крови",
       "address": "г. Орша, ул. Оршично-Набережная, д. 1",
       "phone": "+375 21 651-60-73",
-      "email": "c15@blood.by",
+      "email": "o-voct@bankblood-vitebsk.by",
       "workingHours": "Пн-Пт: 08:00 - 16:00",
       "mapLink": "https://yandex.by/maps/-/CPdxnX6R",
       "eRegistrationLink": "https://bankblood-vitebsk.by/filial-2-g-orsha/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 16,
       "name": "Новополоцкая станция переливания крови",
       "address": "г. Новополоцк, ул. Гайдарова, д. 4В",
       "phone": "+375 21 450-62-60",
-      "email": "c16@blood.by",
+      "email": "n-voct@bankblood-vitebsk.by",
       "workingHours": "Пн-Пт: 08:00 - 16:00",
       "mapLink": "https://yandex.by/maps/-/CPdxr86R",
       "eRegistrationLink": "https://bankblood-vitebsk.by/filial-1-g-novopoloczk/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 17,
       "name": "Полоцкая станция переливания крови",
       "address": "г. Полоцк, ул. Нижне-Покровская, д. 41",
       "phone": "+375 21 443-63-75",
-      "email": "c17@blood.by",
+      "email": "p-voct@bankblood-vitebsk.by",
       "workingHours": "Пн-Пт: 08:00 - 16:00",
       "mapLink": "https://yandex.by/maps/-/CPdxv8OB",
       "eRegistrationLink": "https://bankblood-vitebsk.by/filial-3-g-poloczk/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 18,
       "name": "Гомельский областной госпиталь ИВ - ОПК",
       "address": "г. Гомель, ул. Ильича, д. 286Б",
       "phone": "+375 23 253-98-32",
-      "email": "c18@blood.by",
+      "email": "ggkb3@ggkb3.by",
       "workingHours": "Пн-Пт: 08:30 - 14:30",
       "mapLink": "https://yandex.by/maps/-/CPd3QW3~",
       "eRegistrationLink": "https://www.ggkb3.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 19,
       "name": "Гомельская областная станция переливания крови",
       "address": "г. Гомель, ул. Демьяна Бедного, д. 2",
       "phone": "+375 23 234-72-51",
-      "email": "c19@blood.by",
+      "email": "reghosp@gokb.by",
       "workingHours": "Пн-Пт: 08:30 - 14:30",
       "mapLink": "https://yandex.by/maps/-/CPd3YQoB",
       "eRegistrationLink": "https://gokb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 20,
       "name": "Речицкая центральная районная больница - ОПК",
       "address": "г. Речица, ул. Трифонова, д. 117",
       "phone": "+375 23 404-46-34",
-      "email": "c20@blood.by",
+      "email": "rcrb@rechitsa.by",
       "workingHours": "Пн-Пт: 08:30 - 14:30",
       "mapLink": "https://yandex.by/maps/-/CPd3mRJo",
       "eRegistrationLink": "https://www.med.rechitsa.by/index.php/struktura/drygie-otd/otdelenie-transfuziologii",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 21,
       "name": "Светлогорская станция переливания крови",
       "address": "г. Светлогорск, ул. Свердлова, д. 8",
       "phone": "+375 23 427-69-00",
-      "email": "c21@blood.by",
+      "email": "svetlcge@mail.gomel.by",
       "workingHours": "Пн-Пт: 08:30 - 14:30",
       "mapLink": "https://yandex.by/maps/-/CPd35GYH",
       "eRegistrationLink": "https://www.svetlcge.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 22,
       "name": "Жлобинская ЦРБ - Отделение переливания крови",
       "address": "г. Жлобин, ул. Воровского, д. 1",
       "phone": "+375 23 344-25-21",
-      "email": "c22@blood.by",
+      "email": "zhlcrb@zhlcrb.by",
       "workingHours": "Пн-Пт: 08:30 - 14:30",
       "mapLink": "https://yandex.by/maps/-/CPd3FAoZ",
       "eRegistrationLink": "https://zhlcrb.by/novost/1140-pamyatka-donoru",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 23,
       "name": "Гродненская областная станция переливания крови",
       "address": "г. Гродно, ул. Кабяка, д. 22",
       "phone": "+375 15 231-54-05",
-      "email": "c23@blood.by",
+      "email": "donor@mailgrodno.by",
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPd3F84s",
       "eRegistrationLink": "https://donor.mailgrodno.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 24,
       "name": "Лидская станция переливания крови",
       "address": "г. Лида, ул. Кирова, д. 19",
       "phone": "+375 15 453-20-69",
-      "email": "c24@blood.by",
+      "email": "cancel@crblida.by",
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPd3ZQ49",
       "eRegistrationLink": "https://crblida.by/index.php/informatsiya/donorstvo/prisoedinyajsya-k-donorskomu-dvizheniyu",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 25,
       "name": "Слонимская ЦРБ - ОПК",
       "address": "г. Слоним, ул. Войкова, д. 51А",
       "phone": "+375 15 626-59-68",
-      "email": "c25@blood.by",
+      "email": "info@slncrb.by",
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPd3jMNe",
       "eRegistrationLink": "https://slncrb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 26,
       "name": "Волковысская ЦРБ - ОПК",
       "address": "г. Волковыск, ул. Горбатова, д. 1",
       "phone": "+375 15 125-90-30",
-      "email": "c26@blood.by",
+      "email": "crb@volrb.by",
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPd3jK4U",
       "eRegistrationLink": "https://www.volrb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 27,
       "name": "Сморгонская ЦРБ - ОПК",
       "address": "г. Сморгонь, пер. Больничный, д. 13",
       "phone": "+375 15 922-49-07",
-      "email": "c27@blood.by",
+      "email": "hospital@smorgon-crb.by",
       "workingHours": "Пн-Пт: 08:00 - 15:00",
       "mapLink": "https://yandex.by/maps/-/CPd3vMz4",
       "eRegistrationLink": "http://smorgon-crb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 28,
       "name": "Горецкая центральная районная больница - ОПК",
       "address": "г. Горки, ул. Кирова, д. 18",
       "phone": "+375 22 335-40-11",
-      "email": "c28@blood.by",
+      "email": "priemnaya@gorkicrb.by",
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd3z2mQ",
       "eRegistrationLink": "https://gorkicrb.by/opkotdelenie-perelivaniya-krovi/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 29,
       "name": "Кричевская ЦРБ - ОПК",
       "address": "г. Кричев, ул. Ленинская, д. 70",
       "phone": "+375 22 412-72-80",
-      "email": "c29@blood.by",
+      "email": "krichev-crb@mogilev.by",
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~AXlg",
       "eRegistrationLink": "https://krichev-crb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 30,
       "name": "Осиповичская ЦРБ - ОПК",
       "address": "г. Осиповичи, ул. Октябрьская, д. 2",
       "phone": "+375 22 357-05-80",
-      "email": "c30@blood.by",
+      "email": "oblzdrav@mogilev.by",
       "workingHours": "Пн-Пт: 08:00 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~IYLO",
       "eRegistrationLink": "https://ocrb.by/?ysclid=mq6bko9inj711418264",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 31,
       "name": "Минская областная клиническая больница - ОПК",
       "address": "Минский р-н, пос. Лесной, д. 1",
       "phone": "+375 17 265-25-58",
-      "email": "c31@blood.by",
+      "email": "info@mokb.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~MHy0",
       "eRegistrationLink": "https://minsk-okb.by/otdelenia/hirurgia/perelivanie-krovi.html?ysclid=mq6bpffb8d321241165",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 32,
       "name": "Городской трансфузиологический кабинет (Минск, 6-я ГКБ)",
       "address": "г. Минск, ул. Уральская, д. 5",
       "phone": "+375 17 239-59-13",
-      "email": "c32@blood.by",
+      "email": "6gkb-trfz@mcct.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~UMM~",
       "eRegistrationLink": "https://mcct.by/?ysclid=mq6bq5498y845565086",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 33,
       "name": "ОПК Минской ЦРБ (Минский р-н)",
       "address": "д. Боровляны, ул. Фрунзенская, д. 1А, корп. 6",
       "phone": "+375 17 505-27-33",
-      "email": "c33@blood.by",
+      "email": "uz-mcrb@mcrkb.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~YDJ7",
       "eRegistrationLink": "https://mcrb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 34,
       "name": "Жодинская ЦГБ - ОПК",
       "address": "г. Жодино, пр. Венисье, д. 1",
       "phone": "+375 17 753-49-05",
-      "email": "c34@blood.by",
+      "email": "info@zhcgb.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~4W-v",
       "eRegistrationLink": "https://zhcgb.by/ru/otdelenie-transfuziologi?ysclid=mq6bvtjb81344566277",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 35,
       "name": "Несвижская ЦРБ - ОПК",
       "address": "г. Несвиж г.п. Городея, ул. Гагарина, д. 13",
       "phone": "+375 17 705-81-57",
-      "email": "c35@blood.by",
+      "email": "crb@nesvizh-hospital.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~aPjK",
       "eRegistrationLink": "https://nesvizh-hospital.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 36,
       "name": "Вилейская ЦРБ - ОПК",
       "address": "г. Вилейка, ул. Пионерская, д. 42",
       "phone": "+375 (177) 15-51-11",
-      "email": "c36@blood.by",
+      "email": "crb@vilcrb.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~mF6z",
       "eRegistrationLink": "https://vilcrb.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 37,
       "name": "Речицкая ЦРБ - Филиал переливания крови",
       "address": "г. Речица, ул. Трифонова, д. 119",
       "phone": "+375 23 409-95-27",
-      "email": "c37@blood.by",
+      "email": "rcrb@rechitsa.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~qAJe",
       "eRegistrationLink": "https://med.rechitsa.by/index.php/struktura/drygie-otd/otdelenie-transfuziologii",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 38,
       "name": "Калинковичская ЦРБ - ОПК",
       "address": "г. Калинковичи, ул. Князева, д. 7",
       "phone": "+375 23 452-35-54",
-      "email": "c38@blood.by",
+      "email": "kln-tmo@mail.gomel.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~uTLe",
       "eRegistrationLink": "https://kcrb.by/o-nas/otdeleniya?ysclid=mq6c3lswf9789109011",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 39,
       "name": "Добрушская ЦРБ - ОПК",
       "address": "г. Добруш, ул. Чапаева, д. 3",
       "phone": "+375 23 332-30-37",
-      "email": "c39@blood.by",
+      "email": "info@dcrb.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~y86y",
       "eRegistrationLink": "https://dcrb.by/o-nas/podrazdeleniya/okpp.html?view=article&id=29&catid=15&ysclid=mq6c5wtz9l30973914",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 40,
       "name": "Хойникская ЦРБ - ОПК",
       "address": "г. Хойники, ул. Мира, д. 1",
       "phone": "+375 23 464-13-25",
-      "email": "c40@blood.by",
+      "email": "mail@khoiniki-crb.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~5T~n",
       "eRegistrationLink": "https://khoiniki-crb.by//ysclid=mq6c799ww2888243320",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 41,
       "name": "Лунинецкая ЦРБ - ОПК",
       "address": "г. Лунинец, ул. Максима Богдановича, д. 4",
       "phone": "+375 16 476-27-82",
-      "email": "c41@blood.by",
+      "email": "lncrb@lncrb.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~FQpu",
       "eRegistrationLink": "https://lncrb.by/kontakty/vse-kontaktnye-nomera-telefonov?ysclid=mq6c9gw3zj347592647",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 42,
       "name": "Берёзовская ЦРБ - ОПК",
       "address": "г. Берёза, ул. Ленина, д. 1",
       "phone": "+375 16 433-00-69",
-      "email": "c42@blood.by",
+      "email": "bereza_rtmo@crbbrz.by",
       "workingHours": "Пн-Пт: 08:30 - 15:30",
       "mapLink": "https://yandex.by/maps/-/CPd~F2Mp",
       "eRegistrationLink": "http://www.crbbrz.by/",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     }
   ],
   "users": [
@@ -470,7 +470,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 2,
@@ -479,7 +479,7 @@
       "role": "center",
       "centerId": 1,
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 3,
@@ -487,7 +487,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 4,
@@ -495,7 +495,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 5,
@@ -503,7 +503,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 6,
@@ -511,7 +511,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 7,
@@ -519,7 +519,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 8,
@@ -527,7 +527,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 9,
@@ -535,7 +535,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 10,
@@ -543,7 +543,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 11,
@@ -551,7 +551,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 12,
@@ -559,7 +559,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 13,
@@ -567,7 +567,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 14,
@@ -575,7 +575,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 15,
@@ -583,7 +583,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 16,
@@ -591,7 +591,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 17,
@@ -599,7 +599,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 18,
@@ -607,7 +607,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 19,
@@ -615,7 +615,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 20,
@@ -623,7 +623,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 21,
@@ -631,7 +631,7 @@
       "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
       "role": "donor",
       "isActive": true,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     }
   ],
   "donors": [
@@ -658,7 +658,7 @@
       "lastDonationDate": "2026-04-01",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-31",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 2,
@@ -685,7 +685,7 @@
       "lastDonationDate": null,
       "lastDonationType": null,
       "nextAvailableDate": null,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 3,
@@ -712,7 +712,7 @@
       "lastDonationDate": "2026-03-11",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-11",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 4,
@@ -739,7 +739,7 @@
       "lastDonationDate": "2026-03-12",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-12",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 5,
@@ -766,7 +766,7 @@
       "lastDonationDate": "2026-03-13",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-13",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 6,
@@ -793,7 +793,7 @@
       "lastDonationDate": "2026-03-14",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-14",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 7,
@@ -820,7 +820,7 @@
       "lastDonationDate": null,
       "lastDonationType": null,
       "nextAvailableDate": null,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 8,
@@ -847,7 +847,7 @@
       "lastDonationDate": "2026-03-16",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-16",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 9,
@@ -874,7 +874,7 @@
       "lastDonationDate": "2026-03-17",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-17",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 10,
@@ -901,7 +901,7 @@
       "lastDonationDate": "2026-03-18",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-18",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 11,
@@ -928,7 +928,7 @@
       "lastDonationDate": "2026-03-19",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-19",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 12,
@@ -955,7 +955,7 @@
       "lastDonationDate": null,
       "lastDonationType": null,
       "nextAvailableDate": null,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 13,
@@ -982,7 +982,7 @@
       "lastDonationDate": "2026-03-21",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-21",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 14,
@@ -1009,7 +1009,7 @@
       "lastDonationDate": "2026-03-22",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-22",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 15,
@@ -1036,7 +1036,7 @@
       "lastDonationDate": "2026-03-23",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-23",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 16,
@@ -1063,7 +1063,7 @@
       "lastDonationDate": "2026-03-24",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-24",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 17,
@@ -1090,7 +1090,7 @@
       "lastDonationDate": null,
       "lastDonationType": null,
       "nextAvailableDate": null,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 18,
@@ -1117,7 +1117,7 @@
       "lastDonationDate": "2026-03-26",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-26",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 19,
@@ -1144,7 +1144,7 @@
       "lastDonationDate": "2026-03-27",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-27",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 20,
@@ -1171,7 +1171,7 @@
       "lastDonationDate": "2026-03-28",
       "lastDonationType": "blood",
       "nextAvailableDate": "2026-05-28",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     }
   ],
   "donorCenters": [
@@ -1193,7 +1193,7 @@
       "isPrimary": true,
       "status": "pending",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 3,
@@ -1202,7 +1202,7 @@
       "isPrimary": true,
       "status": "pending",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 4,
@@ -1211,7 +1211,7 @@
       "isPrimary": true,
       "status": "pending",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 5,
@@ -1220,7 +1220,7 @@
       "isPrimary": true,
       "status": "pending",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 6,
@@ -1229,7 +1229,7 @@
       "isPrimary": true,
       "status": "pending",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 7,
@@ -1240,7 +1240,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 8,
@@ -1251,7 +1251,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.819Z"
     },
     {
       "id": 9,
@@ -1262,7 +1262,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 10,
@@ -1273,7 +1273,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 11,
@@ -1284,7 +1284,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 12,
@@ -1295,7 +1295,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 13,
@@ -1306,7 +1306,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 14,
@@ -1317,7 +1317,7 @@
       "rejectionReason": "В предоставленной медицинской выписке отсутствует печать терапевта. Пожалуйста, прикрепите скан новой выписки.",
       "resubmissionCount": 1,
       "resubmittedAt": "2026-05-15T10:00:00Z",
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 15,
@@ -1328,7 +1328,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 16,
@@ -1339,7 +1339,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 17,
@@ -1350,7 +1350,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 18,
@@ -1361,7 +1361,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 19,
@@ -1372,7 +1372,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     },
     {
       "id": 20,
@@ -1383,7 +1383,7 @@
       "confirmedById": 2,
       "confirmedAt": "2026-04-10T09:00:00Z",
       "resubmissionCount": 0,
-      "createdAt": "2026-06-09T08:13:04.052Z"
+      "createdAt": "2026-06-10T06:11:43.820Z"
     }
   ],
   "donations": [
