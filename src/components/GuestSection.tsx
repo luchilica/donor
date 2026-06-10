@@ -649,13 +649,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
               <div key={center.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition duration-150 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Учреждение #{center.id}</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider"></span>
                     {center.eRegistrationLink && (
                       <span className="bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-emerald-100">
-                        Онлайн запись
+                        Запись по телефону
                       </span>
-                    )}
+                    )} 
                   </div>
+                  <span className="text-[5px] uppercase font-bold text-slate-400 tracking-wider"></span>
                   <h3 className="font-semibold text-slate-800 text-sm mb-3 text-red-950">{center.name}</h3>
                   <div className="space-y-2 text-xs text-slate-600 mb-6">
                     <p className="flex items-center">
@@ -691,14 +692,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                       rel="noreferrer"
                       className="text-xs bg-red-600 text-white font-medium px-4 py-1.5 rounded-lg hover:bg-red-700 transition duration-150 shadow-sm"
                     >
-                      Записаться на сдачу
+                      Сайт учреждения
                     </a>
                   ) : (
                     <button 
                       onClick={() => alert(`Запись по телефону: ${center.phone}`)}
                       className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-4 py-1.5 rounded-lg"
                     >
-                      Регистратура
+                      Сайт учреждения
                     </button>
                   )}
                 </div>
@@ -713,28 +714,45 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
       {/* NEWS TAB */}
       {activeTab === 'news' && (
-        <div className="max-w-2xl mx-auto space-y-6">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-semibold text-slate-800">Сводка новостей центров переливания</h2>
-            <p className="text-sm text-slate-500">Свежая информация об акциях безвозмездных кроводач, выездах мобильных комплексов заготовки и дефицитах плазмы.</p>
+        <div>
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold text-slate-800">Сводка новостей центров переливания</h2>
+              <p className="text-sm text-slate-500">Свежая информация об акциях безвозмездных кроводач, выездах мобильных комплексов заготовки и дефицитах плазмы.</p>
+            </div>
           </div>
 
-          {news.map(item => {
-            const centerName = centers.find(c => c.id === item.centerId)?.name || 'Центр переливания крови';
-            return (
-              <div key={item.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-red-100 transition-all duration-300 space-y-3">
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>{centerName}</span>
-                  <span>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Свежая новость'}</span>
-                </div>
-                <h3 className="font-semibold text-slate-800 text-base">{item.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{item.content}</p>
-              </div>
-            );
-          })}
-          {news.length === 0 && (
+          {news.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {news.map(item => {
+                const centerName = centers.find(c => c.id === item.centerId)?.name || 'Центр переливания крови';
+                return (
+                  <div key={item.id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-red-100 hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-3">
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Новость</span>
+                        <span className="bg-slate-50 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200">
+                          {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Свежая новость'}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-slate-800 text-sm mb-3 text-red-950">{item.title}</h3>
+                      <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap">{item.content}</p>
+                    </div>
+                    <div className="flex justify-between items-center pt-3 border-t border-slate-100 mt-4">
+                      <span className="text-xs text-slate-500 font-medium">Центр:</span>
+                      <span className="text-[10px] text-slate-700 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                        {centerName}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
             <p className="text-sm text-slate-500 text-center py-12">Извещения и новости отсутствуют.</p>
           )}
+        </div>
         </div>
       )}
 
