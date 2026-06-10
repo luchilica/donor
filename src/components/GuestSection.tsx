@@ -45,9 +45,10 @@ interface GuestSectionProps {
   news: News[];
   onLoginSuccess: (session: any) => void;
   apiBase: string;
+  session?: any;
 }
 
-export default function GuestSection({ centers, news, onLoginSuccess, apiBase }: GuestSectionProps) {
+export default function GuestSection({ centers, news, onLoginSuccess, apiBase, session }: GuestSectionProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'info' | 'docs' | 'centers' | 'news'>('home');
   const [regionFilter, setRegionFilter] = useState<string>('all');
   const [centerSearch, setCenterSearch] = useState<string>('');
@@ -60,6 +61,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
 
   // Auth States
   const [showAuthModal, setShowAuthModal] = useState<'login' | 'register' | 'forgot' | 'resetAuth' | null>(null);
+
+  useEffect(() => {
+    const handleOpenAuth = () => setShowAuthModal('login');
+    window.addEventListener('openAuth', handleOpenAuth);
+    return () => window.removeEventListener('openAuth', handleOpenAuth);
+  }, []);
+
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -364,29 +372,41 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
               «Донор-Алерт» – современная система оповещения доноров. Мы связываем региональные центры переливания крови РБ с донорами для мгновенного закрытия экстренных дефицитов.
             </p>
             <div className="flex flex-wrap gap-4 mb-8">
-              <button 
-                onClick={() => {
-                  setRegStep(1);
-                  setRegForm({
-                    lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male',
-                    bloodGroup: 'II_A', rhFactor: 'positive', weight: '70', phone: '', email: '', password: '',
-                    primaryCenterId: '', smsEnabled: true, pushEnabled: true, emailNotificationsEnabled: true, agreeTerms: false
-                  });
-                  setRegConfirmPassword('');
-                  setShowAuthModal('register');
-                }}
-                className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
-              >
-                <Heart className="w-5 h-5 mr-2" />
-                Стать донором
-              </button>
-              <button 
-                onClick={() => setShowAuthModal('login')}
-                className="bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:border-white/60 hover:shadow-lg flex items-center"
-              >
-                <User className="w-5 h-5 mr-2" />
-                Личный кабинет
-              </button>
+              {!session ? (
+                <>
+                  <button 
+                    onClick={() => {
+                      setRegStep(1);
+                      setRegForm({
+                        lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male',
+                        bloodGroup: 'II_A', rhFactor: 'positive', weight: '70', phone: '', email: '', password: '',
+                        primaryCenterId: '', smsEnabled: true, pushEnabled: true, emailNotificationsEnabled: true, agreeTerms: false
+                      });
+                      setRegConfirmPassword('');
+                      setShowAuthModal('register');
+                    }}
+                    className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
+                  >
+                    <Heart className="w-5 h-5 mr-2" />
+                    Стать донором
+                  </button>
+                  <button 
+                    onClick={() => setShowAuthModal('login')}
+                    className="bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:border-white/60 hover:shadow-lg flex items-center"
+                  >
+                    <User className="w-5 h-5 mr-2" />
+                    Личный кабинет
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => window.dispatchEvent(new Event('goToDashboard'))}
+                  className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
+                >
+                  <User className="w-5 h-5 mr-2" />
+                  Перейти в личный кабинет
+                </button>
+              )}
             </div>
 
             <hr className="border-white/20 mb-8" />

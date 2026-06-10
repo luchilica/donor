@@ -102,12 +102,21 @@ export default function App() {
   };
 
   useEffect(() => {
+    const handleGoToDashboard = () => setView('dashboard');
+    window.addEventListener('goToDashboard', handleGoToDashboard);
+    return () => window.removeEventListener('goToDashboard', handleGoToDashboard);
+  }, []);
+
+  const [view, setView] = useState<'home' | 'dashboard'>('home');
+
+  useEffect(() => {
     // Attempt local storage decode
     const stored = localStorage.getItem('donor_alert_session');
     if (stored) {
       try {
         const decoded = JSON.parse(stored);
         setSession(decoded);
+        setView('dashboard');
       } catch {}
     }
     loadGlobalData();
@@ -123,17 +132,20 @@ export default function App() {
       setDonorMedicalNotes([]);
       setDonorDonations([]);
       setCenterProfile(null);
+      setView('home');
     }
   }, [session, centers.length]);
 
   const handleLoginSuccess = (loginData: any) => {
     setSession(loginData);
     localStorage.setItem('donor_alert_session', JSON.stringify(loginData));
+    setView('dashboard');
   };
 
   const handleLogout = () => {
     setSession(null);
     localStorage.removeItem('donor_alert_session');
+    setView('home');
   };
 
   // Quick Evaluator Simulator Session set-up
@@ -210,9 +222,9 @@ export default function App() {
       {/* Main Core Navigation Header */}
       <header className="bg-white border-b border-slate-100 py-4 px-6 shadow-xs sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-2 select-none">
+          <div className="flex items-center gap-2 select-none cursor-pointer" onClick={() => setView('home')}>
             <Heart className="w-6.5 h-6.5 text-red-650 text-red-600 fill-red-600" />
-            <h1 className="font-extrabold text-slate-800 text-lg tracking-tight select-all">
+            <h1 className="font-extrabold text-slate-800 text-lg tracking-tight select-none">
               Донор-Алерт
             </h1>
           </div>
@@ -234,8 +246,14 @@ export default function App() {
 
             {session ? (
               <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setView('dashboard')}
+                  className="w-9 h-9 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors cursor-pointer border border-red-200"
+                  title="Личный кабинет"
+                >
+                  <User className="w-5 h-5" />
+                </button>
                 <div className="hidden sm:block text-right">
-
                   <span className="text-xs text-slate-700 font-semibold">{session.user.email}</span>
                 </div>
                 <button 
@@ -246,23 +264,32 @@ export default function App() {
                   Выйти
                 </button>
               </div>
-            ) : null}
+            ) : (
+              <button 
+                onClick={() => window.dispatchEvent(new Event('openAuth'))}
+                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200"
+                title="Войти в кабинет"
+              >
+                <User className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       {/* Primary Context Section area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8">
-        {!session && (
+        {(view === 'home' || !session) && (
           <GuestSection 
             centers={centers}
             news={news}
             onLoginSuccess={handleLoginSuccess}
             apiBase={API_BASE}
+            session={session}
           />
         )}
 
-        {session?.user.role === 'donor' && donorProfile && (
+        {view === 'dashboard' && session?.user.role === 'donor' && donorProfile && (
           <DonorSection 
             donor={donorProfile}
             links={donorLinks}
@@ -276,7 +303,7 @@ export default function App() {
           />
         )}
 
-        {session?.user.role === 'center' && centerProfile && (
+        {view === 'dashboard' && session?.user.role === 'center' && centerProfile && (
           <CenterSection 
             center={centerProfile}
             onRefresh={loadGlobalData}
