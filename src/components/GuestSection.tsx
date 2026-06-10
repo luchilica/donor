@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, FileText, Phone, MapPin, Calendar, 
   ChevronRight, LogIn, UserPlus, HelpCircle, Check, Search, Download, User,
-  Bell, Send
+  Bell, Send, X
 } from 'lucide-react';
 import { BloodCenter, News, BloodGroup, RhFactor, Gender } from '../types';
 
@@ -56,13 +56,56 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
   const [newsSearch, setNewsSearch] = useState<string>('');
   const [newsDateFilter, setNewsDateFilter] = useState<string>('');
   const [newsCenterFilter, setNewsCenterFilter] = useState<string>('all');
+  const [selectedNews, setSelectedNews] = useState<News | null>(null);
 
   // Auth States
-  const [showAuthModal, setShowAuthModal] = useState<'login' | 'register' | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState<'login' | 'register' | 'forgot' | 'resetAuth' | null>(null);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [resetCode, setResetCode] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+
+  const getPasswordHint = (pwd: string) => {
+    if (!pwd) return '';
+    if (pwd.length < 6) return 'Пароль слишком короткий, введите не менее 6 символов';
+    const hasLetters = /[a-zA-Zа-яА-Я]/.test(pwd);
+    const hasNumbers = /[0-9]/.test(pwd);
+    
+    if (!(hasLetters && hasNumbers)) {
+      return 'Пароль слишком простой, добавьте буквы и цифры';
+    }
+    return '';
+  };
+  
+  const isBirthDateInvalid = () => {
+    if (!regForm.birthDate) return false;
+    const bDate = new Date(regForm.birthDate);
+    const minDate = new Date(); minDate.setFullYear(minDate.getFullYear() - 65);
+    const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() - 18);
+    // Note: since it's inverted, minDate is 65 years ago, maxDate is 18 years ago
+    // So valid range is bDate >= minDate && bDate <= maxDate.
+    // Therefore invalid is bDate < minDate || bDate > maxDate.
+    return bDate < minDate || bDate > maxDate;
+  };
+
+  const isEmailInvalid = () => {
+    if (!regForm.email) return false;
+    return !/^.+@.+$/.test(regForm.email);
+  };
+
+  const isConfirmPasswordInvalid = () => {
+    if (!regConfirmPassword) return false;
+    return regConfirmPassword !== regForm.password;
+  };
+
+  const isWeightInvalid = () => {
+    if (!regForm.weight) return false;
+    const w = parseFloat(regForm.weight);
+    return w < 55;
+  };
 
   // Registration States
   const [regStep, setRegStep] = useState(1);
@@ -75,7 +118,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
     bloodGroup: 'II_A' as BloodGroup,
     rhFactor: 'positive' as RhFactor,
     weight: '70',
-    phone: '+375 (',
+    phone: '',
     email: '',
     password: '',
     primaryCenterId: '',
@@ -86,6 +129,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
   });
   const [regError, setRegError] = useState('');
   const [regLoading, setRegLoading] = useState(false);
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
 
   // Stats from DB for landing page
   const [totalDonorsCount, setTotalDonorsCount] = useState(20);
@@ -128,13 +172,77 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail) {
+      setLoginError('Введите ваш e-mail');
+      return;
+    }
+    setLoginError('');
+    setLoginLoading(true);
+
+    try {
+      const res = await fetch(`${apiBase}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Ошибка при запросе сброса пароля');
+      }
+      alert(data.message || 'Письмо отправлено');
+      setShowAuthModal('resetAuth');
+      setResetCode('');
+      setResetPassword('');
+      setResetConfirmPassword('');
+    } catch (err: any) {
+      setLoginError(err.message);
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetCode) {
+      setLoginError('Введите код из письма');
+      return;
+    }
+    if (resetPassword !== resetConfirmPassword) {
+      setLoginError('Пароли не совпадают');
+      return;
+    }
+    setLoginError('');
+    setLoginLoading(true);
+
+    try {
+      const res = await fetch(`${apiBase}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail, code: resetCode, newPassword: resetPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Ошибка при сохранении пароля');
+      }
+      alert(data.message || 'Пароль изменён');
+      setShowAuthModal('login');
+      setLoginPassword('');
+    } catch (err: any) {
+      setLoginError(err.message);
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegError('');
 
     if (regStep === 1) {
       // Validate Step 1
-      if (!regForm.lastName || !regForm.firstName || !regForm.birthDate || !regForm.phone || !regForm.email || !regForm.password) {
+      if (!regForm.lastName || !regForm.firstName || !regForm.birthDate || !regForm.phone || !regForm.email || !regForm.password || !regConfirmPassword) {
         setRegError('Пожалуйста, заполните необходимые личные данные');
         return;
       }
@@ -146,11 +254,26 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
         setRegError('Пароль должен быть длиной не менее 6 символов');
         return;
       }
+      if (regForm.password !== regConfirmPassword) {
+        setRegError('Пароли не совпадают');
+        return;
+      }
+      const bDate = new Date(regForm.birthDate);
+      const minDate = new Date(); minDate.setFullYear(minDate.getFullYear() - 65);
+      const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() - 18);
+      if (bDate < minDate || bDate > maxDate) {
+        setRegError('Возраст донора должен быть от 18 до 65 лет');
+        return;
+      }
       setRegStep(2);
       return;
     }
 
     // Step 2 Validation and submit
+    if (parseFloat(regForm.weight) < 55) {
+      setRegError('К донорству допускаются лица с массой тела не менее 55 кг');
+      return;
+    }
     if (!regForm.primaryCenterId) {
       setRegError('Пожалуйста, выберите ваш основной центр крови из списка');
       return;
@@ -246,9 +369,10 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                   setRegStep(1);
                   setRegForm({
                     lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male',
-                    bloodGroup: 'II_A', rhFactor: 'positive', weight: '70', phone: '+375 (', email: '', password: '',
+                    bloodGroup: 'II_A', rhFactor: 'positive', weight: '70', phone: '', email: '', password: '',
                     primaryCenterId: '', smsEnabled: true, pushEnabled: true, emailNotificationsEnabled: true, agreeTerms: false
                   });
+                  setRegConfirmPassword('');
                   setShowAuthModal('register');
                 }}
                 className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
@@ -799,7 +923,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                 }
 
                 return (
-                  <div key={item.id} className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5 hover:border-red-100 w-full">
+                  <div key={item.id} className="group bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5 hover:border-red-100 w-full">
                     <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 mb-4">
                       <span className="bg-slate-100/80 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200/60 whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
                         {centerName}
@@ -809,7 +933,16 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                       </span>
                     </div>
                     <h3 className="font-bold text-slate-900 text-[17px] mb-2 leading-snug">{item.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap">{item.content}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap line-clamp-2">{item.content}</p>
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center opacity-90 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => setSelectedNews(item)}
+                        className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center transition-colors px-2 py-1 -ml-2 rounded-md hover:bg-red-50"
+                      >
+                        Подробнее
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </button>
+                    </div>
                   </div>
                  );
                })}
@@ -826,13 +959,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
             <button 
               onClick={() => { setShowAuthModal(null); setRegError(''); setLoginError(''); }}
-              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"
+              className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
             >
-              Закрыть
+              <X className="w-5 h-5" />
             </button>
 
             {/* LOGIN PANEL */}
-            {showAuthModal === 'login' ? (
+            {showAuthModal === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-bold text-slate-800">Вход в личный кабинет</h3>
@@ -873,17 +1006,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                   <button 
                     type="button" 
                     onClick={() => {
-                      if (!loginEmail) {
-                        alert('Сначала введите ваш e-mail в соответствующее поле!');
-                      } else {
-                        fetch(`${apiBase}/auth/forgot-password`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ email: loginEmail })
-                        })
-                        .then(r => r.json())
-                        .then(d => alert(d.message || d.error));
-                      }
+                      setLoginError('');
+                      setShowAuthModal('forgot');
                     }}
                     className="text-xs text-red-600 hover:underline hover:text-red-700"
                   >
@@ -903,15 +1027,17 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                   Нет учетной записи?{' '}
                   <button 
                     type="button"
-                    onClick={() => { setShowAuthModal('register'); setRegStep(1); }}
+                    onClick={() => { setShowAuthModal('register'); setRegStep(1); setRegConfirmPassword(''); }}
                     className="text-red-600 hover:underline font-semibold"
                   >
                     Регистрация донора
                   </button>
                 </div>
               </form>
-            ) : (
-              /* REGISTRATION PANEL (STEP BY STEP) */
+            )}
+
+            {/* REGISTRATION PANEL (STEP BY STEP) */}
+            {showAuthModal === 'register' && (
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="text-center mb-4">
                   <h3 className="text-xl font-bold text-slate-800">Регистрация нового донора</h3>
@@ -972,10 +1098,19 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                         <input 
                           type="date" 
                           required
+                          min={new Date(new Date().setFullYear(new Date().getFullYear() - 65)).toISOString().split('T')[0]}
+                          max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                           value={regForm.birthDate}
                           onChange={(e) => setRegForm({...regForm, birthDate: e.target.value})}
-                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                          className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                            isBirthDateInvalid() 
+                              ? 'border-red-500 bg-red-50 focus:border-red-600' 
+                              : 'border-slate-200 focus:border-red-500'
+                          }`}
                         />
+                        {isBirthDateInvalid() && (
+                          <p className="text-xs text-red-500 mt-1">Возраст донора должен быть от 18 до 65 лет</p>
+                        )}
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Пол <span className="text-red-500">*</span></label>
@@ -995,9 +1130,10 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                       <input 
                         type="tel" 
                         required
+                        maxLength={12}
                         value={regForm.phone}
-                        onChange={(e) => setRegForm({...regForm, phone: e.target.value})}
-                        placeholder="+375 (XX) XXX-XX-XX"
+                        onChange={(e) => setRegForm({...regForm, phone: e.target.value.substring(0, 12)})}
+                        placeholder="375XXXXXXXXX"
                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                       />
                     </div>
@@ -1010,8 +1146,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                         value={regForm.email}
                         onChange={(e) => setRegForm({...regForm, email: e.target.value})}
                         placeholder="test@mail.ru"
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                          isEmailInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+                        }`}
                       />
+                      {isEmailInvalid() && (
+                        <p className="text-xs text-red-500 mt-1">Введите корректный почтовый ящик (с символом @)</p>
+                      )}
                     </div>
 
                     <div className="space-y-1">
@@ -1022,8 +1163,30 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                         value={regForm.password}
                         onChange={(e) => setRegForm({...regForm, password: e.target.value})}
                         placeholder="Минимум 6 символов"
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                          getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
+                        }`}
                       />
+                      {getPasswordHint(regForm.password) && (
+                        <p className="text-xs text-orange-600 mt-1">{getPasswordHint(regForm.password)}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Подтверждение пароля <span className="text-red-500">*</span></label>
+                      <input 
+                        type="password" 
+                        required
+                        value={regConfirmPassword}
+                        onChange={(e) => setRegConfirmPassword(e.target.value)}
+                        placeholder="Повторите пароль"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                          isConfirmPasswordInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+                        }`}
+                      />
+                      {isConfirmPasswordInvalid() && (
+                        <p className="text-xs text-red-500 mt-1">Неверный пароль</p>
+                      )}
                     </div>
 
                     <button 
@@ -1073,8 +1236,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                         max="200"
                         value={regForm.weight}
                         onChange={(e) => setRegForm({...regForm, weight: e.target.value})}
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                          isWeightInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+                        }`}
                       />
+                      {isWeightInvalid() && (
+                        <p className="text-xs text-red-500 mt-1">Минимальный вес — 55 кг.</p>
+                      )}
                     </div>
 
                     <div className="space-y-1">
@@ -1171,9 +1339,180 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase }:
                 </div>
               </form>
             )}
+
+            {/* FORGOT PASSWORD PANEL */}
+            {showAuthModal === 'forgot' && (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-slate-800">Восстановление пароля</h3>
+                  <p className="text-xs text-slate-500 mt-1">Вам на почту придет код для сброса</p>
+                </div>
+
+                {loginError && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600">
+                    {loginError}
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Электронная почта (E-mail)</label>
+                  <input 
+                    type="email" 
+                    required
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="ivanov@example.com"
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={loginLoading}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm"
+                >
+                  {loginLoading ? 'Отправка...' : 'Отправить код'}
+                </button>
+
+                <div className="text-center pt-4 border-t border-slate-100 text-xs">
+                  <button 
+                    type="button"
+                    onClick={() => { setShowAuthModal('login'); setLoginError(''); }}
+                    className="text-slate-600 hover:underline font-semibold"
+                  >
+                    Вернуться ко входу
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* RESET PASSWORD PANEL */}
+            {showAuthModal === 'resetAuth' && (
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div className="text-center mb-6">
+                  <h3 className="text-xl font-bold text-slate-800">Новый пароль</h3>
+                  <p className="text-xs text-slate-500 mt-1">Введите код из письма и новый пароль</p>
+                </div>
+
+                {loginError && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600">
+                    {loginError}
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Код восстановления</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value)}
+                    placeholder="Например, 1234"
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Новый пароль</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={resetPassword}
+                    onChange={(e) => setResetPassword(e.target.value)}
+                    placeholder="Минимум 6 символов"
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-700">Подтвердите пароль</label>
+                  <input 
+                    type="password" 
+                    required
+                    value={resetConfirmPassword}
+                    onChange={(e) => setResetConfirmPassword(e.target.value)}
+                    placeholder="Повторите пароль"
+                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={loginLoading}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm"
+                >
+                  {loginLoading ? 'Сохранение...' : 'Сбросить пароль'}
+                </button>
+
+                <div className="text-center pt-4 border-t border-slate-100 text-xs">
+                  <button 
+                    type="button"
+                    onClick={() => { setShowAuthModal('login'); setLoginError(''); }}
+                    className="text-slate-600 hover:underline font-semibold"
+                  >
+                    Отменить
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
+
+      {/* NEWS MODAL */}
+      <AnimatePresence>
+        {selectedNews && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6"
+            onClick={() => setSelectedNews(null)}
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden relative max-h-[85vh] flex flex-col"
+            >
+              <div className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-sm rounded-full">
+                 <button 
+                  onClick={() => setSelectedNews(null)}
+                  className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-full transition-colors focus:outline-none"
+                  aria-label="Close"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="p-6 sm:p-8 overflow-y-auto w-[100%] max-w-none">
+                <div className="flex flex-wrap items-center gap-3 mb-6 pr-8">
+                  <span className="bg-red-50 text-red-700 text-xs font-semibold px-3 py-1 rounded-full border border-red-100">
+                    {centers.find(c => c.id === selectedNews.centerId)?.name || 'Центр переливания'}
+                  </span>
+                  <span className="text-sm font-medium text-slate-500">
+                    {selectedNews.publishedAt ? new Date(selectedNews.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Свежая новость'}
+                  </span>
+                </div>
+                
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 leading-tight max-w-[100%] overflow-hidden break-words">
+                  {selectedNews.title}
+                </h2>
+                
+                <div className="prose prose-slate max-w-[100%] text-slate-700 w-full overflow-hidden mb-6">
+                  <p className="whitespace-pre-wrap leading-relaxed max-w-[100%] break-words">
+                    {selectedNews.content}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -109,11 +109,11 @@ async function startServer() {
     const db = getDb();
     const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'Неверные учетные данные' });
+      return res.status(401).json({ error: 'Пользователя с такой почтой не существует' });
     }
 
     if (!verifyPassword(password, user.passwordHash || '')) {
-      return res.status(401).json({ error: 'Неверные учетные данные' });
+      return res.status(401).json({ error: 'Неверный пароль' });
     }
 
     // Attach profile information
@@ -248,7 +248,39 @@ async function startServer() {
     if (!user) {
       return res.status(404).json({ error: 'Пользователь с таким email не найден' });
     }
-    res.json({ success: true, message: 'Ссылка для сброса пароля отправлена на ваш e-mail (действительна 1 час)' });
+    
+    // Generate a 4-digit mock code
+    const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
+    user.resetCode = resetCode;
+    saveDb(db);
+    
+    // In a real app we would email this code. Here we'll return it in the message for demo purposes.
+    res.json({ success: true, message: `Код для восстановления пароля отправлен на ваш e-mail. (Для теста: Ваш код ${resetCode})` });
+  });
+
+  // CONFIRM RESET PASSWORD
+  app.post('/api/auth/reset-password', (req, res) => {
+    const { email, code, newPassword } = req.body;
+    const db = getDb();
+    const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    
+    if (user.resetCode !== code) {
+      return res.status(400).json({ error: 'Неверный код восстановления' });
+    }
+    
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Пароль должен быть длиной не менее 6 символов' });
+    }
+    
+    user.passwordHash = hashPassword(newPassword);
+    user.resetCode = undefined;
+    saveDb(db);
+    
+    res.json({ success: true, message: 'Пароль успешно изменён' });
   });
 
   // GET ALL CLINICS
