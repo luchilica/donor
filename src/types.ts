@@ -150,6 +150,15 @@ export interface NotificationRecipient {
   sentAt: string;
 }
 
+export interface SmsTemplate {
+  id: number;
+  centerId?: number | null;
+  name: string;
+  text: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
 // Client helper translations
 export function formatBloodGroup(bg: BloodGroup): string {
   switch (bg) {

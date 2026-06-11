@@ -50,8 +50,8 @@ function hashPassword(password: string): string {
 }
 
 // Recalculates stats for a single donor based on their donations
-function recalculateDonorStats(donorId: number) {
-  const db = getDb();
+async function recalculateDonorStats(donorId: number) {
+  const db = await getDb();
   const donor = db.donors.find(d => d.id === donorId);
   if (!donor) return;
 
@@ -79,7 +79,7 @@ function recalculateDonorStats(donorId: number) {
   donor.lastDonationType = lastDonation ? lastDonation.donationType : null;
   donor.nextAvailableDate = nextAvailableDateStr;
 
-  saveDb(db);
+  await saveDb(db);
 }
 
 async function startServer() {
@@ -100,13 +100,13 @@ async function startServer() {
   });
 
   // AUTH LOGIN
-  app.post('/api/auth/login', (req, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Пожалуйста, введите e-mail и пароль' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (!user || !user.isActive) {
       return res.status(401).json({ error: 'Пользователя с такой почтой не существует' });
@@ -140,7 +140,7 @@ async function startServer() {
   });
 
   // REGISTER DONOR
-  app.post('/api/auth/register', (req, res) => {
+  app.post('/api/auth/register', async (req, res) => {
     const {
       lastName,
       firstName,
@@ -178,7 +178,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Регистрация невозможна. Вес донора должен быть не менее 55 кг.' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const existing = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (existing) {
       return res.status(400).json({ error: 'Пользователь с таким e-mail уже зарегистрирован' });
@@ -235,15 +235,15 @@ async function startServer() {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
 
     res.json({ success: true, message: 'Регистрация прошла успешно. Ожидайте подтверждения центра крови!' });
   });
 
   // RESET PASSWORD REQUEST MOCK
-  app.post('/api/auth/forgot-password', (req, res) => {
+  app.post('/api/auth/forgot-password', async (req, res) => {
     const { email } = req.body;
-    const db = getDb();
+    const db = await getDb();
     const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (!user) {
       return res.status(404).json({ error: 'Пользователь с таким email не найден' });
@@ -252,16 +252,16 @@ async function startServer() {
     // Generate a 4-digit mock code
     const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
     user.resetCode = resetCode;
-    saveDb(db);
+    await saveDb(db);
     
     // In a real app we would email this code. Here we'll return it in the message for demo purposes.
     res.json({ success: true, message: `Код для восстановления пароля отправлен на ваш e-mail. (Для теста: Ваш код ${resetCode})` });
   });
 
   // CONFIRM RESET PASSWORD
-  app.post('/api/auth/reset-password', (req, res) => {
+  app.post('/api/auth/reset-password', async (req, res) => {
     const { email, code, newPassword } = req.body;
-    const db = getDb();
+    const db = await getDb();
     const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     
     if (!user) {
@@ -278,32 +278,32 @@ async function startServer() {
     
     user.passwordHash = hashPassword(newPassword);
     user.resetCode = undefined;
-    saveDb(db);
+    await saveDb(db);
     
     res.json({ success: true, message: 'Пароль успешно изменён' });
   });
 
   // GET ALL CLINICS
-  app.get('/api/centers', (req, res) => {
-    const db = getDb();
+  app.get('/api/centers', async (req, res) => {
+    const db = await getDb();
     res.json(db.centers);
   });
 
   // GET GLOBAL NEWS
-  app.get('/api/news', (req, res) => {
-    const db = getDb();
+  app.get('/api/news', async (req, res) => {
+    const db = await getDb();
     const published = db.news.filter(n => n.isPublished);
     res.json(published);
   });
 
   // CREATE NEWS (CENTER)
-  app.post('/api/news', (req, res) => {
+  app.post('/api/news', async (req, res) => {
     const { title, content, isPublished, centerId, sentBy } = req.body;
     if (!title || !content || !centerId) {
       return res.status(400).json({ error: 'Заголовок и текст обязательны' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const newId = db.news.length > 0 ? Math.max(...db.news.map(n => n.id)) + 1 : 1;
     db.news.push({
       id: newId,
@@ -315,16 +315,16 @@ async function startServer() {
       createdAt: new Date().toISOString(),
       createdBy: parseInt(sentBy) || 1
     });
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true });
   });
 
   // UPDATE NEWS (CENTER)
-  app.put('/api/news/:id', (req, res) => {
+  app.put('/api/news/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const { title, content, isPublished } = req.body;
 
-    const db = getDb();
+    const db = await getDb();
     const newsIdx = db.news.findIndex(n => n.id === id);
     if (newsIdx === -1) return res.status(404).json({ error: 'Новость не найдена' });
 
@@ -336,23 +336,23 @@ async function startServer() {
       db.news[newsIdx].publishedAt = new Date().toISOString();
     }
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true });
   });
 
   // DELETE NEWS (CENTER)
-  app.delete('/api/news/:id', (req, res) => {
+  app.delete('/api/news/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const db = getDb();
+    const db = await getDb();
     const index = db.news.findIndex(n => n.id === id);
     if (index === -1) return res.status(404).json({ error: 'Новость не найдена' });
     db.news.splice(index, 1);
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true });
   });
 
   // GET DONOR PROFILE INFO
-  app.get('/api/donor/profile', (req, res) => {
+  app.get('/api/donor/profile', async (req, res) => {
     // Basic session decoding from Header token
     const token = req.headers.authorization;
     if (!token) return res.status(401).json({ error: 'Требуется авторизация' });
@@ -360,7 +360,7 @@ async function startServer() {
     const userIdStr = token.split('-')[3]; // Extract user ID mock from e.g. mock-session-token-1-12312
     const userId = parseInt(userIdStr);
 
-    const db = getDb();
+    const db = await getDb();
     const donor = db.donors.find(d => d.userId === userId);
     if (!donor) return res.status(404).json({ error: 'Профиль донора не найден' });
 
@@ -384,11 +384,11 @@ async function startServer() {
   });
 
   // UPDATE DONOR PROFILE (FROM CABINET)
-  app.put('/api/donor/profile', (req, res) => {
+  app.put('/api/donor/profile', async (req, res) => {
     const { donorId, lastName, firstName, middleName, weight, phone, birthDate, gender, bloodGroup, rhFactor } = req.body;
     if (!donorId) return res.status(400).json({ error: 'Не указан ID донора' });
 
-    const db = getDb();
+    const db = await getDb();
     const donor = db.donors.find(d => d.id === parseInt(donorId));
     if (!donor) return res.status(404).json({ error: 'Донор не найден' });
 
@@ -402,18 +402,18 @@ async function startServer() {
     donor.rhFactor = rhFactor || donor.rhFactor;
     if (weight) donor.weight = parseFloat(weight);
 
-    saveDb(db);
-    recalculateDonorStats(donor.id);
+    await saveDb(db);
+    await recalculateDonorStats(donor.id);
 
     res.json({ success: true, donor });
   });
 
   // ATTACH AN ADDITIONAL CENTER FOR THE DONOR
-  app.post('/api/donor/link-center', (req, res) => {
+  app.post('/api/donor/link-center', async (req, res) => {
     const { donorId, centerId } = req.body;
     if (!donorId || !centerId) return res.status(400).json({ error: 'ID донора и центра обязательны' });
 
-    const db = getDb();
+    const db = await getDb();
     const existing = db.donorCenters.find(dc => dc.donorId === parseInt(donorId) && dc.centerId === parseInt(centerId));
     if (existing) {
       if (existing.status === 'rejected') {
@@ -421,7 +421,7 @@ async function startServer() {
         existing.status = 'pending';
         existing.resubmissionCount++;
         existing.resubmittedAt = new Date().toISOString();
-        saveDb(db);
+        await saveDb(db);
         return res.json({ success: true, message: 'Заявка отправлена повторно' });
       }
       return res.status(400).json({ error: 'Связь с данным центром уже существует' });
@@ -438,16 +438,16 @@ async function startServer() {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true, message: 'Заявка на привязку успешно отправлена в центр крови!' });
   });
 
   // DONOR RESUBMIT FOR REJECTED TIE
-  app.post('/api/donor/resubmit/:centerId', (req, res) => {
+  app.post('/api/donor/resubmit/:centerId', async (req, res) => {
     const centerId = parseInt(req.params.centerId);
     const { donorId } = req.body;
 
-    const db = getDb();
+    const db = await getDb();
     const link = db.donorCenters.find(l => l.donorId === parseInt(donorId) && l.centerId === centerId);
     if (!link) return res.status(404).json({ error: 'Связь не найдена' });
 
@@ -455,14 +455,14 @@ async function startServer() {
     link.resubmissionCount++;
     link.resubmittedAt = new Date().toISOString();
     
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true });
   });
 
   // UPDATE DONOR PAUSE
-  app.put('/api/donor/pause', (req, res) => {
+  app.put('/api/donor/pause', async (req, res) => {
     const { donorId, personalPause, personalPauseUntil, personalPauseNote } = req.body;
-    const db = getDb();
+    const db = await getDb();
     const donor = db.donors.find(d => d.id === parseInt(donorId));
     if (!donor) return res.status(404).json({ error: 'Профиль не найден' });
 
@@ -470,14 +470,14 @@ async function startServer() {
     donor.personalPauseUntil = personalPause ? (personalPauseUntil || null) : null;
     donor.personalPauseNote = personalPause ? (personalPauseNote || null) : null;
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true, donor });
   });
 
   // UPDATE NOTIFICATION ENABLED CHANNELS
-  app.put('/api/donor/notifications', (req, res) => {
+  app.put('/api/donor/notifications', async (req, res) => {
     const { donorId, smsEnabled, pushEnabled, emailNotificationsEnabled, onesignalPlayerId } = req.body;
-    const db = getDb();
+    const db = await getDb();
     const donor = db.donors.find(d => d.id === parseInt(donorId));
     if (!donor) return res.status(404).json({ error: 'Профиль не найден' });
 
@@ -486,14 +486,14 @@ async function startServer() {
     if (emailNotificationsEnabled !== undefined) donor.emailNotificationsEnabled = !!emailNotificationsEnabled;
     if (onesignalPlayerId !== undefined) donor.onesignalPlayerId = onesignalPlayerId;
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true, donor });
   });
 
   // CENTER DASHBOARD DATA
-  app.get('/api/center/stats/:centerId', (req, res) => {
+  app.get('/api/center/stats/:centerId', async (req, res) => {
     const centerId = parseInt(req.params.centerId);
-    const db = getDb();
+    const db = await getDb();
 
     // confirmed donors connected with this center
     const ties = db.donorCenters.filter(dc => dc.centerId === centerId);
@@ -544,11 +544,11 @@ async function startServer() {
   });
 
   // CENTER GET CONNECTED CONFIRMED DONORS
-  app.get('/api/center/donors', (req, res) => {
+  app.get('/api/center/donors', async (req, res) => {
     const centerId = parseInt(req.query.centerId as string);
     if (!centerId) return res.status(400).json({ error: 'Не указан ID центра' });
 
-    const db = getDb();
+    const db = await getDb();
     const ties = db.donorCenters.filter(dc => dc.centerId === centerId && dc.status === 'confirmed');
     let donors = db.donors.filter(d => ties.some(t => t.donorId === d.id));
 
@@ -598,11 +598,11 @@ async function startServer() {
   });
 
   // GET DETAILED DONOR CARD FOR CENTER
-  app.get('/api/center/donors/:id', (req, res) => {
+  app.get('/api/center/donors/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const centerId = parseInt(req.query.centerId as string);
 
-    const db = getDb();
+    const db = await getDb();
     const donor = db.donors.find(d => d.id === id);
     if (!donor) return res.status(404).json({ error: 'Донор не найден' });
 
@@ -623,7 +623,7 @@ async function startServer() {
   });
 
   // CREATE DONOR IN CENTER (DIRECT ACTION)
-  app.post('/api/center/donors', (req, res) => {
+  app.post('/api/center/donors', async (req, res) => {
     const {
       centerId,
       lastName,
@@ -643,7 +643,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Все обязательные поля должны быть заполнены' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const existing = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (existing) {
       return res.status(400).json({ error: 'Пользователь с таким e-mail уже зарегистрирован' });
@@ -696,16 +696,16 @@ async function startServer() {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true, donor });
   });
 
   // UPDATE DONOR PROFILE FROM CENTER
-  app.put('/api/center/donors/:id', (req, res) => {
+  app.put('/api/center/donors/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const { lastName, firstName, middleName, weight, phone, birthDate, gender, bloodGroup, rhFactor, status } = req.body;
 
-    const db = getDb();
+    const db = await getDb();
     const donor = db.donors.find(d => d.id === id);
     if (!donor) return res.status(404).json({ error: 'Донор не найден' });
 
@@ -721,14 +721,14 @@ async function startServer() {
     if (weight) donor.weight = parseFloat(weight);
     if (status) donor.status = status;
 
-    saveDb(db);
-    recalculateDonorStats(id);
+    await saveDb(db);
+    await recalculateDonorStats(id);
 
     res.json({ success: true, donor });
   });
 
   // ADD RECORD OF DONATION
-  app.post('/api/center/donors/:id/donations', (req, res) => {
+  app.post('/api/center/donors/:id/donations', async (req, res) => {
     const donorId = parseInt(req.params.id);
     const { centerId, donationDate, donationType, volumeMl, note, addedBy } = req.body;
 
@@ -736,7 +736,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Дата и тип донации обязательны' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const newId = db.donations.length > 0 ? Math.max(...db.donations.map(d => d.id)) + 1 : 1;
     db.donations.push({
       id: newId,
@@ -750,29 +750,29 @@ async function startServer() {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
-    recalculateDonorStats(donorId);
+    await saveDb(db);
+    await recalculateDonorStats(donorId);
 
     res.json({ success: true });
   });
 
   // DELETE RECORD OF DONATION
-  app.delete('/api/donations/:id', (req, res) => {
+  app.delete('/api/donations/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const db = getDb();
+    const db = await getDb();
     const donationIdx = db.donations.findIndex(d => d.id === id);
     if (donationIdx === -1) return res.status(404).json({ error: 'Донация не найдена' });
 
     const donorId = db.donations[donationIdx].donorId;
     db.donations.splice(donationIdx, 1);
-    saveDb(db);
-    recalculateDonorStats(donorId);
+    await saveDb(db);
+    await recalculateDonorStats(donorId);
 
     res.json({ success: true });
   });
 
   // ADD MEDICAL NOTE
-  app.post('/api/center/donors/:id/medical-notes', (req, res) => {
+  app.post('/api/center/donors/:id/medical-notes', async (req, res) => {
     const donorId = parseInt(req.params.id);
     const { centerId, reason, startDate, endDate, createdBy } = req.body;
 
@@ -780,7 +780,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Причина медотвода и дата начала обязательны' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const newId = db.medicalNotes.length > 0 ? Math.max(...db.medicalNotes.map(m => m.id)) + 1 : 1;
     db.medicalNotes.push({
       id: newId,
@@ -794,16 +794,16 @@ async function startServer() {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true });
   });
 
   // LIFT MEDICAL NOTE
-  app.put('/api/center/medical-notes/:id/lift', (req, res) => {
+  app.put('/api/center/medical-notes/:id/lift', async (req, res) => {
     const id = parseInt(req.params.id);
     const { liftNote, liftedBy } = req.body;
 
-    const db = getDb();
+    const db = await getDb();
     const note = db.medicalNotes.find(m => m.id === id);
     if (!note) return res.status(404).json({ error: 'Медотвод не найден' });
 
@@ -812,16 +812,16 @@ async function startServer() {
     note.liftedBy = liftedBy ? parseInt(liftedBy) : 2;
     note.liftNote = liftNote || 'Снят врачом вручную';
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true });
   });
 
   // GET LIST OF PENDING APPLICATIONS
-  app.get('/api/center/pending', (req, res) => {
+  app.get('/api/center/pending', async (req, res) => {
     const centerId = parseInt(req.query.centerId as string);
     if (!centerId) return res.status(400).json({ error: 'Не указан ID центра' });
 
-    const db = getDb();
+    const db = await getDb();
     const pendingTies = db.donorCenters.filter(dc => dc.centerId === centerId && dc.status === 'pending');
     
     // Enrich with donor core profile details
@@ -837,7 +837,7 @@ async function startServer() {
   });
 
   // CONFIRM OR REJECT PENDING RELATION
-  app.post('/api/center/pending/:id/resolve', (req, res) => {
+  app.post('/api/center/pending/:id/resolve', async (req, res) => {
     const linkId = parseInt(req.params.id);
     const { status, rejectionReason, confirmedById } = req.body; // 'confirmed' or 'rejected'
 
@@ -845,7 +845,7 @@ async function startServer() {
       return res.status(400).json({ error: 'Неверный статус' });
     }
 
-    const db = getDb();
+    const db = await getDb();
     const link = db.donorCenters.find(dc => dc.id === linkId);
     if (!link) return res.status(404).json({ error: 'Заявка не найдена' });
 
@@ -858,14 +858,13 @@ async function startServer() {
       link.rejectionReason = rejectionReason || 'Не указана';
     }
 
-    saveDb(db);
+    await saveDb(db);
     res.json({ success: true });
   });
 
   // HELPER FILTER FOR TARGET NOTIFICATE GROUP FOR COUNTS & DISPATCH
-  function getRecipientsForFilter(params: any): { donors: Donor[]; ids: number[] } {
+  function getRecipientsForFilter(db: any, params: any): { donors: Donor[]; ids: number[] } {
     const centerId = parseInt(params.centerId);
-    const db = getDb();
 
     // Only confirmed coordinates
     const ties = db.donorCenters.filter(dc => dc.centerId === centerId && dc.status === 'confirmed');
@@ -936,13 +935,14 @@ async function startServer() {
   }
 
   // PREVIEW COUNT OF TARGET RECIPIENTS
-  app.post('/api/center/notify/preview', (req, res) => {
-    const list = getRecipientsForFilter(req.body);
+  app.post('/api/center/notify/preview', async (req, res) => {
+    const db = await getDb();
+    const list = getRecipientsForFilter(db, req.body);
     res.json({ count: list.donors.length });
   });
 
   // SEND SYSTEM ALERTS (PUSH, SMS, EMAIL)
-  app.post('/api/center/notify/send', (req, res) => {
+  app.post('/api/center/notify/send', async (req, res) => {
     const {
       centerId,
       sentBy,
@@ -960,11 +960,11 @@ async function startServer() {
       return res.status(400).json({ error: 'Текст уведомления обязателен' });
     }
 
-    // Get filter list
-    const filterResults = getRecipientsForFilter(req.body);
-    const targetDonors = filterResults.donors;
+    const db = await getDb();
 
-    const db = getDb();
+    // Get filter list
+    const filterResults = getRecipientsForFilter(db, req.body);
+    const targetDonors = filterResults.donors;
     const newNotificationId = db.notifications.length > 0 ? Math.max(...db.notifications.map(n => n.id)) + 1 : 1;
 
     let totalPush = 0;
@@ -1041,7 +1041,7 @@ async function startServer() {
       createdAt: new Date().toISOString()
     });
 
-    saveDb(db);
+    await saveDb(db);
 
     res.json({
       success: true,
@@ -1053,11 +1053,11 @@ async function startServer() {
   });
 
   // NEWS LOGS
-  app.get('/api/center/notifications', (req, res) => {
+  app.get('/api/center/notifications', async (req, res) => {
     const centerId = parseInt(req.query.centerId as string);
     if (!centerId) return res.status(400).json({ error: 'Не указан ID центра' });
 
-    const db = getDb();
+    const db = await getDb();
     const lists = db.notifications.filter(n => n.centerId === centerId).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     res.json(lists);
   });

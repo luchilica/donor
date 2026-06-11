@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, BloodGroup, RhFactor, DonationType } from '../src/types';
+import { PrismaClient } from '@prisma/client';
+import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, SmsTemplate, BloodGroup, RhFactor, DonationType } from '../src/types';
+
+export const prisma = new PrismaClient();
 
 // Hardcoded path relative to app root
 const STORE_PATH = path.join(process.cwd(), 'database_store.json');
@@ -15,6 +18,7 @@ export interface DatabaseState {
   news: News[];
   notifications: Notification[];
   notificationRecipients: NotificationRecipient[];
+  smsTemplates: SmsTemplate[];
 }
 
 const INITIAL_CENTERS: BloodCenter[] = [
@@ -619,7 +623,17 @@ const seededState: DatabaseState = {
       createdAt: "2026-06-03T10:45:00Z"
     }
   ],
-  notificationRecipients: []
+  notificationRecipients: [],
+  smsTemplates: [
+    {
+      id: 1,
+      centerId: 1,
+      name: "Срочный призыв",
+      text: "Внимание! Срочно требуется кровь вашей группы. Пожалуйста, придите в центр крови в ближайшее время.",
+      isDefault: true,
+      createdAt: new Date().toISOString()
+    }
+  ]
 };
 
 // Fill up dynamic databases
@@ -759,8 +773,405 @@ function saveState(state: DatabaseState) {
   }
 }
 
+async function seedPostgresWithSeededState() {
+  const data = seededState;
+
+  // 1. Blood Centers
+  for (const item of data.centers) {
+    await prisma.bloodCenter.create({
+      data: {
+        id: item.id,
+        name: item.name,
+        address: item.address,
+        phone: item.phone,
+        email: item.email || null,
+        workingHours: item.workingHours || null,
+        mapLink: item.mapLink || null,
+        eRegistrationLink: item.eRegistrationLink || null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }
+    });
+  }
+
+  // 2. Users
+  for (const item of data.users) {
+    await prisma.user.create({
+      data: {
+        id: item.id,
+        email: item.email,
+        passwordHash: item.passwordHash,
+        role: item.role as any,
+        centerId: item.centerId || null,
+        isActive: item.isActive !== undefined ? item.isActive : true,
+        resetCode: item.resetCode || null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        lastLogin: item.lastLogin ? new Date(item.lastLogin) : null,
+      }
+    });
+  }
+
+  // 3. Donors
+  for (const item of data.donors) {
+    await prisma.donor.create({
+      data: {
+        id: item.id,
+        userId: item.userId,
+        lastName: item.lastName,
+        firstName: item.firstName,
+        middleName: item.middleName || null,
+        birthDate: new Date(item.birthDate),
+        gender: item.gender as any,
+        bloodGroup: item.bloodGroup as any,
+        rhFactor: item.rhFactor as any,
+        weight: item.weight,
+        phone: item.phone,
+        status: (item.status || 'active') as any,
+        smsEnabled: item.smsEnabled !== undefined ? item.smsEnabled : false,
+        pushEnabled: item.pushEnabled !== undefined ? item.pushEnabled : false,
+        emailNotificationsEnabled: item.emailNotificationsEnabled !== undefined ? item.emailNotificationsEnabled : true,
+        onesignalPlayerId: item.onesignalPlayerId || null,
+        personalPause: item.personalPause !== undefined ? item.personalPause : false,
+        personalPauseUntil: item.personalPauseUntil ? new Date(item.personalPauseUntil) : null,
+        personalPauseNote: item.personalPauseNote || null,
+        donationsCount: item.donationsCount || 0,
+        bloodDonationsCount: item.bloodDonationsCount || 0,
+        lastDonationDate: item.lastDonationDate ? new Date(item.lastDonationDate) : null,
+        lastDonationType: item.lastDonationType ? (item.lastDonationType as any) : null,
+        nextAvailableDate: item.nextAvailableDate ? new Date(item.nextAvailableDate) : null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }
+    });
+  }
+
+  // 4. Donor Centers
+  for (const item of data.donorCenters) {
+    await prisma.donorCenter.create({
+      data: {
+        id: item.id,
+        donorId: item.donorId,
+        centerId: item.centerId,
+        isPrimary: item.isPrimary !== undefined ? item.isPrimary : false,
+        status: (item.status || 'pending') as any,
+        rejectionReason: item.rejectionReason || null,
+        resubmissionCount: item.resubmissionCount || 0,
+        resubmittedAt: item.resubmittedAt ? new Date(item.resubmittedAt) : null,
+        confirmedAt: item.confirmedAt ? new Date(item.confirmedAt) : null,
+        confirmedById: item.confirmedById || null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }
+    });
+  }
+
+  // 5. Donations
+  for (const item of data.donations) {
+    await prisma.donation.create({
+      data: {
+        id: item.id,
+        donorId: item.donorId,
+        centerId: item.centerId,
+        donationDate: new Date(item.donationDate),
+        donationType: item.donationType as any,
+        volumeMl: item.volumeMl || null,
+        note: item.note || null,
+        addedById: item.addedBy || null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }
+    });
+  }
+
+  // 6. Medical Notes
+  for (const item of data.medicalNotes) {
+    await prisma.medicalNote.create({
+      data: {
+        id: item.id,
+        donorId: item.donorId,
+        centerId: item.centerId,
+        createdById: item.createdBy || 1,
+        reason: item.reason,
+        startDate: new Date(item.startDate),
+        endDate: item.endDate ? new Date(item.endDate) : null,
+        isActive: item.isActive !== undefined ? item.isActive : true,
+        liftedAt: item.liftedAt ? new Date(item.liftedAt) : null,
+        liftedById: item.liftedBy || null,
+        liftNote: item.liftNote || null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }
+    });
+  }
+
+  // 7. News
+  for (const item of data.news) {
+    await prisma.news.create({
+      data: {
+        id: item.id,
+        centerId: item.centerId,
+        title: item.title,
+        content: item.content,
+        isPublished: item.isPublished !== undefined ? item.isPublished : false,
+        publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        createdById: item.createdBy || null,
+      }
+    });
+  }
+
+  // 8. Notifications
+  for (const item of data.notifications) {
+    await prisma.notification.create({
+      data: {
+        id: item.id,
+        centerId: item.centerId,
+        sentById: item.sentBy || null,
+        bloodGroups: JSON.stringify(item.bloodGroups),
+        rhFactor: item.rhFactor as any,
+        donationType: item.donationType as any,
+        minDaysSinceDonation: item.minDaysSinceDonation || 0,
+        excludeMedical: item.excludeMedical !== undefined ? item.excludeMedical : true,
+        excludePause: item.excludePause !== undefined ? item.excludePause : true,
+        channel: item.channel as any,
+        messageText: item.messageText,
+        recipientsCount: item.recipientsCount || 0,
+        pushSent: item.pushSent || 0,
+        smsSent: item.smsSent || 0,
+        emailSent: item.emailSent || 0,
+        status: item.status as any,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }
+    });
+  }
+
+  // 9. Notification Recipients
+  for (const item of data.notificationRecipients) {
+    await prisma.notificationRecipient.create({
+      data: {
+        id: item.id,
+        notificationId: item.notificationId,
+        donorId: item.donorId,
+        pushStatus: item.pushStatus as any,
+        smsStatus: item.smsStatus as any,
+        emailStatus: item.emailStatus as any,
+        sentAt: item.sentAt ? new Date(item.sentAt) : new Date(),
+      }
+    });
+  }
+
+  // 10. SMS Templates
+  for (const item of data.smsTemplates) {
+    await prisma.smsTemplate.create({
+      data: {
+        id: item.id,
+        centerId: item.centerId || null,
+        name: item.name,
+        text: item.text,
+        isDefault: item.isDefault !== undefined ? item.isDefault : false,
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }
+    });
+  }
+
+  // Reset core sequences
+  const tables = [
+    { name: 'blood_centers', seq: 'blood_centers' },
+    { name: 'users', seq: 'users' },
+    { name: 'donors', seq: 'donors' },
+    { name: 'donor_centers', seq: 'donor_centers' },
+    { name: 'donations', seq: 'donations' },
+    { name: 'medical_notes', seq: 'medical_notes' },
+    { name: 'news', seq: 'news' },
+    { name: 'notifications', seq: 'notifications' },
+    { name: 'notification_recipients', seq: 'notification_recipients' },
+    { name: 'sms_templates', seq: 'sms_templates' }
+  ];
+
+  for (const table of tables) {
+    try {
+      await prisma.$executeRawUnsafe(`
+        SELECT setval(pg_get_serial_sequence('"${table.name}"', 'id'), COALESCE(MAX(id), 0) + 1, false) FROM "${table.name}";
+      `);
+    } catch (e: any) {
+      console.warn(`Could not reset sequence during auto-seed: ${e.message}`);
+    }
+  }
+}
+
 // Load state of store
-export function getDb(): DatabaseState {
+export async function getDb(): Promise<DatabaseState> {
+  const isPostgresActive = !!process.env.DATABASE_URL;
+
+  if (isPostgresActive) {
+    try {
+      // Auto-seeds the database if empty
+      const centerCount = await prisma.bloodCenter.count();
+      if (centerCount === 0) {
+        console.log('PostgreSQL database is empty. Auto-seeding from memory template...');
+        await seedPostgresWithSeededState();
+      }
+
+      const [
+        dbCenters,
+        dbUsers,
+        dbDonors,
+        dbDonorCenters,
+        dbDonations,
+        dbMedicalNotes,
+        dbNews,
+        dbNotifications,
+        dbNotificationRecipients,
+        dbSmsTemplates
+      ] = await Promise.all([
+        prisma.bloodCenter.findMany(),
+        prisma.user.findMany(),
+        prisma.donor.findMany(),
+        prisma.donorCenter.findMany(),
+        prisma.donation.findMany(),
+        prisma.medicalNote.findMany(),
+        prisma.news.findMany(),
+        prisma.notification.findMany(),
+        prisma.notificationRecipient.findMany(),
+        prisma.smsTemplate.findMany()
+      ]);
+
+      return {
+        centers: dbCenters.map(m => ({
+          id: m.id,
+          name: m.name,
+          address: m.address,
+          phone: m.phone,
+          email: m.email,
+          workingHours: m.workingHours,
+          mapLink: m.mapLink,
+          eRegistrationLink: m.eRegistrationLink,
+          createdAt: m.createdAt.toISOString()
+        })),
+        users: dbUsers.map(m => ({
+          id: m.id,
+          email: m.email,
+          passwordHash: m.passwordHash,
+          role: m.role as any,
+          centerId: m.centerId,
+          isActive: m.isActive,
+          resetCode: m.resetCode || undefined,
+          createdAt: m.createdAt.toISOString(),
+          lastLogin: m.lastLogin ? m.lastLogin.toISOString() : null
+        })),
+        donors: dbDonors.map(m => ({
+          id: m.id,
+          userId: m.userId,
+          lastName: m.lastName,
+          firstName: m.firstName,
+          middleName: m.middleName,
+          birthDate: m.birthDate.toISOString().split('T')[0],
+          gender: m.gender as any,
+          bloodGroup: m.bloodGroup as any,
+          rhFactor: m.rhFactor as any,
+          weight: Number(m.weight),
+          phone: m.phone,
+          status: m.status as any,
+          smsEnabled: m.smsEnabled,
+          pushEnabled: m.pushEnabled,
+          emailNotificationsEnabled: m.emailNotificationsEnabled,
+          onesignalPlayerId: m.onesignalPlayerId,
+          personalPause: m.personalPause,
+          personalPauseUntil: m.personalPauseUntil ? m.personalPauseUntil.toISOString().split('T')[0] : null,
+          personalPauseNote: m.personalPauseNote,
+          donationsCount: m.donationsCount,
+          bloodDonationsCount: m.bloodDonationsCount,
+          lastDonationDate: m.lastDonationDate ? m.lastDonationDate.toISOString().split('T')[0] : null,
+          lastDonationType: m.lastDonationType as any,
+          nextAvailableDate: m.nextAvailableDate ? m.nextAvailableDate.toISOString().split('T')[0] : null,
+          createdAt: m.createdAt.toISOString()
+        })),
+        donorCenters: dbDonorCenters.map(m => ({
+          id: m.id,
+          donorId: m.donorId,
+          centerId: m.centerId,
+          isPrimary: m.isPrimary,
+          status: m.status as any,
+          rejectionReason: m.rejectionReason,
+          resubmissionCount: m.resubmissionCount,
+          resubmittedAt: m.resubmittedAt ? m.resubmittedAt.toISOString() : null,
+          confirmedAt: m.confirmedAt ? m.confirmedAt.toISOString() : null,
+          confirmedById: m.confirmedById,
+          createdAt: m.createdAt.toISOString()
+        })),
+        donations: dbDonations.map(m => ({
+          id: m.id,
+          donorId: m.donorId,
+          centerId: m.centerId,
+          donationDate: m.donationDate.toISOString().split('T')[0],
+          donationType: m.donationType as any,
+          volumeMl: m.volumeMl,
+          note: m.note,
+          addedBy: m.addedById,
+          createdAt: m.createdAt.toISOString()
+        })),
+        medicalNotes: dbMedicalNotes.map(m => ({
+          id: m.id,
+          donorId: m.donorId,
+          centerId: m.centerId,
+          createdBy: m.createdById,
+          reason: m.reason,
+          startDate: m.startDate.toISOString().split('T')[0],
+          endDate: m.endDate ? m.endDate.toISOString().split('T')[0] : null,
+          isActive: m.isActive,
+          liftedAt: m.liftedAt ? m.liftedAt.toISOString() : null,
+          liftedBy: m.liftedById,
+          liftNote: m.liftNote,
+          createdAt: m.createdAt.toISOString()
+        })),
+        news: dbNews.map(m => ({
+          id: m.id,
+          centerId: m.centerId,
+          title: m.title,
+          content: m.content,
+          isPublished: m.isPublished,
+          publishedAt: m.publishedAt ? m.publishedAt.toISOString() : undefined,
+          createdAt: m.createdAt.toISOString(),
+          createdBy: m.createdById || 1
+        })),
+        notifications: dbNotifications.map(m => ({
+          id: m.id,
+          centerId: m.centerId,
+          sentBy: m.sentById,
+          bloodGroups: m.bloodGroups ? JSON.parse(m.bloodGroups) : [],
+          rhFactor: m.rhFactor as any,
+          donationType: m.donationType as any,
+          minDaysSinceDonation: m.minDaysSinceDonation,
+          excludeMedical: m.excludeMedical,
+          excludePause: m.excludePause,
+          channel: m.channel as any,
+          messageText: m.messageText,
+          recipientsCount: m.recipientsCount,
+          pushSent: m.pushSent,
+          smsSent: m.smsSent,
+          emailSent: m.emailSent,
+          status: m.status as any,
+          createdAt: m.createdAt.toISOString()
+        })),
+        notificationRecipients: dbNotificationRecipients.map(m => ({
+          id: m.id,
+          notificationId: m.notificationId,
+          donorId: m.donorId,
+          pushStatus: m.pushStatus as any,
+          smsStatus: m.smsStatus as any,
+          emailStatus: m.emailStatus as any,
+          sentAt: m.sentAt.toISOString()
+        })),
+        smsTemplates: dbSmsTemplates.map(m => ({
+          id: m.id,
+          centerId: m.centerId,
+          name: m.name,
+          text: m.text,
+          isDefault: m.isDefault,
+          createdAt: m.createdAt.toISOString()
+        }))
+      };
+    } catch (e) {
+      console.error('Failed to load from PostgreSQL, falling back to JSON storage...', e);
+    }
+  }
+
+  // Fallback to local files
   if (fs.existsSync(STORE_PATH)) {
     try {
       const data = fs.readFileSync(STORE_PATH, 'utf-8');
@@ -776,6 +1187,316 @@ export function getDb(): DatabaseState {
   }
 }
 
-export function saveDb(state: DatabaseState) {
+export async function saveDb(state: DatabaseState): Promise<void> {
+  const isPostgresActive = !!process.env.DATABASE_URL;
+
+  if (isPostgresActive) {
+    try {
+      // 1. Sync User table
+      for (const user of state.users) {
+        await prisma.user.upsert({
+          where: { id: user.id },
+          update: {
+            email: user.email,
+            passwordHash: user.passwordHash,
+            role: user.role as any,
+            centerId: user.centerId,
+            isActive: user.isActive,
+            resetCode: user.resetCode || null,
+            lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
+          },
+          create: {
+            id: user.id,
+            email: user.email,
+            passwordHash: user.passwordHash,
+            role: user.role as any,
+            centerId: user.centerId,
+            isActive: user.isActive,
+            resetCode: user.resetCode || null,
+            createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+            lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
+          }
+        });
+      }
+
+      // 2. Sync Donor table
+      for (const donor of state.donors) {
+        await prisma.donor.upsert({
+          where: { id: donor.id },
+          update: {
+            userId: donor.userId,
+            lastName: donor.lastName,
+            firstName: donor.firstName,
+            middleName: donor.middleName,
+            birthDate: new Date(donor.birthDate),
+            gender: donor.gender as any,
+            bloodGroup: donor.bloodGroup as any,
+            rhFactor: donor.rhFactor as any,
+            weight: donor.weight,
+            phone: donor.phone,
+            status: donor.status as any,
+            smsEnabled: donor.smsEnabled,
+            pushEnabled: donor.pushEnabled,
+            emailNotificationsEnabled: donor.emailNotificationsEnabled,
+            onesignalPlayerId: donor.onesignalPlayerId,
+            personalPause: donor.personalPause,
+            personalPauseUntil: donor.personalPauseUntil ? new Date(donor.personalPauseUntil) : null,
+            personalPauseNote: donor.personalPauseNote,
+            donationsCount: donor.donationsCount,
+            bloodDonationsCount: donor.bloodDonationsCount,
+            lastDonationDate: donor.lastDonationDate ? new Date(donor.lastDonationDate) : null,
+            lastDonationType: donor.lastDonationType as any,
+            nextAvailableDate: donor.nextAvailableDate ? new Date(donor.nextAvailableDate) : null,
+          },
+          create: {
+            id: donor.id,
+            userId: donor.userId,
+            lastName: donor.lastName,
+            firstName: donor.firstName,
+            middleName: donor.middleName,
+            birthDate: new Date(donor.birthDate),
+            gender: donor.gender as any,
+            bloodGroup: donor.bloodGroup as any,
+            rhFactor: donor.rhFactor as any,
+            weight: donor.weight,
+            phone: donor.phone,
+            status: donor.status as any,
+            smsEnabled: donor.smsEnabled,
+            pushEnabled: donor.pushEnabled,
+            emailNotificationsEnabled: donor.emailNotificationsEnabled,
+            onesignalPlayerId: donor.onesignalPlayerId,
+            personalPause: donor.personalPause,
+            personalPauseUntil: donor.personalPauseUntil ? new Date(donor.personalPauseUntil) : null,
+            personalPauseNote: donor.personalPauseNote,
+            donationsCount: donor.donationsCount,
+            bloodDonationsCount: donor.bloodDonationsCount,
+            lastDonationDate: donor.lastDonationDate ? new Date(donor.lastDonationDate) : null,
+            lastDonationType: donor.lastDonationType as any,
+            nextAvailableDate: donor.nextAvailableDate ? new Date(donor.nextAvailableDate) : null,
+            createdAt: donor.createdAt ? new Date(donor.createdAt) : new Date(),
+          }
+        });
+      }
+
+      // 3. Sync DonorCenter connections
+      for (const dc of state.donorCenters) {
+        await prisma.donorCenter.upsert({
+          where: { donorId_centerId: { donorId: dc.donorId, centerId: dc.centerId } },
+          update: {
+            status: dc.status as any,
+            isPrimary: dc.isPrimary,
+            rejectionReason: dc.rejectionReason,
+            resubmissionCount: dc.resubmissionCount,
+            resubmittedAt: dc.resubmittedAt ? new Date(dc.resubmittedAt) : null,
+            confirmedAt: dc.confirmedAt ? new Date(dc.confirmedAt) : null,
+            confirmedById: dc.confirmedById,
+          },
+          create: {
+            id: dc.id,
+            donorId: dc.donorId,
+            centerId: dc.centerId,
+            status: dc.status as any,
+            isPrimary: dc.isPrimary,
+            rejectionReason: dc.rejectionReason,
+            resubmissionCount: dc.resubmissionCount,
+            resubmittedAt: dc.resubmittedAt ? new Date(dc.resubmittedAt) : null,
+            confirmedAt: dc.confirmedAt ? new Date(dc.confirmedAt) : null,
+            confirmedById: dc.confirmedById,
+            createdAt: dc.createdAt ? new Date(dc.createdAt) : new Date(),
+          }
+        });
+      }
+
+      // 4. Create and Delete Donations
+      const donationIds = state.donations.map(d => d.id);
+      await prisma.donation.deleteMany({
+        where: { id: { notIn: donationIds } }
+      });
+      for (const don of state.donations) {
+        await prisma.donation.upsert({
+          where: { id: don.id },
+          update: {
+            donorId: don.donorId,
+            centerId: don.centerId,
+            donationDate: new Date(don.donationDate),
+            donationType: don.donationType as any,
+            volumeMl: don.volumeMl,
+            note: don.note,
+            addedById: don.addedBy,
+          },
+          create: {
+            id: don.id,
+            donorId: don.donorId,
+            centerId: don.centerId,
+            donationDate: new Date(don.donationDate),
+            donationType: don.donationType as any,
+            volumeMl: don.volumeMl,
+            note: don.note,
+            addedById: don.addedBy,
+            createdAt: don.createdAt ? new Date(don.createdAt) : new Date(),
+          }
+        });
+      }
+
+      // 5. Create and Delete Medical Notes
+      const noteIds = state.medicalNotes.map(n => n.id);
+      await prisma.medicalNote.deleteMany({
+        where: { id: { notIn: noteIds } }
+      });
+      for (const note of state.medicalNotes) {
+        await prisma.medicalNote.upsert({
+          where: { id: note.id },
+          update: {
+            donorId: note.donorId,
+            centerId: note.centerId,
+            createdById: note.createdBy,
+            reason: note.reason,
+            startDate: new Date(note.startDate),
+            endDate: note.endDate ? new Date(note.endDate) : null,
+            isActive: note.isActive,
+            liftedAt: note.liftedAt ? new Date(note.liftedAt) : null,
+            liftedById: note.liftedBy,
+            liftNote: note.liftNote,
+          },
+          create: {
+            id: note.id,
+            donorId: note.donorId,
+            centerId: note.centerId,
+            createdById: note.createdBy,
+            reason: note.reason,
+            startDate: new Date(note.startDate),
+            endDate: note.endDate ? new Date(note.endDate) : null,
+            isActive: note.isActive,
+            liftedAt: note.liftedAt ? new Date(note.liftedAt) : null,
+            liftedById: note.liftedBy,
+            liftNote: note.liftNote,
+            createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
+          }
+        });
+      }
+
+      // 6. Sync News and Delete if removed
+      const newsIds = state.news.map(n => n.id);
+      await prisma.news.deleteMany({
+        where: { id: { notIn: newsIds } }
+      });
+      for (const post of state.news) {
+        await prisma.news.upsert({
+          where: { id: post.id },
+          update: {
+            centerId: post.centerId,
+            title: post.title,
+            content: post.content,
+            isPublished: post.isPublished,
+            publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
+            createdById: post.createdBy
+          },
+          create: {
+            id: post.id,
+            centerId: post.centerId,
+            title: post.title,
+            content: post.content,
+            isPublished: post.isPublished,
+            publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
+            createdById: post.createdBy,
+            createdAt: post.createdAt ? new Date(post.createdAt) : new Date()
+          }
+        });
+      }
+
+      // 7. Sync Notifications
+      for (const n of state.notifications) {
+        await prisma.notification.upsert({
+          where: { id: n.id },
+          update: {
+            centerId: n.centerId,
+            sentById: n.sentBy,
+            bloodGroups: JSON.stringify(n.bloodGroups),
+            rhFactor: n.rhFactor as any,
+            donationType: n.donationType as any,
+            minDaysSinceDonation: n.minDaysSinceDonation,
+            excludeMedical: n.excludeMedical,
+            excludePause: n.excludePause,
+            channel: n.channel as any,
+            messageText: n.messageText,
+            recipientsCount: n.recipientsCount,
+            pushSent: n.pushSent,
+            smsSent: n.smsSent,
+            emailSent: n.emailSent,
+            status: n.status as any,
+          },
+          create: {
+            id: n.id,
+            centerId: n.centerId,
+            sentById: n.sentBy,
+            bloodGroups: JSON.stringify(n.bloodGroups),
+            rhFactor: n.rhFactor as any,
+            donationType: n.donationType as any,
+            minDaysSinceDonation: n.minDaysSinceDonation,
+            excludeMedical: n.excludeMedical,
+            excludePause: n.excludePause,
+            channel: n.channel as any,
+            messageText: n.messageText,
+            recipientsCount: n.recipientsCount,
+            pushSent: n.pushSent,
+            smsSent: n.smsSent,
+            emailSent: n.emailSent,
+            status: n.status as any,
+            createdAt: n.createdAt ? new Date(n.createdAt) : new Date(),
+          }
+        });
+      }
+
+      // 8. Sync Recipients
+      for (const rec of state.notificationRecipients) {
+        await prisma.notificationRecipient.upsert({
+          where: { id: rec.id },
+          update: {
+            notificationId: rec.notificationId,
+            donorId: rec.donorId,
+            pushStatus: rec.pushStatus as any,
+            smsStatus: rec.smsStatus as any,
+            emailStatus: rec.emailStatus as any,
+          },
+          create: {
+            id: rec.id,
+            notificationId: rec.notificationId,
+            donorId: rec.donorId,
+            pushStatus: rec.pushStatus as any,
+            smsStatus: rec.smsStatus as any,
+            emailStatus: rec.emailStatus as any,
+            sentAt: rec.sentAt ? new Date(rec.sentAt) : new Date(),
+          }
+        });
+      }
+
+      // 9. Sync SMS Templates
+      for (const temp of state.smsTemplates) {
+        await prisma.smsTemplate.upsert({
+          where: { id: temp.id },
+          update: {
+            centerId: temp.centerId,
+            name: temp.name,
+            text: temp.text,
+            isDefault: temp.isDefault,
+          },
+          create: {
+            id: temp.id,
+            centerId: temp.centerId,
+            name: temp.name,
+            text: temp.text,
+            isDefault: temp.isDefault,
+            createdAt: temp.createdAt ? new Date(temp.createdAt) : new Date()
+          }
+        });
+      }
+
+      console.log('PostgreSQL state fully synchronized.');
+    } catch (e) {
+      console.error('Failed to sync state to PostgreSQL database:', e);
+    }
+  }
+
+  // Always write locally as secondary fallback / dual sync
   saveState(state);
 }

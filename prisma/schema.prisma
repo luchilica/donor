@@ -38,6 +38,7 @@ model User {
   centerId     Int?
   center       BloodCenter? @relation(fields: [centerId], references: [id])
   isActive     Boolean  @default(true)
+  resetCode    String?  @db.VarChar(50)
   createdAt    DateTime @default(now())
   lastLogin    DateTime?
 
