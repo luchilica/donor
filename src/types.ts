@@ -11,6 +11,7 @@ export type NotificationStatus = 'sent' | 'partial' | 'failed';
 export interface BloodCenter {
   id: number;
   name: string;
+  shortName?: string;
   address: string;
   phone: string;
   email?: string;
@@ -29,6 +30,7 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   lastLogin?: string | null;
+  resetCode?: string;
 }
 
 export interface Donor {
@@ -53,9 +55,12 @@ export interface Donor {
   personalPauseNote?: string | null;
   donationsCount: number;
   bloodDonationsCount: number;
+  plasmaDonationsCount?: number;
+  plateletsDonationsCount?: number;
   lastDonationDate?: string | null;
   lastDonationType?: DonationType | null;
   nextAvailableDate?: string | null;
+  email?: string;
   createdAt: string;
 }
 
@@ -71,6 +76,7 @@ export interface DonorCenter {
   confirmedAt?: string | null;
   confirmedById?: number | null;
   createdAt: string;
+  updatedAt?: string | null;
 }
 
 export interface Donation {
@@ -83,6 +89,9 @@ export interface Donation {
   note?: string;
   addedBy?: number;
   createdAt: string;
+  date?: string;
+  type?: string;
+  volume?: number;
 }
 
 export interface MedicalNote {
