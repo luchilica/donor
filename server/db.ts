@@ -3,27 +3,7 @@ import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, SmsTemplate, BloodGroup, RhFactor, DonationType } from '../src/types';
 
-function getClientUrl(urlStr: string | undefined): string | undefined {
-  if (!urlStr) return urlStr;
-  try {
-    const u = new URL(urlStr);
-    u.username = encodeURIComponent(decodeURIComponent(u.username));
-    u.password = encodeURIComponent(decodeURIComponent(u.password));
-    
-    if (u.searchParams.get('pgbouncer') !== 'true') {
-       u.searchParams.set('pgbouncer', 'true');
-    }
-    
-    return u.toString();
-  } catch(e) {
-    return urlStr;
-  }
-}
-
 let dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
-if (dbUrl) {
-  dbUrl = getClientUrl(dbUrl);
-}
 
 export const prisma = new PrismaClient({
   datasources: {
