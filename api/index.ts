@@ -4,8 +4,8 @@ import path from 'path';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import * as OneSignal from 'onesignal-node';
-import { getDb, saveDb } from './server/db';
-import { calculateNextDates, isDonorReady } from './src/utils/intervals';
+import { getDb, saveDb } from '../server/db';
+import { calculateNextDates, isDonorReady } from '../src/utils/intervals';
 import { 
   BloodGroup, 
   RhFactor, 
@@ -16,7 +16,7 @@ import {
   Donor,
   MedicalNote,
   Donation
-} from './src/types';
+} from '../src/types';
 
 // Lazy initialized clients
 let resendClient: Resend | null = null;
@@ -82,14 +82,13 @@ async function recalculateDonorStats(donorId: number) {
   await saveDb(db);
 }
 
-async function startServer() {
-  const app = express();
-  app.use(express.json());
+const app = express();
+app.use(express.json());
 
-  // --- API ---
+// --- API ---
 
-  // SERVE PDF
-  app.get('/api/download/contraindications', (req, res) => {
+// SERVE PDF
+app.get('/api/download/contraindications', (req, res) => {
     const filePath = path.join(process.cwd(), 'assets', 'Перечень противопоказаний.pdf');
     res.download(filePath, 'Перечень противопоказаний.pdf', (err) => {
       if (err) {
@@ -1063,43 +1062,52 @@ async function startServer() {
   });
 
   // --- Vite Dev Server Middleware Integration ---
-  const isProd = process.env.NODE_ENV === 'production';
-  if (!isProd) {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'custom'
-    });
-    app.use(vite.middlewares);
+  async function startServer() {
+    const isProd = process.env.NODE_ENV === 'production';
+    if (!isProd) {
+      const { createServer: createViteServer } = await import('vite');
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'custom'
+      });
+      app.use(vite.middlewares);
 
-    app.use('*', async (req, res, next) => {
-      const url = req.originalUrl;
-      // Skip API routes on fallback
-      if (url.startsWith('/api')) return next();
+      app.use('*', async (req, res, next) => {
+        const url = req.originalUrl;
+        // Skip API routes on fallback
+        if (url.startsWith('/api')) return next();
 
-      try {
-        let template = fs.readFileSync(path.join(process.cwd(), 'index.html'), 'utf-8');
-        template = await vite.transformIndexHtml(url, template);
-        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
-      } catch (e) {
-        vite.ssrFixStacktrace(e as Error);
-        next(e);
-      }
-    });
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+        try {
+          let template = fs.readFileSync(path.join(process.cwd(), 'index.html'), 'utf-8');
+          template = await vite.transformIndexHtml(url, template);
+          res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+        } catch (e) {
+          vite.ssrFixStacktrace(e as Error);
+          next(e);
+        }
+      });
+    } else {
+      const distPath = path.join(process.cwd(), 'dist');
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => {
+        if (req.originalUrl.startsWith('/api')) {
+          res.status(404).json({ error: 'Not found' });
+          return;
+        }
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    }
+
+    const PORT = 3000;
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`[Donor-Alert] Express back-end running at http://localhost:${PORT}`);
     });
   }
 
-  const PORT = 3000;
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[Donor-Alert] Express back-end running at http://localhost:${PORT}`);
-  });
-}
+  if (!process.env.VERCEL) {
+    startServer().catch(err => {
+      console.error('[Donor-Alert] Failed to start server:', err);
+    });
+  }
 
-startServer().catch(err => {
-  console.error('[Donor-Alert] Failed to start server:', err);
-});
+  export default app;
