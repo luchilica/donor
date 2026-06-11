@@ -994,9 +994,21 @@ async function seedPostgresWithSeededState() {
   }
 }
 
+function checkPostgresActive(): boolean {
+  if (!process.env.DATABASE_URL) return false;
+  try {
+    const url = new URL(process.env.DATABASE_URL);
+    if (!['postgres:', 'postgresql:'].includes(url.protocol)) return false;
+    if (url.port && isNaN(Number(url.port))) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Load state of store
 export async function getDb(): Promise<DatabaseState> {
-  const isPostgresActive = !!process.env.DATABASE_URL;
+  const isPostgresActive = checkPostgresActive();
 
   if (isPostgresActive) {
     try {
@@ -1188,7 +1200,7 @@ export async function getDb(): Promise<DatabaseState> {
 }
 
 export async function saveDb(state: DatabaseState): Promise<void> {
-  const isPostgresActive = !!process.env.DATABASE_URL;
+  const isPostgresActive = checkPostgresActive();
 
   if (isPostgresActive) {
     try {
