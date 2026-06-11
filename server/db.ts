@@ -3,6 +3,42 @@ import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, SmsTemplate, BloodGroup, RhFactor, DonationType } from '../src/types';
 
+function fixPrismaUrl(urlStr: string | undefined): string | undefined {
+  if (!urlStr) return urlStr;
+  try {
+    const atIndex = urlStr.lastIndexOf('@');
+    if (atIndex === -1) return urlStr;
+
+    const schemaIndex = urlStr.indexOf('://');
+    if (schemaIndex === -1) return urlStr;
+
+    const protocol = urlStr.substring(0, schemaIndex + 3);
+    const credentials = urlStr.substring(schemaIndex + 3, atIndex);
+    const hostPart = urlStr.substring(atIndex);
+
+    const colonIndex = credentials.indexOf(':');
+    if (colonIndex === -1) return urlStr;
+
+    const user = credentials.substring(0, colonIndex);
+    const password = credentials.substring(colonIndex + 1);
+
+    const encodedUser = encodeURIComponent(decodeURIComponent(user));
+    const encodedPassword = encodeURIComponent(decodeURIComponent(password));
+
+    return `${protocol}${encodedUser}:${encodedPassword}${hostPart}`;
+  } catch {
+    return urlStr;
+  }
+}
+
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
+}
+
+if (process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = fixPrismaUrl(process.env.DATABASE_URL);
+}
+
 export const prisma = new PrismaClient();
 
 // Hardcoded path relative to app root
