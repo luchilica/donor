@@ -4,7 +4,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import * as OneSignal from 'onesignal-node';
-import { getDb, saveDb } from '../server/db';
+import { getDb, saveDb } from '../server/db.js';
 import { calculateNextDates, isDonorReady } from '../src/utils/intervals';
 import { 
   BloodGroup, 
