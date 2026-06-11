@@ -4,8 +4,8 @@ import path from 'path';
 import crypto from 'crypto';
 import { Resend } from 'resend';
 import * as OneSignal from 'onesignal-node';
-import { getDb, saveDb } from './server/db.ts';
-import { calculateNextDates, isDonorReady } from './src/utils/intervals.ts';
+import { getDb, saveDb } from './server/db';
+import { calculateNextDates, isDonorReady } from './src/utils/intervals';
 import { 
   BloodGroup, 
   RhFactor, 
@@ -16,7 +16,7 @@ import {
   Donor,
   MedicalNote,
   Donation
-} from './src/types.ts';
+} from './src/types';
 
 // Lazy initialized clients
 let resendClient: Resend | null = null;
