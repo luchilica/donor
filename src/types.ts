@@ -57,6 +57,10 @@ export interface Donor {
   bloodDonationsCount: number;
   plasmaDonationsCount?: number;
   plateletsDonationsCount?: number;
+  bloodFreeCount?: number;
+  bloodPaidCount?: number;
+  compFreeCount?: number;
+  compPaidCount?: number;
   lastDonationDate?: string | null;
   lastDonationType?: DonationType | null;
   nextAvailableDate?: string | null;
@@ -85,6 +89,7 @@ export interface Donation {
   centerId: number;
   donationDate: string; // ISO date YYYY-MM-DD
   donationType: DonationType;
+  isPaid?: boolean;
   volumeMl?: number;
   note?: string;
   addedBy?: number;
@@ -174,11 +179,19 @@ export function formatRhFactor(rh: RhFactor): string {
   return rh === 'positive' ? 'Rh+' : 'Rh-';
 }
 
-export function getGamificationStatus(bloodDonationsCount: number): { title: string; nextAt: number; color: string } {
-  if (bloodDonationsCount === 0) return { title: 'Новый донор', nextAt: 1, color: 'text-slate-500 bg-slate-50 border-slate-200' };
-  if (bloodDonationsCount <= 2) return { title: 'Начинающий донор', nextAt: 3, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
-  if (bloodDonationsCount <= 5) return { title: 'Активный донор', nextAt: 6, color: 'text-blue-600 bg-blue-50 border-blue-200' };
-  if (bloodDonationsCount <= 9) return { title: 'Опытный донор', nextAt: 10, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
-  if (bloodDonationsCount <= 19) return { title: 'Серебряный донор', nextAt: 20, color: 'text-amber-600 bg-amber-50 border-amber-200' };
-  return { title: 'Почётный донор', nextAt: 20, color: 'text-rose-600 bg-rose-50 border-rose-300 animate-pulse' };
+export function getGamificationStatus(
+  bloodFree: number,
+  compFree: number,
+  bloodPaid: number,
+  compPaid: number
+): { title: string; currentPoints: number; nextAt: number; color: string } {
+  const points = bloodFree * 4 + compFree * 2 + bloodPaid * 2 + compPaid * 1;
+  
+  if (points === 0) return { title: 'НОВЫЙ', currentPoints: 0, nextAt: 4, color: 'text-slate-500 bg-slate-50 border-slate-200' };
+  if (points < 12) return { title: 'НАЧИНАЮЩИЙ', currentPoints: points, nextAt: 12, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
+  if (points < 24) return { title: 'АКТИВНЫЙ', currentPoints: points, nextAt: 24, color: 'text-blue-600 bg-blue-50 border-blue-200' };
+  if (points < 40) return { title: 'ОПЫТНЫЙ', currentPoints: points, nextAt: 40, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
+  if (points < 80) return { title: 'СЕРЕБРЯНЫЙ', currentPoints: points, nextAt: 80, color: 'text-amber-600 bg-amber-50 border-amber-200' };
+  
+  return { title: 'ПОЧЁТНЫЙ', currentPoints: points, nextAt: 80, color: 'text-rose-600 bg-rose-50 border-rose-300 animate-pulse' };
 }

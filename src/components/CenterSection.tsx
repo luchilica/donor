@@ -60,6 +60,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     donationDate: new Date().toISOString().split('T')[0],
     donationType: 'blood' as DonationType,
     volumeMl: '450',
+    isPaid: false,
     note: ''
   });
 
@@ -584,20 +585,32 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <th className="p-3 font-medium">Дата сдачи</th>
                           <th className="p-3 font-medium">Тип заготовки</th>
                           <th className="p-3 font-medium">Объем (мл)</th>
+                          <th className="p-3 font-medium">Примечание</th>
                           <th className="p-3 font-medium"></th>
                         </tr>
                       </thead>
                       <tbody className="divide-y text-slate-600">
-                        {donorCard.donations.map(don => (
-                          <tr key={don.id}>
-                            <td className="p-3 font-mono">{don.donationDate}</td>
-                            <td className="p-3 uppercase font-semibold text-red-700">{don.donationType}</td>
-                            <td className="p-3">{don.volumeMl || '—'}</td>
-                            <td className="p-3 text-right">
-                              <button 
-                                onClick={async () => {
-                                  if (!confirm('Удалить эту запись?')) return;
-                                  const res = await fetch(`${apiBase}/donations/${don.id}`, { method: 'DELETE' });
+                        {donorCard.donations.map(don => {
+                          const donType = don.donationType || don.type;
+                          const typeLabel = donType === 'blood' ? 'Кровь' : donType === 'plasma' ? 'Плазма' : donType === 'platelets' ? 'Тромбоциты' : donType;
+                          const paidLabel = don.isPaid ? 'возмездно' : 'безвозмездно';
+                          const volume = don.volumeMl || don.volume || '—';
+                          
+                          return (
+                            <tr key={don.id}>
+                              <td className="p-3 font-bold text-slate-800">{new Date(don.donationDate || don.date!).toLocaleDateString('ru-RU')}</td>
+                              <td className="p-3">
+                                <span className="bg-red-50 text-red-600 px-2 py-1 rounded font-bold border border-red-100 uppercase text-[10px] tracking-wide inline-block">
+                                  {typeLabel} <span className="opacity-70 lowercase">({paidLabel})</span>
+                                </span>
+                              </td>
+                              <td className="p-3 font-bold">{volume}</td>
+                              <td className="p-3 text-[10px] text-slate-500 italic max-w-[120px] truncate" title={don.note || ''}>{don.note || '—'}</td>
+                              <td className="p-3 text-right">
+                                <button 
+                                  onClick={async () => {
+                                    if (!confirm('Удалить эту запись?')) return;
+                                    const res = await fetch(`${apiBase}/donations/${don.id}`, { method: 'DELETE' });
                                   if (res.ok) {
                                     alert('Запись удалена!');
                                     loadDonorCard(donorCard.donor.id);
@@ -610,10 +623,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                               </button>
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                         {donorCard.donations.length === 0 && (
                           <tr>
-                            <td colSpan={4} className="p-4 text-center text-slate-400">Нет записей о донациях.</td>
+                            <td colSpan={5} className="p-4 text-center text-slate-400">Нет записей о донациях.</td>
                           </tr>
                         )}
                       </tbody>
@@ -1176,6 +1190,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   onChange={(e) => setDonationForm({ ...donationForm, volumeMl: e.target.value })}
                   className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
+              </div>
+
+              <div className="flex items-center justify-between text-xs font-semibold pt-2 pb-1">
+                <span>Донация на платной основе?</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={donationForm.isPaid} 
+                    onChange={(e) => setDonationForm({ ...donationForm, isPaid: e.target.checked })} 
+                  />
+                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+                </label>
               </div>
 
               <div className="space-y-1 text-xs">

@@ -62,6 +62,14 @@ async function recalculateDonorStats(donorId: number) {
   const lastDonation = donations[0] || null;
   const totalDonationsCount = donations.length;
   const bloodDonationsCount = donations.filter(d => d.donationType === 'blood').length;
+  
+  const plasmaDonationsCount = donations.filter(d => d.donationType === 'plasma').length;
+  const plateletsDonationsCount = donations.filter(d => d.donationType === 'platelets').length;
+  
+  const bloodFreeCount = donations.filter(d => d.donationType === 'blood' && !d.isPaid).length;
+  const bloodPaidCount = donations.filter(d => d.donationType === 'blood' && d.isPaid).length;
+  const compFreeCount = donations.filter(d => d.donationType !== 'blood' && d.donationType !== 'granulocytes' && !d.isPaid).length;
+  const compPaidCount = donations.filter(d => d.donationType !== 'blood' && d.donationType !== 'granulocytes' && d.isPaid).length;
 
   let nextAvailableDateStr: string | null = null;
   if (lastDonation) {
@@ -75,6 +83,12 @@ async function recalculateDonorStats(donorId: number) {
 
   donor.donationsCount = totalDonationsCount;
   donor.bloodDonationsCount = bloodDonationsCount;
+  donor.plasmaDonationsCount = plasmaDonationsCount;
+  donor.plateletsDonationsCount = plateletsDonationsCount;
+  donor.bloodFreeCount = bloodFreeCount;
+  donor.bloodPaidCount = bloodPaidCount;
+  donor.compFreeCount = compFreeCount;
+  donor.compPaidCount = compPaidCount;
   donor.lastDonationDate = lastDonation ? lastDonation.donationDate : null;
   donor.lastDonationType = lastDonation ? lastDonation.donationType : null;
   donor.nextAvailableDate = nextAvailableDateStr;
@@ -729,7 +743,7 @@ app.get('/api/download/contraindications', (req, res) => {
   // ADD RECORD OF DONATION
   app.post('/api/center/donors/:id/donations', async (req, res) => {
     const donorId = parseInt(req.params.id);
-    const { centerId, donationDate, donationType, volumeMl, note, addedBy } = req.body;
+    const { centerId, donationDate, donationType, volumeMl, note, addedBy, isPaid } = req.body;
 
     if (!donationDate || !donationType) {
       return res.status(400).json({ error: 'Дата и тип донации обязательны' });
@@ -743,6 +757,7 @@ app.get('/api/download/contraindications', (req, res) => {
       centerId: parseInt(centerId),
       donationDate,
       donationType,
+      isPaid: Boolean(isPaid),
       volumeMl: volumeMl ? parseInt(volumeMl) : undefined,
       note,
       addedBy: addedBy ? parseInt(addedBy) : undefined,

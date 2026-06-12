@@ -166,7 +166,17 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     return age;
   };
 
-  const gameStatus = getGamificationStatus(donor.bloodDonationsCount);
+  const bCounts = donor.bloodDonationsCount || 0;
+  const pCounts = donor.plasmaDonationsCount || 0;
+  const plCounts = donor.plateletsDonationsCount || 0;
+  const totalDonations = bCounts + pCounts + plCounts;
+
+  const bloodFree = donor.bloodFreeCount || 0;
+  const compFree = donor.compFreeCount || 0;
+  const bloodPaid = donor.bloodPaidCount || 0;
+  const compPaid = donor.compPaidCount || 0;
+
+  const gameStatus = getGamificationStatus(bloodFree, compFree, bloodPaid, compPaid);
   const homeCenter = centers.find(c => {
     const primaryLink = links.find(l => l.donorId === donor.id && l.isPrimary);
     return c.id === primaryLink?.centerId;
@@ -208,7 +218,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             </div>
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-bold">Донаций:</span>
-              <span className="text-slate-700 font-medium">{donor.bloodDonationsCount + donor.plasmaDonationsCount + donor.plateletsDonationsCount}</span>
+              <span className="text-slate-700 font-medium">{totalDonations}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-bold">Статус:</span>
@@ -298,16 +308,16 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                   <span className="text-slate-500 font-medium">Всего донаций</span>
-                  <span className="font-bold text-slate-800 text-right">{donor.bloodDonationsCount + donor.plasmaDonationsCount + donor.plateletsDonationsCount}</span>
+                  <span className="font-bold text-slate-800 text-right">{totalDonations}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                   <span className="text-slate-500 font-medium">Донации крови</span>
-                  <span className="font-bold text-slate-800 text-right">{donor.bloodDonationsCount}</span>
+                  <span className="font-bold text-slate-800 text-right">{bCounts}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                   <span className="text-slate-500 font-medium">Последняя сдача</span>
                   <span className="font-bold text-slate-800 text-right">
-                    {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
+                    {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
@@ -330,53 +340,25 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             className="space-y-6"
           >
             
-            {/* Health readiness badge indicator */}
-            <div className={`p-6 md:p-8 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-6 transition-all duration-500 ${readiness.ready ? 'bg-[#f0fdf4] border-[#bbf7d0]' : 'bg-[#fff7ed] border-[#fed7aa]'}`}>
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <span className={`w-2.5 h-2.5 rounded-full inline-block ${readiness.ready ? 'bg-emerald-500 shadow-sm' : 'bg-amber-500'}`}></span>
-                  <h3 className={`font-bold text-xl md:text-xl tracking-tight leading-tight ${readiness.ready ? 'text-emerald-700' : 'text-amber-800'}`}>
-                    {readiness.ready ? 'Вы готовы к донации!' : 'Временное отстранение'}
-                  </h3>
-                </div>
-                {readiness.ready ? (
-                  <p className="text-sm font-medium text-emerald-600/80 max-w-md ml-[22px]">Все условия соблюдены</p>
-                ) : (
-                  <p className="text-sm font-medium text-[#c2410c] max-w-md">
-                    <strong className="font-bold">Причина:</strong> {readiness.reason}
-                  </p>
-                )}
-              </div>
-              {readiness.ready && (
-                <button 
-                  onClick={() => alert(`Ваш домашний центр: ${homeCenter?.name || 'не привязан'}. Пожалуйста, позвоните по номеру ${homeCenter?.phone || donor.phone} и запишитесь на удобный день!`)}
-                  className="bg-emerald-500 hover:bg-emerald-600 hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-sm px-7 py-3.5 rounded-xl transition-all duration-200 inline-flex items-center shadow-sm shrink-0"
-                >
-                  <Calendar className="w-4 h-4 mr-2.5" />
-                  Записаться
-                </button>
-              )}
-            </div>
-
             {/* Stats 4-Grid matching the screenshot */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-center">
-                <span className="text-3xl font-bold text-red-600 leading-none mb-1">{donor.bloodDonationsCount + donor.plasmaDonationsCount + donor.plateletsDonationsCount}</span>
+                <span className="text-3xl font-bold text-red-600 leading-none mb-1">{totalDonations}</span>
                 <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">всего донаций</span>
               </div>
               <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center">
-                <span className="text-3xl font-bold text-emerald-500 leading-none mb-1">{donor.bloodDonationsCount}</span>
+                <span className="text-3xl font-bold text-emerald-500 leading-none mb-1">{bCounts}</span>
                 <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">цельная кровь</span>
               </div>
               <div className="bg-amber-50 border border-amber-100 p-5 rounded-2xl flex flex-col justify-center overflow-hidden">
-                <span className="text-3xl font-bold text-amber-500 leading-none mb-1 truncate">
-                  {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.date).getTime()))).toLocaleDateString('ru-RU') : '—'}
+                <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-amber-500 leading-none mb-1 tracking-tight">
+                  {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : '—'}
                 </span>
                 <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">последняя сдача</span>
               </div>
-              <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex flex-col justify-center">
-                <span className="text-3xl font-bold text-blue-500 leading-none mb-1 font-sans">
-                  {readiness.ready ? '✓' : (donor.nextAvailableDate ? new Date(donor.nextAvailableDate).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit'}) : '—')}
+              <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex flex-col justify-center overflow-hidden">
+                <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-500 leading-none mb-1 font-sans tracking-tight">
+                  {readiness.ready ? '✓' : (donor.nextAvailableDate ? new Date(donor.nextAvailableDate).toLocaleDateString('ru-RU') : '—')}
                 </span>
                 <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest">следующая дата</span>
               </div>
@@ -389,28 +371,29 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Донорский ранг</h3>
                   <p className="text-sm text-slate-500 font-medium">Прогресс и доступные льготы</p>
                 </div>
-                <span className={`px-5 py-2 rounded-full text-[12px] font-bold border shadow-sm ${gameStatus.color.includes('amber') || gameStatus.title === 'СЕРЕБРЯНЫЙ' ? 'bg-white border-amber-400 text-amber-500' : gameStatus.color}`}>
-                  {gameStatus.title === 'НАЧИНАЮЩИЙ' ? 'Новичок' : gameStatus.title === 'ОПЫТНЫЙ' ? 'Серебряный' : gameStatus.title === 'ВЕТЕРАН' ? 'Золотой' : 'Почетный'}
+                <span className={`px-5 py-2 rounded-full text-[12px] font-bold border shadow-sm ${gameStatus.color}`}>
+                  {gameStatus.title}
                 </span>
               </div>
 
               {/* Progress bar estimation slider */}
-              {donor.bloodDonationsCount < gameStatus.nextAt && (
+              {gameStatus.currentPoints < gameStatus.nextAt && (
                 <div className="space-y-4">
                   <div className="flex justify-between items-end">
                     <div className="space-y-0.5">
-                      <span className="text-[13px] font-bold text-slate-800">До следующего ранга</span>
+                      <span className="text-[13px] font-bold text-slate-800">До следующего ранга (баллы)</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-medium text-slate-500 leading-none">{donor.bloodDonationsCount} / {gameStatus.nextAt}</span>
+                      <span className="text-sm font-medium text-slate-500 leading-none">{gameStatus.currentPoints} / {gameStatus.nextAt}</span>
                     </div>
                   </div>
                   <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                     <div 
-                      className="bg-red-600 h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{ width: `${(donor.bloodDonationsCount / gameStatus.nextAt) * 100}%` }}
+                      className="bg-red-650 h-full rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${(gameStatus.currentPoints / gameStatus.nextAt) * 100}%` }}
                     ></div>
                   </div>
+                  <p className="text-xs text-slate-400">1 балл = Компонент (возм); 2 балла = Кровь (возм) или Компонент (безвозм); 4 балла = Кровь (безвозм)</p>
                 </div>
               )}
 
@@ -418,26 +401,26 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="bg-white p-5 rounded-xl border border-slate-700/20">
                   <h4 className="text-sm md:text-base font-bold text-blue-600 mb-2">✓ 100% больничный</h4>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">
-                    4+ донации в год → листок нетрудоспособности 100% с 1-го дня
+                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-semibold">
+                    4+ донации в год → листок нетрудоспособности из расчета 100%
                   </p>
                 </div>
 
                 <div className="bg-slate-100 p-5 rounded-xl border border-slate-200">
                   <h4 className="text-sm md:text-base font-bold text-slate-800 mb-2">«Ганаровы донар»</h4>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium mb-4">
-                    20+ безвозмездных сдач → нагрудный знак МЗ РБ + льготы
+                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-semibold mb-4">
+                    20+ безвозмездных сдач крови (или эквивалент) → знак отличия
                   </p>
                   
                   <div className="space-y-2.5">
                     <div className="flex justify-between items-end">
-                      <span className="text-xs text-slate-600 font-medium">Прогресс</span>
-                      <span className="text-xs font-bold text-slate-800">{donor.bloodDonationsCount}/20</span>
+                      <span className="text-xs text-slate-600 font-medium">Прогресс (баллы)</span>
+                      <span className="text-xs font-bold text-slate-800">{gameStatus.currentPoints}/80</span>
                     </div>
                     <div className="w-full bg-slate-300 h-1.5 rounded-full overflow-hidden">
                       <div 
-                        className="bg-red-600 h-full rounded-full transition-all duration-1000 ease-out"
-                        style={{ width: `${Math.min(100, (donor.bloodDonationsCount / 20) * 100)}%` }}
+                        className="bg-red-650 h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${Math.min(100, (gameStatus.currentPoints / 80) * 100)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -532,17 +515,21 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <tbody className="divide-y divide-slate-100 text-slate-600 bg-white">
                   {donations.map(don => {
                     const center = centers.find(c => c.id === don.centerId);
+                    const donType = don.donationType || don.type;
+                    const typeLabel = donType === 'blood' ? 'Цельная кровь' : donType === 'plasma' ? 'Плазма' : 'Тромбоциты';
+                    const paidLabel = don.isPaid ? 'возмездно' : 'безвозмездно';
+                    const volume = don.volumeMl || don.volume || '—';
                     return (
                       <tr key={don.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-5 py-4 font-bold text-slate-700">{new Date(don.date).toLocaleDateString('ru-RU')}</td>
+                        <td className="px-5 py-4 font-bold text-slate-700">{new Date(don.donationDate || don.date!).toLocaleDateString('ru-RU')}</td>
                         <td className="px-5 py-4">
-                          <span className="bg-red-50 text-red-500 px-2.5 py-1 rounded-full text-xs font-bold border border-red-100/50">
-                            {don.type === 'blood' ? 'Цельная кровь' : don.type === 'plasma' ? 'Плазма' : 'Тромбоциты'}
+                          <span className="bg-red-50 text-red-500 px-2.5 py-1 rounded-full text-xs font-bold border border-red-100/50 inline-block">
+                            {typeLabel} ({paidLabel})
                           </span>
                         </td>
-                        <td className="px-5 py-4 font-medium text-slate-600">{center?.shortName || 'Центр крови'}</td>
-                        <td className="px-5 py-4 font-bold text-red-600">{don.volume} мл</td>
-                        <td className="px-5 py-4 text-xs text-slate-400 italic max-w-[200px] truncate">{don.note || '—'}</td>
+                        <td className="px-5 py-4 font-medium text-slate-600">{center?.shortName || center?.name || 'Центр крови'}</td>
+                        <td className="px-5 py-4 font-bold text-red-600">{volume} мл</td>
+                        <td className="px-5 py-4 text-xs text-slate-400 italic max-w-[200px] truncate" title={don.note || ''}>{don.note || '—'}</td>
                       </tr>
                     );
                   })}
@@ -735,7 +722,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     onChange={(e) => setSelectedCenterId(e.target.value)}
                     className="w-full px-5 py-4 text-sm md:text-base border border-slate-200 rounded-xl focus:border-red-600 focus:ring-4 focus:ring-red-50 transition-all focus:outline-none bg-slate-50/50 font-bold text-slate-700 cursor-pointer shadow-sm appearance-none"
                   >
-                    <option value="">-- Список центров переливания --</option>
+                    <option value=""> Список центров переливания </option>
                     {centers.map(center => {
                       if (links.some(l => l.centerId === center.id)) return null;
                       return <option key={center.id} value={center.id}>{center.name}</option>;
@@ -795,17 +782,6 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     </div>
                   ))}
                 </div>
-
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100/80 shadow-inner group">
-                  <label className="block text-[11px] font-bold text-slate-400 uppercase mb-2 tracking-widest leading-none">Системный идентификатор (OneSignal)</label>
-                  <div className="flex items-center gap-3">
-                    <Check className="w-4 h-4 text-emerald-500" />
-                    <code className="text-red-600 text-sm font-mono font-bold tracking-tight bg-white px-3 py-1 rounded-md border border-slate-200 group-hover:border-red-600/30 transition-colors">
-                      {donor.onesignalPlayerId || 'not-assigned-yet'}
-                    </code>
-                  </div>
-                </div>
-
                 <div className="pt-2">
                   <button 
                     type="submit"

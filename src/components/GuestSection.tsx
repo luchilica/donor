@@ -1288,7 +1288,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         onChange={(e) => setRegForm({...regForm, primaryCenterId: e.target.value})}
                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white"
                       >
-                        <option value="">-- Выберите центр переливания --</option>
+                        <option value=""> Выберите центр переливания </option>
                         {centers.map(center => (
                           <option key={center.id} value={center.id}>{center.name}</option>
                         ))}
