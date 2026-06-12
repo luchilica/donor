@@ -193,11 +193,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50/50 flex flex-col justify-between">
       
       {/* Dynamic Master Switcher Header Panel for Judges/Evaluators */}
-      <div className="bg-slate-900 text-white border-b border-slate-800 text-center py-2 px-4 flex flex-col sm:flex-row justify-between items-center text-xs gap-2">
-        <span className="flex items-center gap-1.5 font-semibold text-rose-300">
-          <Layers className="w-4 h-4 text-rose-400" />
-          Панель быстрого переключения ролей (Экзаменатору):
-        </span>
+      <div className="bg-slate-900 text-white border-b border-slate-800 py-2 px-4 flex justify-center items-center text-xs gap-2">
         <div className="flex flex-wrap justify-center gap-1 select-none">
           <button 
             onClick={() => simulateRole('guest')}

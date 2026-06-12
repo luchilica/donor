@@ -126,7 +126,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
     bloodGroup: 'II_A' as BloodGroup,
     rhFactor: 'positive' as RhFactor,
     weight: '70',
-    phone: '',
+    phone: '+375',
     email: '',
     password: '',
     primaryCenterId: '',
@@ -379,7 +379,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       setRegStep(1);
                       setRegForm({
                         lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male',
-                        bloodGroup: 'II_A', rhFactor: 'positive', weight: '70', phone: '', email: '', password: '',
+                        bloodGroup: 'II_A', rhFactor: 'positive', weight: '70', phone: '+375', email: '', password: '',
                         primaryCenterId: '', smsEnabled: true, pushEnabled: true, emailNotificationsEnabled: true, agreeTerms: false
                       });
                       setRegConfirmPassword('');
@@ -632,18 +632,18 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               <div className="space-y-4 text-sm text-slate-600">
                 <p><strong>Временные противопоказания:</strong></p>
                 <ul className="list-disc list-inside space-y-1">
-                    <li>Острая респираторная инфекция — через 15 суток после выздоровления.</li>
-                    <li>Грипп, COVID-19 — через 1 месяц.</li>
-                    <li>Пневмония (средней и тяжёлой степени) — через 6 месяцев.</li>
-                    <li>Приём антибиотиков — за 10 дней до донации.</li>
-                    <li>Приём салицилатов и анальгетиков — за 5 дней.</li>
-                    <li>Алкоголь и пиво — за 48 часов.</li>
-                    <li>Курение — за 2 часа.</li>
-                    <li>Прививки инактивированными вакцинами — через 10 суток; живыми — через 30 суток.</li>
-                    <li>Татуировка, пирсинг, перманентный макияж — через 6 месяцев.</li>
-                    <li>Травма — не ранее 3 месяцев после выздоровления.</li>
-                    <li>Оперативное вмешательство — через 6 месяцев (кроме протезирования суставов).</li>
-                    <li>След от венепункции в локтевом сгибе без документа — 7 суток.</li>
+                    <li>Острая респираторная инфекция – через 15 суток после выздоровления.</li>
+                    <li>Грипп, COVID-19 – через 1 месяц.</li>
+                    <li>Пневмония (средней и тяжёлой степени) – через 6 месяцев.</li>
+                    <li>Приём антибиотиков – за 10 дней до донации.</li>
+                    <li>Приём салицилатов и анальгетиков – за 5 дней.</li>
+                    <li>Алкоголь и пиво – за 48 часов.</li>
+                    <li>Курение – за 2 часа.</li>
+                    <li>Прививки инактивированными вакцинами – через 10 суток; живыми – через 30 суток.</li>
+                    <li>Татуировка, пирсинг, перманентный макияж – через 6 месяцев.</li>
+                    <li>Травма – не ранее 3 месяцев после выздоровления.</li>
+                    <li>Оперативное вмешательство – через 6 месяцев (кроме протезирования суставов).</li>
+                    <li>След от венепункции в локтевом сгибе без документа – 7 суток.</li>
                 </ul>
                 <div className="mt-4 pt-4 border-t border-red-100">
                     <a href="/api/download/contraindications" target="_blank" download className="text-sm text-red-600 font-semibold hover:underline flex items-center">
@@ -656,10 +656,10 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
 <AccordionItem title="Как подготовиться к сдаче крови">
                 <div className="space-y-2 text-sm text-slate-600">
-                    <p><strong>За 10 дней</strong> — воздержаться от приёма антибактериальных медицинских препаратов.</p>
-                    <p><strong>За 5 дней</strong> — от салицилатов и аналгетиков.</p>
-                    <p><strong>За 48 часов</strong> — от приёма алкогольных (слабоалкогольных) напитков и пива.</p>
-                    <p><strong>За 2 часа</strong> — от курения.</p>
+                    <p><strong>За 10 дней</strong> – воздержаться от приёма антибактериальных медицинских препаратов.</p>
+                    <p><strong>За 5 дней</strong> – от салицилатов и аналгетиков.</p>
+                    <p><strong>За 48 часов</strong> – от приёма алкогольных (слабоалкогольных) напитков и пива.</p>
+                    <p><strong>За 2 часа</strong> – от курения.</p>
                     <p><strong>Режим питания:</strong></p>
                     <p>Исключить: жирную, жареную, острую, копчёную пищу, молочные продукты, яйца, масло, бананы, цитрусовые, орехи, семечки.</p>
                     <p>Разрешено: сладкий чай, варенье, хлеб, сухари, сушки, отварные крупы, макароны на воде без масла, рыба на пару, соки, морсы, компоты, минеральная вода, овощи, фрукты (кроме цитрусовых и бананов).</p>
@@ -670,7 +670,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
             <AccordionItem title="Что происходит во время сдачи крови">
               <div className="space-y-2 text-sm text-slate-600">
-                <p>1. <strong>Регистрация.</strong> При первичном обращении оформляются учётная карточка, медицинский документ донора, карта-анкета. При повторных — только карта-анкета.</p>
+                <p>1. <strong>Регистрация.</strong> При первичном обращении оформляются учётная карточка, медицинский документ донора, карта-анкета. При повторных – только карта-анкета.</p>
                 <p>2. <strong>Заполнение карты-анкеты.</strong> Донор отвечает на вопросы и подписывает добровольное согласие на забор крови.</p>
                 <p>3. <strong>Клинико-лабораторные исследования.</strong></p>
                 <p>4. <strong>Медицинский осмотр.</strong> Врач оценивает анамнез, проводит осмотр, измеряет:</p>
@@ -678,7 +678,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                    Пульс: ритмичный, 55–100 ударов в минуту.<br/>
                    Температура: 36–37°C.</p>
                 <p>5. <strong>Приём завтрака.</strong></p>
-                <p>6. <strong>Процедура донации.</strong> Заготовка крови в количестве 450 мл ± 10%. До 40 мл забирается для анализов (ВИЧ, гепатит B и C, сифилис и др.). Продолжительность — 10–15 минут. После процедуры накладывается асептическая давящая повязка на 4+ часа.</p>
+                <p>6. <strong>Процедура донации.</strong> Заготовка крови в количестве 450 мл ± 10%. До 40 мл забирается для анализов (ВИЧ, гепатит B и C, сифилис и др.). Продолжительность – 10–15 минут. После процедуры накладывается асептическая давящая повязка на 4+ часа.</p>
                 <p>7. <strong>Наблюдение 30 минут после донации.</strong></p>
                 <p>8. <strong>Получение документов для гарантий и компенсаций.</strong></p>
                 <p>9. <strong>Получение компенсации на питание (при безвозмездной донации).</strong></p>
@@ -763,10 +763,10 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
                   <li>Паспорт (или аналогичный документ).</li>
                   <li>Карта-анкета донора.</li>
-                  <li>Выписка из медицинской документации — 1 раз в 12 месяцев.</li>
-                  <li>Результат флюорографии — 1 раз в 12 месяцев.</li>
-                  <li>Осмотр врачом-гинекологом — 1 раз в 12 месяцев (для женщин).</li>
-                  <li>ЭКГ — 1 раз в 12 месяцев (для доноров компонентов методом афереза).</li>
+                  <li>Выписка из медицинской документации – 1 раз в 12 месяцев.</li>
+                  <li>Результат флюорографии – 1 раз в 12 месяцев.</li>
+                  <li>Осмотр врачом-гинекологом – 1 раз в 12 месяцев (для женщин).</li>
+                  <li>ЭКГ – 1 раз в 12 месяцев (для доноров компонентов методом афереза).</li>
                 </ul>
              </AccordionItem>
           </div>
@@ -1150,10 +1150,25 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       <input 
                         type="tel" 
                         required
-                        maxLength={12}
+                        maxLength={13}
                         value={regForm.phone}
-                        onChange={(e) => setRegForm({...regForm, phone: e.target.value.substring(0, 12)})}
-                        placeholder="375XXXXXXXXX"
+                        onChange={(e) => {
+                          let inputVal = e.target.value;
+                          if (inputVal.length < 4 || !inputVal.startsWith('+375')) {
+                            const allDigits = inputVal.replace(/\D/g, '');
+                            if (allDigits.startsWith('375')) {
+                              const extra = allDigits.substring(3);
+                              inputVal = '+375' + extra;
+                            } else {
+                              inputVal = '+375';
+                            }
+                          } else {
+                            const extra = inputVal.substring(4).replace(/\D/g, '');
+                            inputVal = '+375' + extra;
+                          }
+                          setRegForm({...regForm, phone: inputVal.substring(0, 13)});
+                        }}
+                        placeholder="+375XXXXXXXXX"
                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                       />
                     </div>
