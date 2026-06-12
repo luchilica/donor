@@ -45,6 +45,66 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const [linkError, setLinkError] = useState('');
   const [linkSuccess, setLinkSuccess] = useState('');
 
+  // Profile edit states
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    lastName: donor.lastName,
+    firstName: donor.firstName,
+    middleName: donor.middleName || '',
+    birthDate: donor.birthDate ? donor.birthDate.split('T')[0] : '',
+    gender: donor.gender,
+    phone: donor.phone,
+    email: donor.email || '',
+    weight: donor.weight,
+    bloodGroup: donor.bloodGroup,
+    rhFactor: donor.rhFactor
+  });
+  const [editSuccess, setEditSuccess] = useState('');
+  const [editError, setEditError] = useState('');
+
+  React.useEffect(() => {
+    setProfileForm({
+      lastName: donor.lastName,
+      firstName: donor.firstName,
+      middleName: donor.middleName || '',
+      birthDate: donor.birthDate ? donor.birthDate.split('T')[0] : '',
+      gender: donor.gender,
+      phone: donor.phone,
+      email: donor.email || '',
+      weight: donor.weight,
+      bloodGroup: donor.bloodGroup,
+      rhFactor: donor.rhFactor
+    });
+  }, [donor.id, donor.lastName, donor.firstName, donor.middleName, donor.birthDate, donor.gender, donor.phone, donor.email, donor.weight, donor.bloodGroup, donor.rhFactor]);
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditSuccess('');
+    setEditError('');
+    try {
+      const res = await fetch(`${apiBase}/donor/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({
+          donorId: donor.id,
+          ...profileForm
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Ошибка при сохранении профиля');
+      }
+      setEditSuccess('Профиль успешно сохранен и отправлен в центр крови для подтверждения!');
+      setIsEditingProfile(false);
+      onRefresh();
+    } catch (err: any) {
+      setEditError(err.message || 'Ошибка обновления профиля');
+    }
+  };
+
   const triggerRefresh = async () => {
     setRefreshing(true);
     await onRefresh();
@@ -305,63 +365,229 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm">
               <div className="flex justify-between items-center mb-8">
                 <h3 className="font-bold text-slate-800 text-xl tracking-tight">Личная информация</h3>
-                <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                  <User className="w-4 h-4" /> {/* Or Edit icon, but using user/edit for simplicity */}
-                  Редактировать
-                </button>
+                {!isEditingProfile && (
+                  <button 
+                    onClick={() => setIsEditingProfile(true)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Редактировать
+                  </button>
+                )}
               </div>
 
-              <div className="divide-y divide-slate-100/80 text-sm">
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">ФИО</span>
-                  <span className="font-bold text-slate-800 text-right">{donor.lastName} {donor.firstName} {donor.middleName}</span>
+              {editError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-bold font-sans">
+                  {editError}
                 </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Дата рождения</span>
-                  <span className="font-bold text-slate-800 text-right">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
+              )}
+              {editSuccess && (
+                <div className="mb-4 p-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-bold font-sans">
+                  {editSuccess}
                 </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Пол</span>
-                  <span className="font-bold text-slate-800 text-right">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Телефон</span>
-                  <span className="font-bold text-slate-800 text-right">{donor.phone}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">E-mail</span>
-                  <span className="font-bold text-slate-800 text-right">{donor.email}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Вес</span>
-                  <span className="font-bold text-slate-800 text-right">{donor.weight} кг</span>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Группа / Резус</span>
-                  <div className="flex gap-2">
-                    <span className="bg-slate-100 text-red-600 font-bold px-3 py-1 rounded-full text-xs">{formatBloodGroup(donor.bloodGroup)}</span>
-                    <span className="text-slate-800 font-bold px-1 py-1 text-sm">{formatRhFactor(donor.rhFactor)}</span>
+              )}
+
+              {isEditingProfile ? (
+                <form onSubmit={handleProfileSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Фамилия</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={profileForm.lastName} 
+                        onChange={e => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Имя</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={profileForm.firstName} 
+                        onChange={e => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Отчество</label>
+                      <input 
+                        type="text" 
+                        value={profileForm.middleName} 
+                        onChange={e => setProfileForm({ ...profileForm, middleName: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Дата рождения</label>
+                      <input 
+                        type="date" 
+                        required
+                        value={profileForm.birthDate} 
+                        onChange={e => setProfileForm({ ...profileForm, birthDate: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Пол</label>
+                      <select 
+                        value={profileForm.gender} 
+                        onChange={e => setProfileForm({ ...profileForm, gender: e.target.value as any })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      >
+                        <option value="male">Мужской</option>
+                        <option value="female">Женский</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Телефон</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={profileForm.phone} 
+                        onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">E-mail</label>
+                      <input 
+                        type="email" 
+                        required
+                        value={profileForm.email} 
+                        onChange={e => setProfileForm({ ...profileForm, email: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Вес (кг)</label>
+                      <input 
+                        type="number" 
+                        required
+                        step="0.1"
+                        value={profileForm.weight} 
+                        onChange={e => setProfileForm({ ...profileForm, weight: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Группа крови</label>
+                      <select 
+                        value={profileForm.bloodGroup} 
+                        onChange={e => setProfileForm({ ...profileForm, bloodGroup: e.target.value as any })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      >
+                        <option value="I_O">I (O)</option>
+                        <option value="II_A">II (A)</option>
+                        <option value="III_B">III (B)</option>
+                        <option value="IV_AB">IV (AB)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">Резус-фактор</label>
+                      <select 
+                        value={profileForm.rhFactor} 
+                        onChange={e => setProfileForm({ ...profileForm, rhFactor: e.target.value as any })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                      >
+                        <option value="positive">Rh+</option>
+                        <option value="negative">Rh-</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-slate-100/80 text-sm mt-6 pt-4 border-t border-slate-100">
+                    <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                      <span className="text-slate-400 font-medium font-sans">Всего донаций (накапливается автоматически)</span>
+                      <span className="font-bold text-slate-500 text-right">{totalDonations}</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                      <span className="text-slate-400 font-medium font-sans">Последняя сдача (вносится автоматически)</span>
+                      <span className="font-bold text-slate-500 text-right font-mono">
+                        {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
+                      <span className="text-slate-400 font-medium font-sans">В системе с</span>
+                      <span className="font-bold text-slate-500 text-right font-mono">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-6 border-t border-slate-100/60 font-sans">
+                    <button 
+                      type="button"
+                      onClick={() => setIsEditingProfile(false)}
+                      className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
+                    >
+                      Отмена
+                    </button>
+                    <button 
+                      type="submit"
+                      className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade"
+                    >
+                      Сохранить изменения
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90">
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">ФИО</span>
+                    <span className="font-bold text-slate-800 text-right">{donor.lastName} {donor.firstName} {donor.middleName || ''}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">Дата рождения</span>
+                    <span className="font-bold text-slate-800 text-right">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">Пол</span>
+                    <span className="font-bold text-slate-800 text-right">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">Телефон</span>
+                    <span className="font-bold text-slate-800 text-right">{donor.phone}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">E-mail</span>
+                    <span className="font-bold text-slate-800 text-right">{donor.email}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">Вес</span>
+                    <span className="font-bold text-slate-800 text-right">{donor.weight} кг</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-center justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">Группа / Резус</span>
+                    <div className="flex gap-2">
+                      <span className="bg-slate-100 text-red-600 font-bold px-2.5 py-0.5 rounded-full text-[10px]">{formatBloodGroup(donor.bloodGroup)}</span>
+                      <span className="text-slate-800 font-bold px-1 py-0.5 text-xs">{formatRhFactor(donor.rhFactor)}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">Всего донаций</span>
+                    <span className="font-bold text-slate-800 text-right">{totalDonations}</span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">Последняя сдача</span>
+                    <span className="font-bold text-slate-800 text-right font-mono">
+                      {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                    <span className="text-slate-500 font-medium font-sans">В системе с</span>
+                    <span className="font-bold text-slate-800 text-right font-mono">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
                   </div>
                 </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Всего донаций</span>
-                  <span className="font-bold text-slate-800 text-right">{totalDonations}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Донации крови</span>
-                  <span className="font-bold text-slate-800 text-right">{bCounts}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">Последняя сдача</span>
-                  <span className="font-bold text-slate-800 text-right">
-                    {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                  <span className="text-slate-500 font-medium">В системе с</span>
-                  <span className="font-bold text-slate-800 text-right">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
-                </div>
-              </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -429,7 +655,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               </div>
               <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex flex-col justify-center overflow-hidden">
                 <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-500 leading-none mb-1 font-sans tracking-tight">
-                  {readiness.ready ? '✓' : (donor.nextAvailableDate ? new Date(donor.nextAvailableDate).toLocaleDateString('ru-RU') : '—')}
+                  {readiness.ready ? '—' : (donor.nextAvailableDate ? new Date(donor.nextAvailableDate).toLocaleDateString('ru-RU') : '—')}
                 </span>
                 <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest">следующая дата</span>
               </div>
@@ -551,16 +777,47 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {[
-                  { label: 'Цельная кровь', date: nextBloodDate ? nextBloodDate.toISOString().split('T')[0] : donor.nextAvailableDate, interval: `${bloodDays} дней`, active: true },
-                  { label: 'Плазма / Тромбоциты', date: nextAferesisDate ? nextAferesisDate.toISOString().split('T')[0] : null, interval: `${aferezisDays} дней`, active: false },
-                  { label: 'Гранулоциты', date: nextGranDate ? nextGranDate.toISOString().split('T')[0] : null, interval: `${granulocytesDays} дней`, active: false },
-                ].map((item, idx) => (
-                  <div key={idx} className={`p-5 rounded-2xl border transition-all ${item.active ? 'bg-slate-100 border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-100'}`}>
-                    <span className={`text-[10px] uppercase font-bold block mb-2 tracking-[0.15em] ${item.active ? 'text-red-600' : 'text-slate-400'}`}>{item.label}</span>
-                    <span className="font-mono text-[16px] font-bold text-slate-800 block mb-1">{item.date ? new Date(item.date).toLocaleDateString('ru-RU') : 'Доступно'}</span>
-                    <span className={`text-[11px] font-bold ${item.active ? 'text-red-600/60' : 'text-slate-400/80'}`}>{item.interval}</span>
-                  </div>
-                ))}
+                  { label: 'Цельная кровь', date: nextBloodDate ? nextBloodDate.toISOString().split('T')[0] : donor.nextAvailableDate, interval: `${bloodDays} дней` },
+                  { label: 'Плазма / Тромбоциты', date: nextAferesisDate ? nextAferesisDate.toISOString().split('T')[0] : null, interval: `${aferezisDays} дней` },
+                  { label: 'Гранулоциты', date: nextGranDate ? nextGranDate.toISOString().split('T')[0] : null, interval: `${granulocytesDays} дней` },
+                ].map((item, idx) => {
+                  const now = new Date();
+                  now.setHours(0, 0, 0, 0);
+                  const itemDateObj = item.date ? new Date(item.date) : null;
+                  if (itemDateObj) {
+                    itemDateObj.setHours(0, 0, 0, 0);
+                  }
+                  const isAvailable = !itemDateObj || itemDateObj <= now;
+
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`p-5 rounded-2xl border transition-all flex flex-col justify-between min-h-[130px] ${
+                        isAvailable 
+                          ? 'bg-emerald-50/40 border-emerald-100/80 hover:bg-emerald-50/70 shadow-sm shadow-emerald-50' 
+                          : 'bg-rose-50/40 border-rose-100/80 hover:bg-rose-50/70 shadow-sm shadow-rose-50'
+                      }`}
+                    >
+                      <span className={`text-[10px] uppercase font-bold block tracking-[0.14em] ${
+                        isAvailable ? 'text-emerald-700/90' : 'text-rose-700/90'
+                      }`}>
+                        {item.label}
+                      </span>
+                      <div className="flex-1 flex items-center py-2">
+                        <span className={`font-mono text-base font-bold block ${
+                          isAvailable ? 'text-emerald-800' : 'text-rose-800'
+                        }`}>
+                          {isAvailable ? 'Доступно' : itemDateObj?.toLocaleDateString('ru-RU')}
+                        </span>
+                      </div>
+                      <span className={`text-[11px] font-bold ${
+                        isAvailable ? 'text-emerald-600/70' : 'text-rose-600/70'
+                      }`}>
+                        {item.interval}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -764,34 +1021,58 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </button>
               </div>
 
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {links.map(link => {
                   const center = centers.find(c => c.id === link.centerId);
                   const isConfirmed = link.status === 'confirmed';
+                  const statusDate = link.confirmedAt 
+                    ? new Date(link.confirmedAt).toLocaleDateString('ru-RU') 
+                    : new Date(link.updatedAt || link.createdAt).toLocaleDateString('ru-RU');
+                  
                   return (
-                    <div key={link.id} className={`p-6 rounded-2xl border transition-all duration-300 ${link.isPrimary ? 'bg-slate-100 border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-100/80 hover:border-slate-300'}`}>
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-5">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-3 flex-wrap">
-                            <h4 className="font-bold text-slate-800 text-base font-bold text-slate-800 tracking-tight">{center ? center.name : `Центр #${link.centerId}`}</h4>
+                    <div key={link.id} className={`p-4 rounded-xl border transition-all duration-300 ${link.isPrimary ? 'bg-red-55/10 border-red-100 shadow-sm' : 'bg-slate-50/55 border-slate-100/80 hover:border-slate-200'}`}>
+                      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-slate-800 text-sm tracking-tight leading-none">{center ? center.name : `Центр #${link.centerId}`}</h4>
                             {link.isPrimary && (
-                              <span className="text-[9px] bg-red-600 text-white font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">домашний</span>
+                              <span className="text-[8px] bg-red-600/10 text-red-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider leading-none">домашний</span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 text-xs md:text-sm text-slate-500 font-medium bg-white/50 w-fit px-3 py-1 rounded-lg border border-white/50">
-                            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                            {center?.address}
+                          
+                          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium leading-none">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>{center?.address}</span>
                           </div>
-                          <div className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.1em] mt-2 flex items-center gap-2">
-                            <Calendar className="w-3 h-3" />
-                            {isConfirmed ? `Подтверждён: ${new Date(link.updatedAt).toLocaleDateString('ru-RU')}` : `Подан: ${new Date(link.createdAt).toLocaleDateString('ru-RU')}`}
+
+                          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-2 leading-none">
+                            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span>
+                              {isConfirmed 
+                                ? `Подтверждён: ${statusDate}` 
+                                : `Подан: ${new Date(link.createdAt).toLocaleDateString('ru-RU')}`}
+                            </span>
                           </div>
                         </div>
 
-                        <div className="self-end sm:self-start">
-                          <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold border transition-colors ${isConfirmed ? 'bg-white text-emerald-500 border-emerald-500/30 shadow-sm' : link.status === 'pending' ? 'bg-white text-amber-600 border-amber-600/30' : 'bg-white text-red-600 border-red-600/30 shadow-sm'}`}>
-                            {isConfirmed && <Check className="w-4 h-4 stroke-[3px]" />}
-                            {link.status === 'confirmed' ? 'Подтверждён' : link.status === 'pending' ? 'На модерации' : 'Отклонено'}
+                        <div className="shrink-0">
+                          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+                            isConfirmed 
+                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                              : link.status === 'pending' 
+                              ? 'bg-amber-50 text-amber-600 border-amber-100' 
+                              : 'bg-rose-50 text-rose-600 border-rose-100'
+                          }`}>
+                            {isConfirmed ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 stroke-[3px]" />
+                                <span>Подтверждён {statusDate}</span>
+                              </>
+                            ) : link.status === 'pending' ? (
+                              <span>На рассмотрении</span>
+                            ) : (
+                              <span>Отклонено</span>
+                            )}
                           </div>
                         </div>
                       </div>

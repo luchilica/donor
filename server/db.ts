@@ -1077,6 +1077,7 @@ export async function getDb(): Promise<DatabaseState> {
         donors: dbDonors.map(m => ({
           id: m.id,
           userId: m.userId,
+          email: dbUsers.find(u => u.id === m.userId)?.email || '',
           lastName: m.lastName,
           firstName: m.firstName,
           middleName: m.middleName,

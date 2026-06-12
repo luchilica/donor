@@ -387,6 +387,11 @@ app.get('/api/download/contraindications', (req, res) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const readiness = isDonorReady(donor, todayStr, medicalNotes, confirmedCenters.length > 0);
 
+    const user = db.users.find(u => u.id === userId);
+    if (user) {
+      donor.email = user.email;
+    }
+
     res.json({
       donor,
       links,
@@ -398,7 +403,7 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // UPDATE DONOR PROFILE (FROM CABINET)
   app.put('/api/donor/profile', async (req, res) => {
-    const { donorId, lastName, firstName, middleName, weight, phone, birthDate, gender, bloodGroup, rhFactor } = req.body;
+    const { donorId, lastName, firstName, middleName, weight, phone, birthDate, gender, bloodGroup, rhFactor, email } = req.body;
     if (!donorId) return res.status(400).json({ error: 'Не указан ID донора' });
 
     const db = await getDb();
@@ -414,6 +419,20 @@ app.get('/api/download/contraindications', (req, res) => {
     donor.bloodGroup = bloodGroup || donor.bloodGroup;
     donor.rhFactor = rhFactor || donor.rhFactor;
     if (weight) donor.weight = parseFloat(weight);
+
+    const user = db.users.find(u => u.id === donor.userId);
+    if (user && email) {
+      user.email = email.toLowerCase();
+      donor.email = email;
+    }
+
+    // Reset status of all centers links to pending to request center confirmation
+    const ties = db.donorCenters.filter(dc => dc.donorId === donor.id);
+    for (const link of ties) {
+      link.status = 'pending';
+      link.resubmissionCount = (link.resubmissionCount || 0) + 1;
+      link.resubmittedAt = new Date().toISOString();
+    }
 
     await saveDb(db);
     await recalculateDonorStats(donor.id);
