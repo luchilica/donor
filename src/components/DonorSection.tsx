@@ -6,6 +6,7 @@ import {
   Home, User, Link, Pause, MapPin, Download
 } from 'lucide-react';
 import { Donor, DonorCenter, Donation, MedicalNote, BloodCenter, formatBloodGroup, formatRhFactor, getGamificationStatus } from '../types';
+import { calculateNextDates } from '../utils/intervals';
 
 interface DonorSectionProps {
   donor: Donor;
@@ -169,18 +170,54 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const bCounts = donor.bloodDonationsCount || 0;
   const pCounts = donor.plasmaDonationsCount || 0;
   const plCounts = donor.plateletsDonationsCount || 0;
-  const totalDonations = bCounts + pCounts + plCounts;
+  const grCounts = donations.filter(d => (d.donationType || d.type) === 'granulocytes').length;
+  const totalDonations = bCounts + pCounts + plCounts + grCounts;
 
-  const bloodFree = donor.bloodFreeCount || 0;
+  const bloodFree = donations.filter(d => (d.donationType || d.type) === 'blood' && !d.isPaid).length;
   const compFree = donor.compFreeCount || 0;
-  const bloodPaid = donor.bloodPaidCount || 0;
+  const bloodPaid = donations.filter(d => (d.donationType || d.type) === 'blood' && d.isPaid).length;
   const compPaid = donor.compPaidCount || 0;
+
+  const totalFreeDonations = donations.filter(d => !d.isPaid).length;
+  const totalPaidDonations = donations.filter(d => d.isPaid).length;
 
   const gameStatus = getGamificationStatus(bloodFree, compFree, bloodPaid, compPaid);
   const homeCenter = centers.find(c => {
     const primaryLink = links.find(l => l.donorId === donor.id && l.isPrimary);
     return c.id === primaryLink?.centerId;
   });
+
+  let nextBloodDate = null;
+  let nextAferesisDate = null;
+  let nextGranDate = null;
+  let bloodDays = 60, aferezisDays = 14, granulocytesDays = 30;
+
+  if (donor.lastDonationDate && donor.lastDonationType) {
+    const datesInfo = calculateNextDates(donor.lastDonationType, bCounts, new Date(donor.lastDonationDate));
+    nextBloodDate = datesInfo.nextBloodDate;
+    nextAferesisDate = datesInfo.nextAferesisDate;
+    nextGranDate = datesInfo.nextGranulocytesDate;
+
+    const isEveryFifth = bCounts > 0 && bCounts % 5 === 0;
+    switch (donor.lastDonationType) {
+      case 'blood':
+        bloodDays = isEveryFifth ? 90 : 60;
+        aferezisDays = 30;
+        granulocytesDays = isEveryFifth ? 60 : 30;
+        break;
+      case 'plasma':
+      case 'platelets':
+        bloodDays = 14;
+        aferezisDays = 14;
+        granulocytesDays = 14;
+        break;
+      case 'granulocytes':
+        bloodDays = 30;
+        aferezisDays = 30;
+        granulocytesDays = 30;
+        break;
+    }
+  }
 
   return (
     <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
@@ -342,13 +379,47 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             
             {/* Stats 4-Grid matching the screenshot */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-center">
+              <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-center relative group cursor-pointer hover:bg-red-100/30 transition-all">
                 <span className="text-3xl font-bold text-red-600 leading-none mb-1">{totalDonations}</span>
                 <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">всего донаций</span>
+                
+                {/* Popover summary list on hover */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 bg-slate-900 border border-slate-800 text-white rounded-xl p-3.5 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[12px] space-y-1.5 font-sans">
+                  {/* Small arrow pin */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
+                  
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-1.5 mb-1.5">
+                    Статистика по типам
+                  </div>
+                  <div className="flex justify-between items-center text-slate-200">
+                    <span>Цельная кровь:</span>
+                    <span className="font-bold text-rose-300">{bCounts}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-200">
+                    <span>Плазма:</span>
+                    <span className="font-bold text-rose-300">{pCounts}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-200">
+                    <span>Тромбоциты:</span>
+                    <span className="font-bold text-rose-300">{plCounts}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-200">
+                    <span>Гранулоциты:</span>
+                    <span className="font-bold text-rose-300">{grCounts}</span>
+                  </div>
+                </div>
               </div>
               <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center">
-                <span className="text-3xl font-bold text-emerald-500 leading-none mb-1">{bCounts}</span>
-                <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">цельная кровь</span>
+                <div className="space-y-2 font-sans">
+                  <div className="flex justify-between items-center transition-colors">
+                    <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">безвозмездно</span>
+                    <span className="text-xl sm:text-2xl font-bold text-emerald-600 leading-none">{totalFreeDonations}</span>
+                  </div>
+                  <div className="flex justify-between items-center transition-colors">
+                    <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">возмездно</span>
+                    <span className="text-xl sm:text-2xl font-bold text-emerald-600 leading-none">{totalPaidDonations}</span>
+                  </div>
+                </div>
               </div>
               <div className="bg-amber-50 border border-amber-100 p-5 rounded-2xl flex flex-col justify-center overflow-hidden">
                 <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-amber-500 leading-none mb-1 tracking-tight">
@@ -365,61 +436,104 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             </div>
 
             {/* Gamification progress card */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-8">
-              <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
-                <div className="space-y-1">
-                  <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Донорский ранг</h3>
-                  <p className="text-sm text-slate-500 font-medium">Прогресс и доступные льготы</p>
+            <div id="donor-rank-card" className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm">
+              
+              {/* Header from screenshot */}
+              <div className="flex flex-row items-center justify-between gap-4 pb-4 border-b border-slate-100/60">
+                <div>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">Донорский ранг</h3>
+                  <p className="text-xs md:text-sm text-slate-500 mt-0.5">Прогресс и доступные льготы</p>
                 </div>
-                <span className={`px-5 py-2 rounded-full text-[12px] font-bold border shadow-sm ${gameStatus.color}`}>
-                  {gameStatus.title}
-                </span>
+                <div>
+                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full border text-xs sm:text-sm font-semibold tracking-wide shadow-xs ${gameStatus.color}`}>
+                    {gameStatus.title.charAt(0) + gameStatus.title.slice(1).toLowerCase()}
+                  </span>
+                </div>
               </div>
 
               {/* Progress bar estimation slider */}
               {gameStatus.currentPoints < gameStatus.nextAt && (
-                <div className="space-y-4">
+                <div className="space-y-3 mt-5">
                   <div className="flex justify-between items-end">
-                    <div className="space-y-0.5">
+                    <div className="relative group flex items-center gap-1.5 cursor-help">
                       <span className="text-[13px] font-bold text-slate-800">До следующего ранга (баллы)</span>
+                      <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
+                      <div className="absolute bottom-full left-0 mb-2 w-72 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal text-left">
+                        <strong className="block text-red-400 border-b border-white/10 pb-1 mb-1">Расчет баллов донаций:</strong>
+                        • 4 балла — Кровь (безвозм)<br/>
+                        • 2 балла — Кровь (возм) или Компонент (безвозм)<br/>
+                        • 1 балл — Компонент (возм)
+                      </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-medium text-slate-500 leading-none">{gameStatus.currentPoints} / {gameStatus.nextAt}</span>
+                      <span className="text-sm font-bold text-slate-800 leading-none">{gameStatus.currentPoints} / {gameStatus.nextAt}</span>
                     </div>
                   </div>
                   <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                     <div 
-                      className="bg-red-650 h-full rounded-full transition-all duration-1000 ease-out"
+                      className="bg-red-600 h-full rounded-full transition-all duration-1000 ease-out"
                       style={{ width: `${(gameStatus.currentPoints / gameStatus.nextAt) * 100}%` }}
                     ></div>
                   </div>
-                  <p className="text-xs text-slate-400">1 балл = Компонент (возм); 2 балла = Кровь (возм) или Компонент (безвозм); 4 балла = Кровь (безвозм)</p>
                 </div>
               )}
 
               {/* Real benefits info alerts */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="bg-white p-5 rounded-xl border border-slate-700/20">
-                  <h4 className="text-sm md:text-base font-bold text-blue-600 mb-2">✓ 100% больничный</h4>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-semibold">
-                    4+ донации в год → листок нетрудоспособности из расчета 100%
-                  </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-8">
+                <div className={`relative group p-5 rounded-xl border transition-all cursor-help flex flex-col justify-between min-h-[140px] ${
+                  totalDonations >= 4 
+                    ? 'bg-blue-50 border-blue-100 hover:bg-blue-100/50 shadow-sm' 
+                    : 'bg-white hover:bg-slate-50 border-slate-200'
+                }`}>
+                  <div>
+                    <h4 className="text-sm md:text-base font-bold text-blue-600 flex items-center gap-1.5">
+                      100% больничный
+                      <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
+                    </h4>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">4+ донаций в год</p>
+                  </div>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal border border-slate-800 animate-fade">
+                    При систематической сдаче крови (4+ раза в год) гарантируется выплата пособия по временной нетрудоспособности в размере 100% среднего заработка.
+                  </div>
+
+                  <div className="space-y-1.5 mt-3">
+                    <div className="flex justify-between items-end">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Прогресс</span>
+                      <span className="text-xs font-bold text-slate-800">{Math.min(4, totalDonations)}/4</span>
+                    </div>
+                    <div className="w-full bg-slate-100 border border-slate-200/50 h-2.5 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-blue-600 h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${Math.min(100, (totalDonations / 4) * 100)}%` }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="bg-slate-100 p-5 rounded-xl border border-slate-200">
-                  <h4 className="text-sm md:text-base font-bold text-slate-800 mb-2">«Ганаровы донар»</h4>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-semibold mb-4">
-                    20+ безвозмездных сдач крови (или эквивалент) → знак отличия
-                  </p>
-                  
-                  <div className="space-y-2.5">
+                <div className={`relative group p-5 rounded-xl border transition-all cursor-help flex flex-col justify-between min-h-[140px] ${
+                  gameStatus.currentPoints >= 80 
+                    ? 'bg-amber-50 border-amber-200 hover:bg-amber-100/50 shadow-sm' 
+                    : 'bg-white hover:bg-slate-50 border-slate-200'
+                }`}>
+                  <div>
+                    <h4 className="text-sm md:text-base font-bold text-amber-600 flex items-center gap-1.5">
+                      «Ганаровы донар»
+                      <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
+                    </h4>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">Знак отличия и льготы</p>
+                  </div>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal border border-slate-800">
+                    20+ безвозмездных сдач крови (или эквивалент в баллах) дают право на знак отличия «Почётный донор Республики Беларусь» и полный пакет гос. льгот.
+                  </div>
+
+                  <div className="space-y-1.5 mt-3">
                     <div className="flex justify-between items-end">
-                      <span className="text-xs text-slate-600 font-medium">Прогресс (баллы)</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Прогресс</span>
                       <span className="text-xs font-bold text-slate-800">{gameStatus.currentPoints}/80</span>
                     </div>
-                    <div className="w-full bg-slate-300 h-1.5 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-100 border border-slate-200/50 h-2.5 rounded-full overflow-hidden">
                       <div 
-                        className="bg-red-650 h-full rounded-full transition-all duration-1000 ease-out"
+                        className="bg-amber-500 h-full rounded-full transition-all duration-1000 ease-out"
                         style={{ width: `${Math.min(100, (gameStatus.currentPoints / 80) * 100)}%` }}
                       ></div>
                     </div>
@@ -437,9 +551,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {[
-                  { label: 'Цельная кровь', date: donor.nextAvailableDate, interval: '60-90 дней', active: true },
-                  { label: 'Плазма', date: donor.lastDonationDate ? new Date(new Date(donor.lastDonationDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null, interval: '14 дней', active: false },
-                  { label: 'Тромбоциты', date: donor.lastDonationDate ? new Date(new Date(donor.lastDonationDate).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : null, interval: '14 дней', active: false },
+                  { label: 'Цельная кровь', date: nextBloodDate ? nextBloodDate.toISOString().split('T')[0] : donor.nextAvailableDate, interval: `${bloodDays} дней`, active: true },
+                  { label: 'Плазма / Тромбоциты', date: nextAferesisDate ? nextAferesisDate.toISOString().split('T')[0] : null, interval: `${aferezisDays} дней`, active: false },
+                  { label: 'Гранулоциты', date: nextGranDate ? nextGranDate.toISOString().split('T')[0] : null, interval: `${granulocytesDays} дней`, active: false },
                 ].map((item, idx) => (
                   <div key={idx} className={`p-5 rounded-2xl border transition-all ${item.active ? 'bg-slate-100 border-slate-200 shadow-sm' : 'bg-slate-50 border-slate-100'}`}>
                     <span className={`text-[10px] uppercase font-bold block mb-2 tracking-[0.15em] ${item.active ? 'text-red-600' : 'text-slate-400'}`}>{item.label}</span>
