@@ -5,6 +5,15 @@ import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Not
 
 let dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
+if (dbUrl) {
+  const match = dbUrl.match(/:([^:@]+)@/);
+  if (match) {
+    const pwd = match[1];
+    const escapedPwd = encodeURIComponent(pwd);
+    dbUrl = dbUrl.replace(':' + pwd + '@', ':' + escapedPwd + '@');
+  }
+}
+
 export const prisma = new PrismaClient({
   datasources: {
     db: {
