@@ -723,17 +723,28 @@ for (let i = 0; i < 19; i++) {
 
   // Adding fake history entries
   if (donationsCount > 0) {
-    seededState.donations.push({
-      id: i * 2 + 1,
-      donorId,
-      centerId: 1,
-      donationDate: lastDonDate!,
-      donationType: "blood",
-      volumeMl: 450,
-      note: "Регулярная донация, без осложнений",
-      addedBy: 2,
-      createdAt: lastDonDate!
-    });
+    for (let dIdx = 0; dIdx < donationsCount; dIdx++) {
+      const isPaid = Math.random() > 0.5;
+      const donationTypeRandom = Math.random();
+      let dType: DonationType = "blood";
+      if (donationTypeRandom > 0.8) dType = "plasma";
+      else if (donationTypeRandom > 0.95) dType = "platelets";
+      
+      const donationDate = new Date(Date.now() - Math.floor(Math.random() * 1000 * 60 * 60 * 24 * 365 * 2)).toISOString().split('T')[0];
+
+      seededState.donations.push({
+        id: i * 20 + dIdx + 1,
+        donorId,
+        centerId: 1,
+        donationDate: dIdx === 0 ? lastDonDate! : donationDate, // Keep at least one as the most recent lastDonDate
+        donationType: dType,
+        isPaid,
+        volumeMl: dType === "blood" ? 450 : dType === "plasma" ? 600 : 250,
+        note: "Регулярная донация",
+        addedBy: 2,
+        createdAt: dIdx === 0 ? lastDonDate! : donationDate
+      });
+    }
   }
 
   // Create active medical notes for exactly 2 donors (donor 9 and donor 10)
@@ -767,6 +778,28 @@ for (let i = 0; i < 19; i++) {
     });
   }
 }
+
+// Recalculate stats for all seeded donors so they match the actual donations
+seededState.donors.forEach(donor => {
+  const ds = seededState.donations.filter(d => d.donorId === donor.id);
+  const total = ds.length;
+  const blood = ds.filter(d => d.donationType === 'blood').length;
+  const plasma = ds.filter(d => d.donationType === 'plasma').length;
+  const platelets = ds.filter(d => d.donationType === 'platelets').length;
+  const bloodFree = ds.filter(d => d.donationType === 'blood' && !d.isPaid).length;
+  const bloodPaid = ds.filter(d => d.donationType === 'blood' && d.isPaid).length;
+  const compFree = ds.filter(d => d.donationType !== 'blood' && !d.isPaid).length;
+  const compPaid = ds.filter(d => d.donationType !== 'blood' && d.isPaid).length;
+
+  donor.donationsCount = total;
+  donor.bloodDonationsCount = blood;
+  donor.plasmaDonationsCount = plasma;
+  donor.plateletsDonationsCount = platelets;
+  donor.bloodFreeCount = bloodFree;
+  donor.bloodPaidCount = bloodPaid;
+  donor.compFreeCount = compFree;
+  donor.compPaidCount = compPaid;
+});
 
 // Ensure the helper saves to file
 function saveState(state: DatabaseState) {
