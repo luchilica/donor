@@ -80,6 +80,12 @@ model Donor {
   personalPauseNote       String?      @db.Text
   donationsCount          Int          @default(0)
   bloodDonationsCount     Int          @default(0)
+  plasmaDonationsCount    Int          @default(0)
+  plateletsDonationsCount Int          @default(0)
+  bloodFreeCount          Int          @default(0)
+  bloodPaidCount          Int          @default(0)
+  compFreeCount           Int          @default(0)
+  compPaidCount           Int          @default(0)
   lastDonationDate        DateTime?    @db.Date
   lastDonationType        DonationType?
   nextAvailableDate       DateTime?    @db.Date
@@ -156,6 +162,7 @@ model Donation {
   center       BloodCenter @relation(fields: [centerId], references: [id])
   donationDate DateTime @db.Date
   donationType DonationType
+  isPaid       Boolean  @default(false)
   volumeMl     Int?
   note         String?  @db.Text
   addedById    Int?

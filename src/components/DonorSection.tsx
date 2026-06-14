@@ -231,15 +231,15 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const pCounts = donor.plasmaDonationsCount || 0;
   const plCounts = donor.plateletsDonationsCount || 0;
   const grCounts = donations.filter(d => (d.donationType || d.type) === 'granulocytes').length;
-  const totalDonations = bCounts + pCounts + plCounts + grCounts;
+  const totalDonations = donor.donationsCount || 0;
 
-  const bloodFree = donations.filter(d => (d.donationType || d.type) === 'blood' && !d.isPaid).length;
+  const bloodFree = donor.bloodFreeCount || 0;
   const compFree = donor.compFreeCount || 0;
-  const bloodPaid = donations.filter(d => (d.donationType || d.type) === 'blood' && d.isPaid).length;
+  const bloodPaid = donor.bloodPaidCount || 0;
   const compPaid = donor.compPaidCount || 0;
 
-  const totalFreeDonations = donations.filter(d => !d.isPaid).length;
-  const totalPaidDonations = donations.filter(d => d.isPaid).length;
+  const totalFreeDonations = bloodFree + compFree;
+  const totalPaidDonations = bloodPaid + compPaid;
 
   const gameStatus = getGamificationStatus(bloodFree, compFree, bloodPaid, compPaid);
   const homeCenter = centers.find(c => {
@@ -514,7 +514,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                       <span className="text-slate-400 font-medium font-sans">Последняя сдача (вносится автоматически)</span>
                       <span className="font-bold text-slate-500 text-right font-mono">
-                        {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
+                        {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
@@ -579,7 +579,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                     <span className="text-slate-500 font-medium font-sans">Последняя сдача</span>
                     <span className="font-bold text-slate-800 text-right font-mono">
-                      {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : 'Нет данных'}
+                      {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
@@ -649,7 +649,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               </div>
               <div className="bg-amber-50 border border-amber-100 p-5 rounded-2xl flex flex-col justify-center overflow-hidden">
                 <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-amber-500 leading-none mb-1 tracking-tight">
-                  {donations.length > 0 ? new Date(Math.max(...donations.map(d => new Date(d.donationDate || d.date).getTime()))).toLocaleDateString('ru-RU') : '—'}
+                  {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : '—'}
                 </span>
                 <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">последняя сдача</span>
               </div>
