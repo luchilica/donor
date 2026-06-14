@@ -1025,9 +1025,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 {links.map(link => {
                   const center = centers.find(c => c.id === link.centerId);
                   const isConfirmed = link.status === 'confirmed';
-                  const statusDate = link.confirmedAt 
-                    ? new Date(link.confirmedAt).toLocaleDateString('ru-RU') 
-                    : new Date(link.updatedAt || link.createdAt).toLocaleDateString('ru-RU');
+                  
+                  let statusDate = new Date(link.createdAt).toLocaleDateString('ru-RU');
+                  if (isConfirmed && link.confirmedAt) {
+                    statusDate = new Date(link.confirmedAt).toLocaleDateString('ru-RU');
+                  } else if (link.resubmittedAt) {
+                    statusDate = new Date(link.resubmittedAt).toLocaleDateString('ru-RU');
+                  }
                   
                   return (
                     <div key={link.id} className={`p-4 rounded-xl border transition-all duration-300 ${link.isPrimary ? 'bg-red-55/10 border-red-100 shadow-sm' : 'bg-slate-50/55 border-slate-100/80 hover:border-slate-200'}`}>
@@ -1050,7 +1054,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                             <span>
                               {isConfirmed 
                                 ? `Подтверждён: ${statusDate}` 
-                                : `Подан: ${new Date(link.createdAt).toLocaleDateString('ru-RU')}`}
+                                : `Подан: ${statusDate}`}
                             </span>
                           </div>
                         </div>

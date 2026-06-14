@@ -412,7 +412,7 @@ app.get('/api/download/contraindications', (req, res) => {
 
     donor.lastName = lastName || donor.lastName;
     donor.firstName = firstName || donor.firstName;
-    donor.middleName = middleName || donor.middleName;
+    donor.middleName = middleName !== undefined ? middleName : donor.middleName;
     donor.phone = phone || donor.phone;
     donor.birthDate = birthDate || donor.birthDate;
     donor.gender = gender || donor.gender;
@@ -432,6 +432,8 @@ app.get('/api/download/contraindications', (req, res) => {
       link.status = 'pending';
       link.resubmissionCount = (link.resubmissionCount || 0) + 1;
       link.resubmittedAt = new Date().toISOString();
+      link.confirmedAt = null;
+      link.confirmedById = null;
     }
 
     await saveDb(db);
@@ -453,6 +455,9 @@ app.get('/api/download/contraindications', (req, res) => {
         existing.status = 'pending';
         existing.resubmissionCount++;
         existing.resubmittedAt = new Date().toISOString();
+        existing.confirmedAt = null;
+        existing.confirmedById = null;
+        existing.rejectionReason = undefined;
         await saveDb(db);
         return res.json({ success: true, message: 'Заявка отправлена повторно' });
       }
@@ -486,6 +491,9 @@ app.get('/api/download/contraindications', (req, res) => {
     link.status = 'pending';
     link.resubmissionCount++;
     link.resubmittedAt = new Date().toISOString();
+    link.confirmedAt = null;
+    link.confirmedById = null;
+    link.rejectionReason = undefined;
     
     await saveDb(db);
     res.json({ success: true });
@@ -889,6 +897,8 @@ app.get('/api/download/contraindications', (req, res) => {
       link.rejectionReason = undefined;
     } else {
       link.rejectionReason = rejectionReason || 'Не указана';
+      link.confirmedAt = null;
+      link.confirmedById = null;
     }
 
     await saveDb(db);
