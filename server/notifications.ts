@@ -59,14 +59,15 @@ export async function sendEmailNotification(emails: string[], messageText: strin
     `;
 
     try {
-        await resend.emails.send({
+        const result = await resend.emails.send({
             from: 'Donor-Alert <noreply@resend.dev>', // Needs a verified domain in real life
             to: emails,
             subject: 'Донор-Алерт: требуется кровь',
             html: htmlContent,
         });
-    } catch (e) {
-        console.error('Email notification error:', e);
+        console.log(`[Resend] Successfully sent mass email to ${emails.length} recipients:`, result.data?.id);
+    } catch (e: any) {
+        console.error('[Resend] ERROR sending mass email:', e.message || e);
     }
 }
 
@@ -105,14 +106,15 @@ export async function sendTransactionalEmail(to: string, type: 'welcome' | 'cent
     }
 
     try {
-        await resend.emails.send({
+        const result = await resend.emails.send({
             from: 'Donor-Alert <noreply@resend.dev>',
             to,
             subject,
             html: htmlContent,
         });
-    } catch (e) {
-        console.error('Transactional email error:', e);
+        console.log(`[Resend] Successfully sent ${type} email to ${to}:`, result.data?.id);
+    } catch (e: any) {
+        console.error(`[Resend] ERROR sending ${type} email to ${to}:`, e.message || e);
     }
 }
 

@@ -121,8 +121,9 @@ app.get('/api/download/contraindications', (req, res) => {
       return res.status(400).json({ error: 'Пожалуйста, введите e-mail и пароль' });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
     const db = await getDb();
-    const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const user = db.users.find(u => u.email.toLowerCase() === cleanEmail);
     if (!user || !user.isActive) {
       return res.status(401).json({ error: 'Пользователя с такой почтой не существует' });
     }
@@ -178,6 +179,8 @@ app.get('/api/download/contraindications', (req, res) => {
       return res.status(400).json({ error: 'Все обязательные поля должны быть заполнены' });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
+
     // Age validation
     const today = new Date();
     const birth = new Date(birthDate);
@@ -194,7 +197,7 @@ app.get('/api/download/contraindications', (req, res) => {
     }
 
     const db = await getDb();
-    const existing = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const existing = db.users.find(u => u.email.toLowerCase() === cleanEmail);
     if (existing) {
       return res.status(400).json({ error: 'Пользователь с таким e-mail уже зарегистрирован' });
     }
@@ -203,7 +206,7 @@ app.get('/api/download/contraindications', (req, res) => {
     const newUserId = db.users.length > 0 ? Math.max(...db.users.map(u => u.id)) + 1 : 1;
     const newUser: User = {
       id: newUserId,
-      email: email.toLowerCase(),
+      email: cleanEmail,
       passwordHash: hashPassword(password),
       role: 'donor',
       isActive: true,
@@ -260,8 +263,9 @@ app.get('/api/download/contraindications', (req, res) => {
   // RESET PASSWORD REQUEST MOCK
   app.post('/api/auth/forgot-password', async (req, res) => {
     const { email } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
     const db = await getDb();
-    const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const user = db.users.find(u => u.email.toLowerCase() === cleanEmail);
     if (!user) {
       return res.status(404).json({ error: 'Пользователь с таким email не найден' });
     }
@@ -279,8 +283,9 @@ app.get('/api/download/contraindications', (req, res) => {
   // CONFIRM RESET PASSWORD
   app.post('/api/auth/reset-password', async (req, res) => {
     const { email, code, newPassword } = req.body;
+    const cleanEmail = email.toLowerCase().trim();
     const db = await getDb();
-    const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const user = db.users.find(u => u.email.toLowerCase() === cleanEmail);
     
     if (!user) {
       return res.status(404).json({ error: 'Пользователь не найден' });
@@ -427,8 +432,9 @@ app.get('/api/download/contraindications', (req, res) => {
 
     const user = db.users.find(u => u.id === donor.userId);
     if (user && email) {
-      user.email = email.toLowerCase();
-      donor.email = email;
+      const cleanEmail = email.toLowerCase().trim();
+      user.email = cleanEmail;
+      donor.email = cleanEmail;
     }
 
     // Reset status of all centers links to pending to request center confirmation
@@ -688,8 +694,9 @@ app.get('/api/download/contraindications', (req, res) => {
       return res.status(400).json({ error: 'Все обязательные поля должны быть заполнены' });
     }
 
+    const cleanEmail = email.toLowerCase().trim();
     const db = await getDb();
-    const existing = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const existing = db.users.find(u => u.email.toLowerCase() === cleanEmail);
     if (existing) {
       return res.status(400).json({ error: 'Пользователь с таким e-mail уже зарегистрирован' });
     }
@@ -697,7 +704,7 @@ app.get('/api/download/contraindications', (req, res) => {
     const newUserId = db.users.length > 0 ? Math.max(...db.users.map(u => u.id)) + 1 : 1;
     db.users.push({
       id: newUserId,
-      email: email.toLowerCase(),
+      email: cleanEmail,
       passwordHash: hashPassword(password),
       role: 'donor',
       isActive: true,

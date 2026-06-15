@@ -1568,7 +1568,7 @@ export async function saveDb(state: DatabaseState): Promise<void> {
       }
 
       // 9. Sync SMS Templates
-      for (const temp of state.smsTemplates) {
+      for (const temp of (state.smsTemplates || [])) {
         await prisma.smsTemplate.upsert({
           where: { id: temp.id },
           update: {
