@@ -64,8 +64,24 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
   useEffect(() => {
     const handleOpenAuth = () => setShowAuthModal('login');
+    const handleOpenRegister = () => setShowAuthModal('register');
+    const handleChangeTab = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail && ['home', 'info', 'docs', 'centers', 'news'].includes(customEvent.detail)) {
+        setActiveTab(customEvent.detail);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
     window.addEventListener('openAuth', handleOpenAuth);
-    return () => window.removeEventListener('openAuth', handleOpenAuth);
+    window.addEventListener('openRegister', handleOpenRegister);
+    window.addEventListener('changeTab', handleChangeTab);
+
+    return () => {
+      window.removeEventListener('openAuth', handleOpenAuth);
+      window.removeEventListener('openRegister', handleOpenRegister);
+      window.removeEventListener('changeTab', handleChangeTab);
+    };
   }, []);
 
   const [loginEmail, setLoginEmail] = useState('');
