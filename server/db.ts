@@ -1276,8 +1276,8 @@ export async function saveDb(state: DatabaseState): Promise<void> {
   if (isPostgresActive) {
     try {
       // 1. Sync User table
-      for (const user of state.users) {
-        await prisma.user.upsert({
+      await Promise.all(state.users.map(user => 
+        prisma.user.upsert({
           where: { id: user.id },
           update: {
             email: user.email,
@@ -1299,8 +1299,8 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
             lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
           }
-        });
-      }
+        })
+      ));
 
       // 2. Sync Donor table
       for (const donor of state.donors) {
