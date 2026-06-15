@@ -1,15 +1,26 @@
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 import * as OneSignal from 'onesignal-node';
 import { Donor } from '../src/types.js';
 
-let resendClient: Resend | null = null;
+let transporter: nodemailer.Transporter | null = null;
 let oneSignalClient: OneSignal.Client | null = null;
 
-function getResend(): Resend | null {
-    if (!resendClient && process.env.RESEND_API_KEY) {
-        resendClient = new Resend(process.env.RESEND_API_KEY);
+function getTransporter(): nodemailer.Transporter | null {
+    if (!transporter && process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD) {
+        // Automatically determine host/port based on common providers, or allow them to be customized if needed.
+        // For Gmail, we can use the 'gmail' service shortcut.
+        transporter = nodemailer.createTransport({
+            service: process.env.SMTP_EMAIL.includes('@gmail.com') ? 'gmail' : undefined,
+            host: process.env.SMTP_HOST || (process.env.SMTP_EMAIL.includes('@yandex') ? 'smtp.yandex.ru' : process.env.SMTP_EMAIL.includes('@mail.ru') ? 'smtp.mail.ru' : undefined),
+            port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465,
+            secure: true,
+            auth: {
+                user: process.env.SMTP_EMAIL,
+                pass: process.env.SMTP_PASSWORD
+            }
+        });
     }
-    return resendClient;
+    return transporter;
 }
 
 function getOneSignal(): OneSignal.Client | null {
@@ -42,8 +53,8 @@ export async function sendPushNotification(playerIds: string[], messageText: str
 }
 
 export async function sendEmailNotification(emails: string[], messageText: string, centerPhone: string) {
-    const resend = getResend();
-    if (!resend || emails.length === 0) return;
+    const transporter = getTransporter();
+    if (!transporter || emails.length === 0) return;
 
     const htmlContent = `
         <div style="font-family: sans-serif; padding: 20px;">
@@ -59,21 +70,21 @@ export async function sendEmailNotification(emails: string[], messageText: strin
     `;
 
     try {
-        const result = await resend.emails.send({
-            from: 'Donor-Alert <noreply@resend.dev>', // Needs a verified domain in real life
+        const info = await transporter.sendMail({
+            from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
             to: emails,
             subject: 'Донор-Алерт: требуется кровь',
             html: htmlContent,
         });
-        console.log(`[Resend] Successfully sent mass email to ${emails.length} recipients:`, result.data?.id);
+        console.log(`[Nodemailer] Successfully sent mass email to ${emails.length} recipients:`, info.messageId);
     } catch (e: any) {
-        console.error('[Resend] ERROR sending mass email:', e.message || e);
+        console.error('[Nodemailer] ERROR sending mass email:', e.message || e);
     }
 }
 
 export async function sendTransactionalEmail(to: string, type: 'welcome' | 'center_added' | 'reset', extra?: any) {
-    const resend = getResend();
-    if (!resend) return;
+    const transporter = getTransporter();
+    if (!transporter) return;
 
     let subject = '';
     let htmlContent = '';
@@ -106,15 +117,15 @@ export async function sendTransactionalEmail(to: string, type: 'welcome' | 'cent
     }
 
     try {
-        const result = await resend.emails.send({
-            from: 'Donor-Alert <noreply@resend.dev>',
+        const info = await transporter.sendMail({
+            from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
             to,
             subject,
             html: htmlContent,
         });
-        console.log(`[Resend] Successfully sent ${type} email to ${to}:`, result.data?.id);
+        console.log(`[Nodemailer] Successfully sent ${type} email to ${to}:`, info.messageId);
     } catch (e: any) {
-        console.error(`[Resend] ERROR sending ${type} email to ${to}:`, e.message || e);
+        console.error(`[Nodemailer] ERROR sending ${type} email to ${to}:`, e.message || e);
     }
 }
 
