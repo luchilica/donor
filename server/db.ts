@@ -12,6 +12,9 @@ if (dbUrl) {
     const escapedPwd = encodeURIComponent(pwd);
     dbUrl = dbUrl.replace(':' + pwd + '@', ':' + escapedPwd + '@');
   }
+  if (dbUrl.includes(':6543') && !dbUrl.includes('pgbouncer=true')) {
+    dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'pgbouncer=true';
+  }
 }
 
 export const prisma = new PrismaClient({
@@ -814,7 +817,6 @@ seededState.donors.forEach(donor => {
 function saveState(state: DatabaseState) {
   try {
     fs.writeFileSync(STORE_PATH, JSON.stringify(state, null, 2), 'utf-8');
-    syncToSupabase(state).catch(console.error);
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === 'EROFS') {
         console.warn('Read-only file system detected (likely Cloud Run). Database not persisted to disk.');
@@ -824,41 +826,7 @@ function saveState(state: DatabaseState) {
   }
 }
 
-async function syncToSupabase(state: DatabaseState) {
-  console.log('Syncing state to Supabase...');
-  for (const don of state.donations) {
-    try {
-      await prisma.donation.upsert({
-        where: { id: don.id },
-        update: {
-          donorId: don.donorId,
-          centerId: don.centerId,
-          donationDate: new Date(don.donationDate),
-          donationType: don.donationType as any,
-          isPaid: don.isPaid,
-          volumeMl: don.volumeMl,
-          note: don.note,
-          addedById: don.addedBy,
-        },
-        create: {
-          id: don.id,
-          donorId: don.donorId,
-          centerId: don.centerId,
-          donationDate: new Date(don.donationDate),
-          donationType: don.donationType as any,
-          isPaid: don.isPaid,
-          volumeMl: don.volumeMl,
-          note: don.note,
-          addedById: don.addedBy,
-          createdAt: don.createdAt ? new Date(don.createdAt) : new Date(),
-        }
-      });
-    } catch (e) {
-      console.error(`Failed to sync donation ${don.id}:`, e);
-    }
-  }
-  console.log('Sync complete.');
-}
+
 
 
 async function seedPostgresWithSeededState() {
@@ -1090,9 +1058,9 @@ async function seedPostgresWithSeededState() {
 }
 
 function checkPostgresActive(): boolean {
-  if (!process.env.DATABASE_URL) return false;
+  if (!dbUrl) return false;
   try {
-    const url = new URL(process.env.DATABASE_URL);
+    const url = new URL(dbUrl);
     if (!['postgres:', 'postgresql:'].includes(url.protocol)) return false;
     if (url.port && isNaN(Number(url.port))) return false;
     return true;
