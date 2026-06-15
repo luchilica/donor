@@ -75,6 +75,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const [resetCode, setResetCode] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
 
   const getPasswordHint = (pwd: string) => {
     if (!pwd) return '';
@@ -204,6 +212,35 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       setResetCode('');
       setResetPassword('');
       setResetConfirmPassword('');
+      setResendCooldown(30);
+    } catch (err: any) {
+      setLoginError(err.message);
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+    if (!loginEmail) {
+      setLoginError('Введите ваш e-mail');
+      return;
+    }
+    setLoginError('');
+    setLoginLoading(true);
+
+    try {
+      const res = await fetch(`${apiBase}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Ошибка при запросе сброса пароля');
+      }
+      alert('Новый код отправлен на ваш e-mail!');
+      setResendCooldown(30);
     } catch (err: any) {
       setLoginError(err.message);
     } finally {
@@ -1478,6 +1515,21 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 >
                   {loginLoading ? 'Сохранение...' : 'Сбросить пароль'}
                 </button>
+
+                <div className="text-center text-xs text-slate-500 py-1">
+                  {resendCooldown > 0 ? (
+                    <span>Отправить код повторно через {resendCooldown} сек.</span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendCode}
+                      disabled={loginLoading}
+                      className="text-red-600 hover:text-red-700 font-semibold hover:underline"
+                    >
+                      Отправить код повторно
+                    </button>
+                  )}
+                </div>
 
                 <div className="text-center pt-4 border-t border-slate-100 text-xs">
                   <button 
