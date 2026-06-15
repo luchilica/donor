@@ -18,6 +18,8 @@ import {
   Donation
 } from '../src/types.js';
 
+import { dispatchNotifications, sendTransactionalEmail } from '../server/notifications.js';
+
 // Lazy initialized clients
 let resendClient: Resend | null = null;
 let oneSignalClient: OneSignal.Client | null = null;
@@ -250,6 +252,8 @@ app.get('/api/download/contraindications', (req, res) => {
 
     await saveDb(db);
 
+    sendTransactionalEmail(email, 'welcome').catch(console.error);
+
     res.json({ success: true, message: 'Регистрация прошла успешно. Ожидайте подтверждения центра крови!' });
   });
 
@@ -267,8 +271,9 @@ app.get('/api/download/contraindications', (req, res) => {
     user.resetCode = resetCode;
     await saveDb(db);
     
-    // In a real app we would email this code. Here we'll return it in the message for demo purposes.
-    res.json({ success: true, message: `Код для восстановления пароля отправлен на ваш e-mail. (Для теста: Ваш код ${resetCode})` });
+    sendTransactionalEmail(email, 'reset', { code: resetCode, email }).catch(console.error);
+
+    res.json({ success: true, message: `Код для восстановления пароля отправлен на ваш e-mail.` });
   });
 
   // CONFIRM RESET PASSWORD
@@ -737,6 +742,9 @@ app.get('/api/download/contraindications', (req, res) => {
     });
 
     await saveDb(db);
+
+    sendTransactionalEmail(email, 'center_added', { email, password }).catch(console.error);
+
     res.json({ success: true, donor });
   });
 
@@ -1085,6 +1093,11 @@ app.get('/api/download/contraindications', (req, res) => {
     });
 
     await saveDb(db);
+
+    // Dispatch async notifications
+    const center = db.centers.find(c => c.id === parseInt(centerId));
+    const centerPhone = center ? center.phone : '';
+    dispatchNotifications(targetDonors, channel as string, messageText, centerPhone);
 
     res.json({
       success: true,
