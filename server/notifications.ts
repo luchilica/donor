@@ -9,11 +9,13 @@ function getTransporter(): nodemailer.Transporter | null {
     if (!transporter && process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD) {
         // Automatically determine host/port based on common providers, or allow them to be customized if needed.
         // For Gmail, we can use the 'gmail' service shortcut.
+        const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
+        const isSecure = smtpPort === 465;
         transporter = nodemailer.createTransport({
             service: process.env.SMTP_EMAIL.includes('@gmail.com') ? 'gmail' : undefined,
             host: process.env.SMTP_HOST || (process.env.SMTP_EMAIL.includes('@yandex') ? 'smtp.yandex.ru' : process.env.SMTP_EMAIL.includes('@mail.ru') ? 'smtp.mail.ru' : undefined),
-            port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465,
-            secure: true,
+            port: smtpPort,
+            secure: isSecure,
             auth: {
                 user: process.env.SMTP_EMAIL,
                 pass: process.env.SMTP_PASSWORD

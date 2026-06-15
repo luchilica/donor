@@ -255,7 +255,11 @@ app.get('/api/download/contraindications', (req, res) => {
 
     await saveDb(db);
 
-    sendTransactionalEmail(email, 'welcome').catch(console.error);
+    try {
+      await sendTransactionalEmail(email, 'welcome');
+    } catch (err) {
+      console.error('Failed to send welcome email:', err);
+    }
 
     res.json({ success: true, message: 'Регистрация прошла успешно. Ожидайте подтверждения центра крови!' });
   });
@@ -275,7 +279,11 @@ app.get('/api/download/contraindications', (req, res) => {
     user.resetCode = resetCode;
     await saveDb(db);
     
-    sendTransactionalEmail(email, 'reset', { code: resetCode, email }).catch(console.error);
+    try {
+      await sendTransactionalEmail(email, 'reset', { code: resetCode, email });
+    } catch (err) {
+      console.error('Failed to send reset email:', err);
+    }
 
     res.json({ success: true, message: `Код для восстановления пароля отправлен на ваш e-mail.` });
   });
@@ -750,7 +758,11 @@ app.get('/api/download/contraindications', (req, res) => {
 
     await saveDb(db);
 
-    sendTransactionalEmail(email, 'center_added', { email, password }).catch(console.error);
+    try {
+      await sendTransactionalEmail(email, 'center_added', { email, password });
+    } catch (err) {
+      console.error('Failed to send center_added email:', err);
+    }
 
     res.json({ success: true, donor });
   });

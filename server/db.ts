@@ -1069,8 +1069,14 @@ function checkPostgresActive(): boolean {
   }
 }
 
+let cachedDb: DatabaseState | null = null;
+
 // Load state of store
 export async function getDb(): Promise<DatabaseState> {
+  if (cachedDb) {
+    return cachedDb;
+  }
+
   const isPostgresActive = checkPostgresActive();
 
   if (isPostgresActive) {
@@ -1106,7 +1112,7 @@ export async function getDb(): Promise<DatabaseState> {
         prisma.smsTemplate.findMany()
       ]);
 
-      return {
+      cachedDb = {
         centers: dbCenters.map(m => ({
           id: m.id,
           name: m.name,
@@ -1249,6 +1255,7 @@ export async function getDb(): Promise<DatabaseState> {
           createdAt: m.createdAt.toISOString()
         }))
       };
+      return cachedDb;
     } catch (e) {
       console.error('Failed to load from PostgreSQL, falling back to JSON storage...', e);
     }
@@ -1258,19 +1265,23 @@ export async function getDb(): Promise<DatabaseState> {
   if (fs.existsSync(STORE_PATH)) {
     try {
       const data = fs.readFileSync(STORE_PATH, 'utf-8');
-      return JSON.parse(data);
+      cachedDb = JSON.parse(data);
+      return cachedDb!;
     } catch (e) {
       console.error('Database file corrupt. Seeding again...');
       saveState(seededState);
+      cachedDb = seededState;
       return seededState;
     }
   } else {
     saveState(seededState);
+    cachedDb = seededState;
     return seededState;
   }
 }
 
 export async function saveDb(state: DatabaseState): Promise<void> {
+  cachedDb = state; // Update memory cache instantly so all subsequent reads are lightning fast!
   const isPostgresActive = checkPostgresActive();
 
   if (isPostgresActive) {
