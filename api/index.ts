@@ -549,6 +549,35 @@ app.get('/api/download/contraindications', (req, res) => {
     res.json({ success: true, donor });
   });
 
+  // GET RECEIVED NOTIFICATIONS FOR DONOR HISTORY
+  app.get('/api/donor/notifications/:donorId', async (req, res) => {
+    const donorId = parseInt(req.params.donorId);
+    if (!donorId) return res.status(400).json({ error: 'Не указан ID донора' });
+
+    const db = await getDb();
+    
+    // Find all recipient entries for this donor
+    const recs = db.notificationRecipients.filter(r => r.donorId === donorId);
+    
+    // map recipient records to actual notification details, sorted by date DESC
+    const history = recs.map(rec => {
+      const notif = db.notifications.find(n => n.id === rec.notificationId);
+      const center = db.centers.find(c => c.id === (notif?.centerId || notif?.centerId));
+      return {
+        id: rec.id,
+        messageText: notif?.messageText || 'Уведомление от центра крови',
+        centerName: center?.name || 'Центр крови',
+        sentAt: rec.sentAt || notif?.createdAt || new Date().toISOString(),
+        pushStatus: rec.pushStatus,
+        smsStatus: rec.smsStatus,
+        emailStatus: rec.emailStatus,
+        channel: notif?.channel || 'all'
+      };
+    }).sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
+
+    res.json({ success: true, notifications: history });
+  });
+
   // CENTER DASHBOARD DATA
   app.get('/api/center/stats/:centerId', async (req, res) => {
     const centerId = parseInt(req.params.centerId);

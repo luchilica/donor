@@ -132,19 +132,31 @@ export async function sendTransactionalEmail(to: string, type: 'welcome' | 'cent
 }
 
 export async function sendSmsNotification(phones: string[], messageText: string) {
+    if (phones.length === 0) return;
+    const text = messageText.substring(0, 160); // 160 chars max
+
     const apiKey = process.env.SMS_API_KEY;
-    if (!apiKey || phones.length === 0) return;
+    if (!apiKey) {
+        console.log(`\n============== [SMS SIMULATOR / СМС-СИМУЛЯТОР] ==============`);
+        console.log(`Статус: ИМИТАЦИЯ ОТПРАВКИ УСПЕШНА (API-ключ не задан в .env.example)`);
+        console.log(`Отправитель: "Donor-Alert"`);
+        console.log(`Получатели (${phones.length}): ${phones.join(', ')}`);
+        console.log(`Сообщение: "${text}"`);
+        console.log(`=============================================================\n`);
+        return;
+    }
 
     // Using a mock SMS provider approach as configured (SMSPILOT / Unisender)
     // We'll use a generic fetch that logs if testing, or sends if valid
-    const text = messageText.substring(0, 160); // 160 chars max
-
     try {
         // SMSPILOT Example
         const url = `https://smspilot.ru/api.php?send=${encodeURIComponent(text)}&to=${phones.join(',')}&apikey=${apiKey}&format=json`;
+        console.log(`[SMSPILOT] Sending to ${phones.join(',')} via real gateway...`);
         const response = await fetch(url);
         if (!response.ok) {
             console.error('SMS notification error, status:', response.status);
+        } else {
+            console.log('[SMSPILOT] API call completed.');
         }
     } catch (e) {
         console.error('SMS notification error:', e);
