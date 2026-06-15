@@ -75,7 +75,7 @@ export function isDonorReady(
   todayStr: string,
   medicalNotes: MedicalNote[],
   allLinkConfirmations: boolean
-): { ready: boolean; reason?: string } {
+): { ready: boolean; reason?: string; pendingConfirmation?: boolean } {
   const today = new Date(todayStr);
 
   // 1. Check account status
@@ -85,7 +85,7 @@ export function isDonorReady(
 
   // 2. Check center links confirmations
   if (!allLinkConfirmations) {
-    return { ready: false, reason: 'Нет подтвержденной связи ни с одним центром крови' };
+    return { ready: false, reason: 'Нет подтвержденной связи ни с одним центром крови', pendingConfirmation: true };
   }
 
   // 3. Weight limit (>= 55 kg)

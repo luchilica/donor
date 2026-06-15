@@ -13,7 +13,7 @@ interface DonorSectionProps {
   links: DonorCenter[];
   donations: Donation[];
   medicalNotes: MedicalNote[];
-  readiness: { ready: boolean; reason?: string };
+  readiness: { ready: boolean; reason?: string; pendingConfirmation?: boolean };
   centers: BloodCenter[];
   onRefresh: () => void;
   apiBase: string;
@@ -319,7 +319,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             </div>
             <div className="flex justify-between items-center">
               <span className="text-slate-500 font-bold">Статус:</span>
-              <span className={readiness.ready ? 'text-emerald-500 font-bold' : 'text-red-600 font-bold'}>{readiness.ready ? 'Готов к сдаче' : 'Отвод'}</span>
+              <span className={readiness.ready ? 'text-emerald-500 font-bold' : readiness.pendingConfirmation ? 'text-amber-500 font-bold' : 'text-red-700 font-bold'}>
+                {readiness.ready ? 'Готов к сдаче' : readiness.pendingConfirmation ? 'На подтверждении' : 'Отвод'}
+              </span>
             </div>
           </div>
         </div>

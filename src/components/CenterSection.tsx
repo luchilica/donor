@@ -550,8 +550,18 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <p className="text-xs text-slate-500">Телефоны: {donorCard.donor.phone} | Электронная почта: {donorCard.donor.emailNotificationsEnabled ? donorCard.donor.onesignalPlayerId : 'не указана/отключена'}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-bold ${donorCard.readiness.ready ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-700 border border-amber-100'}`}>
-                    {donorCard.readiness.ready ? 'Готов к донации цельной крови' : 'Медотвод/Ограничение'}
+                  <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                    donorCard.readiness.ready 
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                      : donorCard.readiness.pendingConfirmation 
+                        ? 'bg-amber-50 text-amber-600 border border-amber-100' 
+                        : 'bg-red-50 text-red-700 border border-red-100'
+                  }`}>
+                    {donorCard.readiness.ready 
+                      ? 'Готов к донации цельной крови' 
+                      : donorCard.readiness.pendingConfirmation 
+                        ? 'На подтверждении изменений' 
+                        : 'Медотвод/Ограничение'}
                   </span>
                 </div>
               </div>
