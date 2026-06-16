@@ -76,7 +76,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const [showManualRegModal, setShowManualRegModal] = useState(false);
   const [manualForm, setManualForm] = useState({
     lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male' as 'male'|'female',
-    bloodGroup: 'I_O' as BloodGroup, rhFactor: 'positive' as RhFactor, weight: '70', phone: '+375 (', email: '', password: 'password123'
+    bloodGroup: 'I_O' as BloodGroup, rhFactor: 'positive' as RhFactor, weight: '70', phone: '+375', email: '', password: 'password123'
   });
   const [manualError, setManualError] = useState('');
 
@@ -196,11 +196,46 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   }, [activeMenu, notifyForm]);
 
   // Handle Manual register submit
+  const handleManualNameChange = (field: 'lastName' | 'firstName' | 'middleName', val: string) => {
+    const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+    setManualForm(prev => ({ ...prev, [field]: lettersOnly }));
+  };
+
+  const isBirthDateInvalid = () => {
+    if (!manualForm.birthDate) return false;
+    const bDate = new Date(manualForm.birthDate);
+    const minDate = new Date(); minDate.setFullYear(minDate.getFullYear() - 65);
+    const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() - 18);
+    return bDate < minDate || bDate > maxDate;
+  };
+
+  const isWeightInvalid = () => {
+    if (!manualForm.weight) return false;
+    return parseFloat(manualForm.weight) < 55;
+  };
+
+  const isEmailInvalid = () => {
+    if (!manualForm.email) return false;
+    return !/^.+@.+$/.test(manualForm.email);
+  };
+
   const handleManualReg = async (e: React.FormEvent) => {
     e.preventDefault();
     setManualError('');
     if (!manualForm.lastName || !manualForm.firstName || !manualForm.email || !manualForm.phone) {
       setManualError('Заполните обязательные поля');
+      return;
+    }
+    if (isBirthDateInvalid()) {
+      setManualError('Возраст донора должен быть от 18 до 65 лет');
+      return;
+    }
+    if (isWeightInvalid()) {
+      setManualError('К донорству допускаются лица с массой тела не менее 55 кг');
+      return;
+    }
+    if (isEmailInvalid()) {
+      setManualError('Введите корректный e-mail');
       return;
     }
     try {
@@ -387,6 +422,27 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     } catch {}
   };
 
+  const bloodSlices = [
+    { id: 'I_O', label: 'I (O) – Первая', count: stats.bloodGroupStats.I_O, stroke: '#dc2626', bg: 'bg-red-600' },
+    { id: 'II_A', label: 'II (A) – Вторая', count: stats.bloodGroupStats.II_A, stroke: '#b91c1c', bg: 'bg-red-700' },
+    { id: 'III_B', label: 'III (B) – Третья', count: stats.bloodGroupStats.III_B, stroke: '#f87171', bg: 'bg-red-400' },
+    { id: 'IV_AB', label: 'IV (AB) – Четвертая', count: stats.bloodGroupStats.IV_AB, stroke: '#fca5a5', bg: 'bg-red-300' }
+  ];
+  let currentAccum = 0;
+  const pieData = bloodSlices.map(slice => {
+    const pct = stats.totalDonors > 0 ? (slice.count / stats.totalDonors) * 100 : 0;
+    const dasharray = `${pct} ${100 - pct}`;
+    const dashoffset = 25 - currentAccum;
+    const midPct = currentAccum + pct / 2;
+    // Calculate angle; standard SVG offsets 3 o'clock initially, but we adjusted visually by an offset of 25 (top)
+    const angle = (midPct / 100) * Math.PI * 2 - Math.PI / 2;
+    const textX = 21 + Math.cos(angle) * 15.915;
+    const textY = 21 + Math.sin(angle) * 15.915;
+    
+    currentAccum += pct;
+    return { ...slice, pct: Math.round(pct), dasharray, dashoffset, textX, textY };
+  });
+
   return (
     <div className="w-full space-y-6">
       
@@ -426,88 +482,118 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       {/* MENU 1: DASHBOARD STATS */}
       {activeMenu === 'stats' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Всего доноров (активных)</span>
-              <span className="text-3xl font-light text-slate-800">{stats.totalDonors}</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-red-100/30 transition-all">
+              <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest mb-1">всего доноров (активных)</span>
+              <span className="text-3xl sm:text-4xl font-bold text-red-600 leading-none tracking-tight">{stats.totalDonors}</span>
+              
+              {/* Popover summary list on hover */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
+                Все зарегистрированные доноры, отслеживаемые данным центром.
+              </div>
             </div>
-            <div className="bg-emerald-50/20 p-5 rounded-2xl border border-emerald-100/50 shadow-sm">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Готовы сдать сейчас</span>
-              <span className="text-3xl font-light text-emerald-800">{stats.readyCount}</span>
-              <span className="text-[10px] text-slate-400 block mt-1">Остальные — сроки/медотводы</span>
+
+            <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-emerald-100/30 transition-all">
+              <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest mb-1">готовы сдать сейчас</span>
+              <span className="text-3xl sm:text-4xl font-bold text-emerald-600 leading-none tracking-tight">{stats.readyCount}</span>
+
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
+                Остальные — временно отстранены (сроки/медотводы).
+              </div>
             </div>
-            <div className="bg-amber-50/20 p-5 rounded-2xl border border-amber-100/50 shadow-sm">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Ожидают подтверждения</span>
-              <span className="text-3xl font-light text-amber-800">{stats.pendingCount}</span>
-              <span className="text-[10px] text-slate-400 block mt-1">Новые заявки доноров</span>
+
+            <div className="bg-amber-50 border border-amber-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-amber-100/30 transition-all">
+              <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest mb-1">ожидают подтверждения</span>
+              <span className="text-3xl sm:text-4xl font-bold text-amber-500 leading-none tracking-tight">{stats.pendingCount}</span>
+
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
+                Новые заявки от доноров на прикрепление к вашему центру.
+              </div>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Рассылок в этом месяце</span>
-              <span className="text-3xl font-light text-slate-800">{stats.notificationsThisMonth}</span>
+
+            <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-blue-100/30 transition-all">
+              <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest mb-1">рассылок в этом месяце</span>
+              <span className="text-3xl sm:text-4xl font-bold text-blue-500 leading-none tracking-tight">{stats.notificationsThisMonth}</span>
+
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
+                Количество отправленных SMS-оповещений.
+              </div>
             </div>
           </div>
 
           {/* Stanning Interactive SVG Charts on blood and Rh factors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Chart 1: Blood Groups */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-              <h3 className="font-bold text-slate-800 text-sm">Распределение базы по группам крови</h3>
-              <p className="text-xs text-slate-500">Отображается отношение доноров по I, II, III, IV клиническим группам:</p>
+            <div className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4">
+              <h3 className="font-bold text-slate-800 text-base">Распределение базы по группам крови</h3>
+              <p className="text-sm text-slate-500">Отображается отношение доноров по I, II, III, IV клиническим группам:</p>
               
               {/* Graphic custom interactive SVG */}
               <div className="flex flex-col sm:flex-row items-center gap-6 justify-around pt-2">
-                <svg className="w-36 h-36 border border-slate-50 rounded-full" viewBox="0 0 40 40">
-                  {/* Just basic SVG slices based on counts for visually pristine representations */}
-                  <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#E2E8F0" strokeWidth="6"></circle>
+                <svg className="w-36 h-36 shrink-0 border border-slate-50 rounded-full" viewBox="0 0 42 42">
+                  {/* Base background circle */}
+                  <circle r="15.915" cx="21" cy="21" fill="transparent" stroke="#fef2f2" strokeWidth="10"></circle>
                   
-                  {/* I_O slice (orange, e.g. 5 donors = 25%) */}
-                  <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#E11D48" strokeWidth="6" strokeDasharray="30 70" strokeDashoffset="25"></circle>
-                  
-                  {/* II_A slice (red, e.g. 8 donors = 40%) */}
-                  <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#9F1239" strokeWidth="6" strokeDasharray="40 60" strokeDashoffset="95"></circle>
-
-                  {/* III_B slice (amber, e.g. 4 donors = 20%) */}
-                  <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#F59E0B" strokeWidth="6" strokeDasharray="20 80" strokeDashoffset="55"></circle>
-
-                  {/* IV_AB slice (slate, e.g. 3 donors = 15%) */}
-                  <circle r="15.915" cx="20" cy="20" fill="transparent" stroke="#64748B" strokeWidth="6" strokeDasharray="15 85" strokeDashoffset="35"></circle>
+                  {/* Dynamic slices and percentages */}
+                  {pieData.map((slice) => slice.pct > 0 && (
+                    <g key={slice.id}>
+                      <circle 
+                        r="15.915" 
+                        cx="21" 
+                        cy="21" 
+                        fill="transparent" 
+                        stroke={slice.stroke} 
+                        strokeWidth="10" 
+                        strokeDasharray={slice.dasharray} 
+                        strokeDashoffset={slice.dashoffset}
+                      />
+                      {slice.pct >= 5 && (
+                        <text
+                          x={slice.textX}
+                          y={slice.textY}
+                          fill="white"
+                          fontSize="3.2"
+                          fontWeight="bold"
+                          textAnchor="middle"
+                          dominantBaseline="central"
+                          dy="0.1em"
+                        >
+                          {slice.pct}%
+                        </text>
+                      )}
+                    </g>
+                  ))}
                 </svg>
 
-                <div className="space-y-2.5 text-xs text-slate-700 w-full sm:w-auto">
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded bg-red-800 block"></span>
-                    <span><strong>II (A) — Вторая:</strong> {stats.bloodGroupStats.II_A} дон. ({stats.totalDonors > 0 ? Math.round((stats.bloodGroupStats.II_A/stats.totalDonors)*100) : 0}%)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded bg-rose-650 block bg-rose-600"></span>
-                    <span><strong>I (O) — Первая:</strong> {stats.bloodGroupStats.I_O} дон. ({stats.totalDonors > 0 ? Math.round((stats.bloodGroupStats.I_O/stats.totalDonors)*100) : 0}%)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded bg-amber-500 block"></span>
-                    <span><strong>III (B) — Третья:</strong> {stats.bloodGroupStats.III_B} дон. ({stats.totalDonors > 0 ? Math.round((stats.bloodGroupStats.III_B/stats.totalDonors)*100) : 0}%)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded bg-slate-500 block"></span>
-                    <span><strong>IV (AB) — Четвертая:</strong> {stats.bloodGroupStats.IV_AB} дон. ({stats.totalDonors > 0 ? Math.round((stats.bloodGroupStats.IV_AB/stats.totalDonors)*100) : 0}%)</span>
-                  </div>
+                <div className="space-y-3 text-sm text-slate-700 w-full sm:w-auto overflow-hidden">
+                  {pieData.map(slice => (
+                    <div key={slice.id} className="flex items-center gap-2 whitespace-nowrap">
+                      <span className={`w-3 h-3 rounded ${slice.bg} block shrink-0`}></span>
+                      <span className="truncate"><strong>{slice.label}:</strong> {slice.count} дон.</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Chart 2: Rh factors */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-              <h3 className="font-bold text-slate-800 text-sm">Резус-фактор доноров подразделения</h3>
-              <p className="text-xs text-slate-500">Доноры с резус-отрицательным фактором (Rh-) являются особо дефицитным ресурсом:</p>
+            <div className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4">
+              <h3 className="font-bold text-slate-800 text-base">Резус-фактор доноров подразделения</h3>
+              <p className="text-sm text-slate-500">Отображается отношение доноров по Rh+ и Rh- клиническим группам:</p>
               
-              <div className="space-y-4 pt-3 text-xs text-slate-700">
+              <div className="space-y-4 pt-3 text-sm text-slate-700">
                 <div className="space-y-1.5">
                   <div className="flex justify-between">
                     <span><strong>Rh+ (Положительный):</strong> {stats.rhStats.positive} доноров</span>
                     <span>{stats.totalDonors > 0 ? Math.round((stats.rhStats.positive / stats.totalDonors) * 100) : 0}%</span>
                   </div>
-                  <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div className="w-full bg-red-50 h-3 rounded-full overflow-hidden border border-red-100">
                     <div 
-                      className="bg-red-700 h-full rounded-full"
+                      className="bg-red-500 h-full rounded-full"
                       style={{ width: `${stats.totalDonors > 0 ? (stats.rhStats.positive / stats.totalDonors) * 100 : 0}%` }}
                     ></div>
                   </div>
@@ -518,9 +604,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <span><strong>Rh- (Отрицательный):</strong> {stats.rhStats.negative} доноров</span>
                     <span>{stats.totalDonors > 0 ? Math.round((stats.rhStats.negative / stats.totalDonors) * 100) : 0}%</span>
                   </div>
-                  <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+                  <div className="w-full bg-red-50 h-3 rounded-full overflow-hidden border border-red-100">
                     <div 
-                      className="bg-amber-600 h-full rounded-full"
+                      className="bg-red-700 h-full rounded-full"
                       style={{ width: `${stats.totalDonors > 0 ? (stats.rhStats.negative / stats.totalDonors) * 100 : 0}%` }}
                     ></div>
                   </div>
@@ -693,7 +779,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     onClick={() => {
                       setManualForm({
                         lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male',
-                        bloodGroup: 'I_O', rhFactor: 'positive', weight: '70', phone: '+375 (', email: '', password: 'password123'
+                        bloodGroup: 'I_O', rhFactor: 'positive', weight: '70', phone: '+375', email: '', password: 'password123'
                       });
                       setShowManualRegModal(true);
                     }}
@@ -1355,76 +1441,143 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             {manualError && <p className="p-2 border border-red-100 rounded-lg bg-red-50 text-red-700 text-xs mt-1 mb-2.5">{manualError}</p>}
             
             <form onSubmit={handleManualReg} className="space-y-3.5">
-              <div className="grid grid-cols-2 gap-3.5">
-                <div className="space-y-1 text-xs">
-                  <label className="font-semibold">Фамилия <span className="text-red-500">*</span></label>
-                  <input type="text" required value={manualForm.lastName} onChange={(e) => setManualForm({...manualForm, lastName: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Фамилия <span className="text-red-500">*</span></label>
+                  <input type="text" required placeholder="Иванов" value={manualForm.lastName} onChange={(e) => handleManualNameChange('lastName', e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none" />
                 </div>
-                <div className="space-y-1 text-xs">
-                  <label className="font-semibold">Имя <span className="text-red-500">*</span></label>
-                  <input type="text" required value={manualForm.firstName} onChange={(e) => setManualForm({...manualForm, firstName: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Имя <span className="text-red-500">*</span></label>
+                  <input type="text" required placeholder="Иван" value={manualForm.firstName} onChange={(e) => handleManualNameChange('firstName', e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none" />
                 </div>
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold">Отчество</label>
-                <input type="text" value={manualForm.middleName} onChange={(e) => setManualForm({...manualForm, middleName: e.target.value})} className="w-full px-3 py-2 border rounded-xl font-normal" />
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Отчество</label>
+                <input type="text" placeholder="Сергеевич" value={manualForm.middleName} onChange={(e) => handleManualNameChange('middleName', e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none" />
               </div>
 
-              <div className="grid grid-cols-2 gap-3.5">
-                <div className="space-y-1 text-xs">
-                  <label className="font-semibold">Дата рождения <span className="text-red-500">*</span></label>
-                  <input type="date" required value={manualForm.birthDate} onChange={(e) => setManualForm({...manualForm, birthDate: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Дата рождения <span className="text-red-500">*</span></label>
+                  <input 
+                    type="date" 
+                    required 
+                    min={new Date(new Date().setFullYear(new Date().getFullYear() - 65)).toISOString().split('T')[0]}
+                    max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                    value={manualForm.birthDate} 
+                    onChange={(e) => setManualForm({...manualForm, birthDate: e.target.value})} 
+                    className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                      isBirthDateInvalid() 
+                        ? 'border-red-500 bg-red-50 focus:border-red-600' 
+                        : 'border-slate-200 focus:border-red-500'
+                    }`}
+                  />
+                  {isBirthDateInvalid() && (
+                    <p className="text-xs text-red-500 mt-1">Возраст донора должен быть от 18 до 65 лет</p>
+                  )}
                 </div>
-                <div className="space-y-1 text-xs">
-                  <label className="font-semibold">Пол <span className="text-red-500">*</span></label>
-                  <select value={manualForm.gender} onChange={(e) => setManualForm({...manualForm, gender: e.target.value as any})} className="w-full px-3 py-2 border rounded-xl bg-white">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Пол <span className="text-red-500">*</span></label>
+                  <select value={manualForm.gender} onChange={(e) => setManualForm({...manualForm, gender: e.target.value as any})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white">
                     <option value="male">Мужской</option>
                     <option value="female">Женский</option>
                   </select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3.5">
-                <div className="col-span-2 space-y-1 text-xs">
-                  <label className="font-semibold">Группа крови <span className="text-red-500">*</span></label>
-                  <select value={manualForm.bloodGroup} onChange={(e) => setManualForm({...manualForm, bloodGroup: e.target.value as any})} className="w-full px-3 py-2 border rounded-xl bg-white font-medium">
-                    <option value="I_O">I (O) — Первая</option>
-                    <option value="II_A">II (A) — Вторая</option>
-                    <option value="III_B">III (B) — Третья</option>
-                    <option value="IV_AB">IV (AB) — Четвертая</option>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2 space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Группа крови <span className="text-red-500">*</span></label>
+                  <select value={manualForm.bloodGroup} onChange={(e) => setManualForm({...manualForm, bloodGroup: e.target.value as any})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white">
+                    <option value="I_O">I (O) - Первая</option>
+                    <option value="II_A">II (A) - Вторая</option>
+                    <option value="III_B">III (B) - Третья</option>
+                    <option value="IV_AB">IV (AB) - Четвертая</option>
                   </select>
                 </div>
-                <div className="space-y-1 text-xs">
-                  <label className="font-semibold">Резус <span className="text-red-500">*</span></label>
-                  <select value={manualForm.rhFactor} onChange={(e) => setManualForm({...manualForm, rhFactor: e.target.value as any})} className="w-full px-3 py-2 border rounded-xl bg-white font-medium">
-                    <option value="positive">Rh+</option>
-                    <option value="negative">Rh-</option>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Резус-фактор <span className="text-red-500">*</span></label>
+                  <select value={manualForm.rhFactor} onChange={(e) => setManualForm({...manualForm, rhFactor: e.target.value as any})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white">
+                    <option value="positive">Rh +</option>
+                    <option value="negative">Rh -</option>
                   </select>
                 </div>
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold">Вес донора в кг <span className="text-red-500">*</span></label>
-                <input type="number" required value={manualForm.weight} onChange={(e) => setManualForm({...manualForm, weight: e.target.value})} className="w-full px-3 py-2 border rounded-xl font-medium" />
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Вес донора (кг) <span className="text-red-500">*</span></label>
+                <input 
+                  type="number" 
+                  required 
+                  min="55" 
+                  max="200" 
+                  value={manualForm.weight} 
+                  onChange={(e) => setManualForm({...manualForm, weight: e.target.value})} 
+                  className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                    isWeightInvalid() 
+                      ? 'border-red-500 bg-red-50 focus:border-red-600' 
+                      : 'border-slate-200 focus:border-red-500'
+                  }`}
+                />
+                {isWeightInvalid() && (
+                  <p className="text-xs text-red-500 mt-1">К донорству допускаются лица с массой тела не менее 55 кг</p>
+                )}
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold">Номер мобильного телефона <span className="text-red-500">*</span></label>
-                <input type="text" required value={manualForm.phone} onChange={(e) => setManualForm({...manualForm, phone: e.target.value})} className="w-full px-3 py-2 border rounded-xl font-medium" />
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Номер телефона <span className="text-red-500">*</span></label>
+                <input 
+                  type="tel" 
+                  required 
+                  maxLength={13}
+                  value={manualForm.phone} 
+                  onChange={(e) => {
+                    let inputVal = e.target.value;
+                    if (inputVal.length < 4 || !inputVal.startsWith('+375')) {
+                      const allDigits = inputVal.replace(/\D/g, '');
+                      if (allDigits.startsWith('375')) {
+                        const extra = allDigits.substring(3);
+                        inputVal = '+375' + extra;
+                      } else {
+                        inputVal = '+375';
+                      }
+                    } else {
+                      const extra = inputVal.substring(4).replace(/\D/g, '');
+                      inputVal = '+375' + extra;
+                    }
+                    setManualForm({...manualForm, phone: inputVal.substring(0, 13)});
+                  }} 
+                  placeholder="+375XXXXXXXXX"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none" 
+                />
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold">Рабочий E-Mail <span className="text-red-500">*</span></label>
-                <input type="email" required value={manualForm.email} onChange={(e) => setManualForm({...manualForm, email: e.target.value})} className="w-full px-3 py-2 border rounded-xl text-slate-800" />
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Рабочий E-Mail (Логин) <span className="text-red-500">*</span></label>
+                <input 
+                  type="email" 
+                  required 
+                  placeholder="test@mail.ru" 
+                  value={manualForm.email} 
+                  onChange={(e) => setManualForm({...manualForm, email: e.target.value})} 
+                  className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                    isEmailInvalid() 
+                      ? 'border-red-500 bg-red-50 focus:border-red-600' 
+                      : 'border-slate-200 focus:border-red-500'
+                  }`}
+                />
+                {isEmailInvalid() && manualForm.email.length > 0 && (
+                  <p className="text-xs text-red-500 mt-1">Введите корректный e-mail</p>
+                )}
               </div>
 
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold">Временный пароль для входа:</label>
-                <input type="text" required value={manualForm.password} onChange={(e) => setManualForm({...manualForm, password: e.target.value})} className="w-full px-3 py-2 border rounded-xl font-mono text-xs font-semibold text-red-700 bg-red-50" />
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Временный пароль для входа <span className="text-red-500">*</span></label>
+                <input type="text" required value={manualForm.password} onChange={(e) => setManualForm({...manualForm, password: e.target.value})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl font-mono focus:border-red-500 focus:outline-none text-red-700 bg-red-50" />
               </div>
 
-              <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl hover:shadow duration-150 text-xs">
+              <button type="submit" className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm">
                 Создать профиль донора (Подтвержден на месте)
               </button>
             </form>
