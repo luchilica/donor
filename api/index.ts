@@ -398,7 +398,10 @@ app.get('/api/download/contraindications', (req, res) => {
     // Find links to centers
     const links = db.donorCenters.filter(dc => dc.donorId === donor.id);
     const medicalNotes = db.medicalNotes.filter(m => m.donorId === donor.id);
-    const donations = db.donations.filter(d => d.donorId === donor.id);
+    const donations = db.donations
+      .filter(d => d.donorId === donor.id)
+      .sort((a, b) => new Date(b.donationDate).getTime() - new Date(a.donationDate).getTime());
+
 
     // Calculate donor setup info
     const confirmedCenters = links.filter(l => l.status === 'confirmed');
@@ -718,7 +721,9 @@ app.get('/api/download/contraindications', (req, res) => {
     if (!donor) return res.status(404).json({ error: 'Донор не найден' });
 
     const link = db.donorCenters.find(dc => dc.donorId === id && dc.centerId === centerId);
-    const donations = db.donations.filter(d => d.donorId === id);
+    const donations = db.donations
+      .filter(d => d.donorId === id)
+      .sort((a, b) => new Date(b.donationDate).getTime() - new Date(a.donationDate).getTime());
     const medicalNotes = db.medicalNotes.filter(m => m.donorId === id);
 
     const todayStr = new Date().toISOString().split('T')[0];

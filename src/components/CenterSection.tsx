@@ -393,9 +393,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       {/* Clinic Header Metadata banner info */}
       <div className="bg-slate-100 p-6 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Авторизован филиал РБ</span>
           <h2 className="font-bold text-slate-800 text-lg leading-tight">{center.name}</h2>
-          <p className="text-xs text-slate-500 mt-1">Клиника: {center.address} | Тел: {center.phone}</p>
+          <p className="text-xs text-slate-500 mt-1">Адрес: {center.address}</p>
+          <p className="text-xs text-slate-500 mt-0.5">Тел: {center.phone}</p>
         </div>
 
         <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1">

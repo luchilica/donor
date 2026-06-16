@@ -91,6 +91,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const [resetCode, setResetCode] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   const [resetConfirmPassword, setResetConfirmPassword] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showResetConfirmPassword, setShowResetConfirmPassword] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
   useEffect(() => {
@@ -102,12 +104,23 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
   const getPasswordHint = (pwd: string) => {
     if (!pwd) return '';
-    if (pwd.length < 6) return 'Пароль слишком короткий, введите не менее 6 символов';
-    const hasLetters = /[a-zA-Zа-яА-Я]/.test(pwd);
+    if (pwd.length < 6) return 'Пароль должен быть не менее 6 символов';
+    const hasLetters = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(pwd);
     const hasNumbers = /[0-9]/.test(pwd);
     
-    if (!(hasLetters && hasNumbers)) {
-      return 'Пароль слишком простой, добавьте буквы и цифры';
+    if (!hasLetters || !hasNumbers) {
+      return 'пароль ненадёжный должен содержать буквы и цифры';
+    }
+    return '';
+  };
+
+  const getResetPasswordHint = (pwd: string) => {
+    if (!pwd) return '';
+    if (pwd.length < 6) return 'Пароль должен быть не менее 6 символов';
+    const hasLetters = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(pwd);
+    const hasNumbers = /[0-9]/.test(pwd);
+    if (!hasLetters || !hasNumbers) {
+      return 'пароль не надёжный должны присутствовать цифры и буквы';
     }
     return '';
   };
@@ -278,8 +291,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       setLoginError('Введите код из письма');
       return;
     }
+    const hint = getResetPasswordHint(resetPassword);
+    if (hint) {
+      setLoginError(hint);
+      return;
+    }
     if (resetPassword !== resetConfirmPassword) {
-      setLoginError('Пароли не совпадают');
+      setLoginError('неверный пароль');
       return;
     }
     setLoginError('');
@@ -1085,7 +1103,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     <button
                       type="button"
                       onClick={() => setShowLoginPassword(!showLoginPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors-all"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors"
                     >
                       {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -1270,19 +1288,19 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           onChange={(e) => setRegForm({...regForm, password: e.target.value})}
                           placeholder="Минимум 6 символов"
                           className={`w-full pl-3 pr-10 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
-                            getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
+                            regForm.password && getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
                           }`}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors-all"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-all"
                         >
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
-                      {getPasswordHint(regForm.password) && (
-                        <p className="text-xs text-orange-600 mt-1">{getPasswordHint(regForm.password)}</p>
+                      {regForm.password && getPasswordHint(regForm.password) && (
+                        <p className="text-xs text-orange-600 mt-1 font-medium">{getPasswordHint(regForm.password)}</p>
                       )}
                     </div>
 
@@ -1302,7 +1320,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors-all"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-all"
                         >
                           {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
@@ -1537,26 +1555,58 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-700">Новый пароль</label>
-                  <input 
-                    type="password" 
-                    required
-                    value={resetPassword}
-                    onChange={(e) => setResetPassword(e.target.value)}
-                    placeholder="Минимум 6 символов"
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showResetPassword ? "text" : "password"} 
+                      required
+                      value={resetPassword}
+                      onChange={(e) => setResetPassword(e.target.value)}
+                      placeholder="Минимум 6 символов"
+                      className={`w-full pl-3.5 pr-10 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors ${
+                        resetPassword && getResetPasswordHint(resetPassword)
+                          ? 'border-orange-500 bg-orange-50/50 focus:border-orange-600'
+                          : 'border-slate-200 focus:border-red-500'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowResetPassword(!showResetPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-all"
+                    >
+                      {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {resetPassword && getResetPasswordHint(resetPassword) && (
+                    <p className="text-xs text-orange-600 mt-1 font-medium">{getResetPasswordHint(resetPassword)}</p>
+                  )}
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-700">Подтвердите пароль</label>
-                  <input 
-                    type="password" 
-                    required
-                    value={resetConfirmPassword}
-                    onChange={(e) => setResetConfirmPassword(e.target.value)}
-                    placeholder="Повторите пароль"
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showResetConfirmPassword ? "text" : "password"} 
+                      required
+                      value={resetConfirmPassword}
+                      onChange={(e) => setResetConfirmPassword(e.target.value)}
+                      placeholder="Повторите пароль"
+                      className={`w-full pl-3.5 pr-10 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors ${
+                        resetConfirmPassword && resetPassword !== resetConfirmPassword
+                          ? 'border-red-500 bg-red-50/50 focus:border-red-600'
+                          : 'border-slate-200 focus:border-red-500'
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowResetConfirmPassword(!showResetConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-all"
+                    >
+                      {showResetConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {resetConfirmPassword && resetPassword !== resetConfirmPassword && (
+                    <p className="text-xs text-red-500 mt-1">неверный пароль</p>
+                  )}
                 </div>
 
                 <button 
