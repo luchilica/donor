@@ -1179,36 +1179,36 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             className="grid grid-cols-1 lg:grid-cols-3 gap-6"
           >
             {/* LEFT / MAIN COLUMN: INBOX (HISTORY) */}
-            <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
-              <div className="space-y-1">
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight flex items-center gap-2">
+            <div className="lg:col-span-2 bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm space-y-4">
+              <div className="space-y-0.5">
+                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight flex items-center gap-2">
                   <Inbox className="w-5 h-5 text-red-600" />
                   Входящие уведомления и вызовы
                 </h3>
-                <p className="text-sm text-slate-500 font-medium">История сообщений, направленных вам центрами крови</p>
+                <p className="text-xs text-slate-500 font-medium">История сообщений, направленных вам центрами крови</p>
               </div>
 
               {loadingNotifications ? (
-                <div className="flex flex-col items-center justify-center py-12 space-y-3">
-                  <RefreshCw className="w-8 h-8 text-red-500 animate-spin" />
+                <div className="flex flex-col items-center justify-center py-6 space-y-2">
+                  <RefreshCw className="w-6 h-6 text-red-500 animate-spin" />
                   <p className="text-xs text-slate-400 font-medium font-sans">Загрузка истории...</p>
                 </div>
               ) : notificationsHistory.length === 0 ? (
-                <div className="text-center py-12 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
-                  <Bell className="w-10 h-10 text-slate-300 mx-auto mb-3 animate-pulse" />
-                  <p className="text-sm text-slate-500 font-semibold">У вас пока нет активных уведомлений</p>
-                  <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Когда центру крови понадобится ваша группа или редкий фенотип, вы увидите срочный запрос здесь.</p>
+                <div className="text-center py-8 border border-dashed border-slate-100 rounded-xl bg-slate-50/30">
+                  <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2 animate-pulse" />
+                  <p className="text-xs text-slate-500 font-semibold">У вас пока нет активных уведомлений</p>
+                  <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto px-4">Когда центру крови понадобится ваша группа или редкий фенотип, вы увидите срочный запрос здесь.</p>
                 </div>
               ) : (
-                <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
+                <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
                   {notificationsHistory.map((notif: any) => (
                     <div 
                       key={notif.id} 
-                      className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-slate-50/85 transition-all space-y-2 shadow-sm"
+                      className="p-3 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-slate-50/85 transition-all space-y-1.5 shadow-sm"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-0.5">
-                          <span className="inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-extrabold bg-rose-50 text-rose-600 border border-rose-100">
+                          <span className="inline-block px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-extrabold bg-rose-50 text-rose-600 border border-rose-100">
                             Вызов донора
                           </span>
                           <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight">
@@ -1225,7 +1225,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         </span>
                       </div>
                       
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100 shadow-inner">
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed bg-white p-2 rounded-lg border border-slate-100 shadow-inner">
                         {notif.messageText}
                       </p>
                     </div>
@@ -1235,30 +1235,30 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             </div>
 
             {/* RIGHT SIDEBAR COLUMN: NOTIFICATION SETTINGS */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-8 h-fit">
-              <div className="space-y-1">
-                <h3 className="font-bold text-slate-800 text-lg tracking-tight leading-tight">Каналы связи</h3>
+            <div className="bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm space-y-4 h-fit">
+              <div className="space-y-0.5">
+                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">Каналы связи</h3>
                 <p className="text-xs text-slate-500 font-medium">Отметьте удобные каналы вызова</p>
               </div>
 
               {notifSuccess && (
-                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-700 font-bold flex items-center gap-3">
+                <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-700 font-bold flex items-center gap-2">
                   <Check className="w-4 h-4" />
                   {notifSuccess}
                 </div>
               )}
 
-              <form onSubmit={handleNotifSubmit} className="space-y-6">
-                <div className="space-y-4">
+              <form onSubmit={handleNotifSubmit} className="space-y-4">
+                <div className="space-y-2.5">
                   {[
                     { id: 'push', title: 'Push-уведомления', desc: 'Всплывающие окна в браузере или приложении', enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
                     { id: 'sms', title: 'SMS-оповещения', desc: `Экстренные сообщения на номер ${donor.phone}`, enabled: notifForm.smsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, smsEnabled: val}) },
                     { id: 'email', title: 'Email-рассылки', desc: 'Письма с приглашениями и результатами', enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
                   ].map((notif, idx) => (
-                    <div key={notif.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-xl border border-slate-100 transition-hover hover:border-slate-200">
-                      <div className="space-y-0.5 pr-2">
-                        <h4 className="text-xs md:text-sm font-bold text-red-600 tracking-tight">{notif.title}</h4>
-                        <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-tight">{notif.desc}</p>
+                    <div key={notif.id} className="flex items-center justify-between p-3.5 md:p-4 bg-slate-50/50 rounded-xl border border-slate-100 transition-hover hover:border-slate-200">
+                      <div className="space-y-1 pr-2">
+                        <h4 className="text-sm md:text-base font-bold text-red-600 tracking-tight">{notif.title}</h4>
+                        <p className="text-xs md:text-sm text-slate-500 font-medium leading-normal">{notif.desc}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0">
                         <input type="checkbox" className="sr-only peer" checked={notif.enabled} onChange={(e) => notif.toggle(e.target.checked)} />
@@ -1270,7 +1270,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="pt-2">
                   <button 
                     type="submit"
-                    className="w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-3.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center gap-2"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center gap-2"
                   >
                     <Check className="w-[1rem] h-[1rem] stroke-[3px]" />
                     Сохранить изменения

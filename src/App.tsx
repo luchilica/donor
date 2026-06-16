@@ -324,108 +324,110 @@ export default function App() {
       </motion.main>
 
       {/* Aesthetic multi-column footer layout (matching screenshot & responsive) */}
-      <footer className="bg-white border-t border-slate-100 py-12 px-6 text-sm text-slate-500 select-none">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-8 border-b border-slate-100">
-            {/* Column 1: Brand & Desc */}
-            <div className="space-y-4">
-              <div 
-                className="flex items-center gap-2 select-none cursor-pointer" 
-                onClick={() => setView('home')}
-              >
-                <Heart className="w-5.5 h-5.5 text-red-600 fill-red-600" />
-                <h2 className="font-extrabold text-slate-800 text-base tracking-tight">
-                  Донор-Алерт
-                </h2>
+      {(view === 'home' || !session) && (
+        <footer className="bg-white border-t border-slate-100 py-12 px-6 text-sm text-slate-500 select-none">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-8 border-b border-slate-100">
+              {/* Column 1: Brand & Desc */}
+              <div className="space-y-4">
+                <div 
+                  className="flex items-center gap-2 select-none cursor-pointer" 
+                  onClick={() => setView('home')}
+                >
+                  <Heart className="w-5.5 h-5.5 text-red-600 fill-red-600" />
+                  <h2 className="font-extrabold text-slate-800 text-base tracking-tight">
+                    Донор-Алерт
+                  </h2>
+                </div>
+                <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
+                  Платформа для оповещения доноров крови в Беларуси
+                </p>
               </div>
-              <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-                Платформа для оповещения доноров крови в Беларуси
-              </p>
+
+              {/* Column 2: Информация Link List */}
+              <div className="space-y-4 md:pl-10">
+                <h3 className="font-bold text-slate-800 text-sm tracking-wide uppercase">
+                  Информация
+                </h3>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <button 
+                      onClick={() => handleFooterNavigation('info')}
+                      className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
+                    >
+                      О донорстве
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => handleFooterNavigation('docs')}
+                      className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
+                    >
+                      Документы
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => handleFooterNavigation('centers')}
+                      className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
+                    >
+                      Центры крови
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => handleFooterNavigation('news')}
+                      className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
+                    >
+                      Новости
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column 3: Доноры Link List */}
+              <div className="space-y-4 md:pl-10">
+                <h3 className="font-bold text-slate-800 text-sm tracking-wide uppercase">
+                  Доноры
+                </h3>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <button 
+                      onClick={() => {
+                        setView('home');
+                        setTimeout(() => {
+                          window.dispatchEvent(new Event('openRegister'));
+                        }, 50);
+                      }}
+                      className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
+                    >
+                      Стать донором
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => {
+                        if (session) {
+                          setView('dashboard');
+                        } else {
+                          window.dispatchEvent(new Event('openAuth'));
+                        }
+                      }}
+                      className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
+                    >
+                      {session ? 'Личный кабинет' : 'Войти в кабинет'}
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
 
-            {/* Column 2: Информация Link List */}
-            <div className="space-y-4 md:pl-10">
-              <h3 className="font-bold text-slate-800 text-sm tracking-wide uppercase">
-                Информация
-              </h3>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <button 
-                    onClick={() => handleFooterNavigation('info')}
-                    className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
-                  >
-                    О донорстве
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => handleFooterNavigation('docs')}
-                    className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
-                  >
-                    Документы
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => handleFooterNavigation('centers')}
-                    className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
-                  >
-                    Центры крови
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => handleFooterNavigation('news')}
-                    className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
-                  >
-                    Новости
-                  </button>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Доноры Link List */}
-            <div className="space-y-4 md:pl-10">
-              <h3 className="font-bold text-slate-800 text-sm tracking-wide uppercase">
-                Доноры
-              </h3>
-              <ul className="space-y-2 text-xs">
-                <li>
-                  <button 
-                    onClick={() => {
-                      setView('home');
-                      setTimeout(() => {
-                        window.dispatchEvent(new Event('openRegister'));
-                      }, 50);
-                    }}
-                    className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
-                  >
-                    Стать донором
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    onClick={() => {
-                      if (session) {
-                        setView('dashboard');
-                      } else {
-                        window.dispatchEvent(new Event('openAuth'));
-                      }
-                    }}
-                    className="text-slate-400 hover:text-red-650 hover:translate-x-1 transition duration-150 cursor-pointer block font-medium"
-                  >
-                    {session ? 'Личный кабинет' : 'Войти в кабинет'}
-                  </button>
-                </li>
-              </ul>
+            <div className="pt-6 text-center text-xs text-slate-400 font-light">
+              <p>© 2026 Донор-Алерт. Республика Беларусь.</p>
             </div>
           </div>
-
-          <div className="pt-6 text-center text-xs text-slate-400 font-light">
-            <p>© 2026 Донор-Алерт. Республика Беларусь.</p>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      )}
 
     </div>
   );
