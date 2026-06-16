@@ -498,6 +498,29 @@ app.get('/api/download/contraindications', (req, res) => {
     res.json({ success: true, message: 'Заявка на привязку успешно отправлена в центр крови!' });
   });
 
+  // SET THE PRIMARY (HOME) CENTER FOR THE DONOR
+  app.post('/api/donor/set-primary-center', async (req, res) => {
+    const { donorId, centerId } = req.body;
+    if (!donorId || !centerId) return res.status(400).json({ error: 'ID донора и центра обязательны' });
+
+    const db = await getDb();
+    const parseDonorId = parseInt(donorId);
+    const parseCenterId = parseInt(centerId);
+
+    const userCenterLinks = db.donorCenters.filter(dc => dc.donorId === parseDonorId);
+    const targetLink = userCenterLinks.find(dc => dc.centerId === parseCenterId);
+    if (!targetLink) {
+      return res.status(404).json({ error: 'Связь с данным центром не найдена' });
+    }
+
+    for (const link of userCenterLinks) {
+      link.isPrimary = (link.centerId === parseCenterId);
+    }
+
+    await saveDb(db);
+    res.json({ success: true, message: 'Домашний центр успешно изменен!' });
+  });
+
   // DONOR RESUBMIT FOR REJECTED TIE
   app.post('/api/donor/resubmit/:centerId', async (req, res) => {
     const centerId = parseInt(req.params.centerId);

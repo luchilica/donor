@@ -343,6 +343,28 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     }
   };
 
+  // Set center as primary (home)
+  const handleSetPrimary = async (centerId: number) => {
+    try {
+      const res = await fetch(`${apiBase}/donor/set-primary-center`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ donorId: donor.id, centerId })
+      });
+      if (res.ok) {
+        onRefresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Ошибка при изменении домашнего центра');
+      }
+    } catch (err) {
+      alert('Ошибка при изменении домашнего центра');
+    }
+  };
+
   // Send secondary link application
   const handleCenterLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1094,7 +1116,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             transition={{ duration: 0.3, ease: 'easeOut' }}
             className="space-y-6"
           >
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-xl space-y-6">
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
               <div>
                 <h3 className="font-bold text-slate-800 text-xl tracking-tight">Личная пауза</h3>
                 <p className="text-sm text-slate-500 mt-1">Временно исключает вас из всех рассылок. Никто не потревожит.</p>
@@ -1152,9 +1174,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="pt-2 border-t border-slate-100">
                   <button 
                     type="submit"
-                    className="bg-red-600 hover:bg-red-700 text-white text-sm md:text-base font-bold px-8 py-3 rounded-lg transition duration-150 shadow-sm flex items-center gap-2"
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition duration-150 shadow-xs"
                   >
-                    <Check className="w-4 h-4" />
                     Сохранить
                   </button>
                 </div>
@@ -1200,14 +1221,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   }
                   
                   return (
-                    <div key={link.id} className={`p-4 rounded-xl border transition-all duration-300 ${link.isPrimary ? 'bg-red-55/10 border-red-100 shadow-sm' : 'bg-slate-50/55 border-slate-100/80 hover:border-slate-200'}`}>
+                    <div key={link.id} className={`p-4 rounded-xl border transition-all duration-300 ${link.isPrimary ? 'bg-red-50/20 border-red-100 shadow-sm' : 'bg-slate-50/55 border-slate-100/80 hover:border-slate-200'}`}>
                       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <h4 className="font-bold text-slate-800 text-sm tracking-tight leading-none">{center ? center.name : `Центр #${link.centerId}`}</h4>
-                            {link.isPrimary && (
-                              <span className="text-[8px] bg-red-600/10 text-red-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider leading-none">домашний</span>
-                            )}
                           </div>
                           
                           <div className="flex items-center gap-2 text-xs text-slate-500 font-medium leading-none">
@@ -1225,25 +1243,53 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                           </div>
                         </div>
 
-                        <div className="shrink-0">
-                          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
-                            isConfirmed 
-                              ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
-                              : link.status === 'pending' 
-                              ? 'bg-amber-50 text-amber-600 border-amber-100' 
-                              : 'bg-rose-50 text-rose-600 border-rose-100'
-                          }`}>
-                            {isConfirmed ? (
-                              <>
-                                <Check className="w-3.5 h-3.5 stroke-[3px]" />
-                                <span>Подтверждён {statusDate}</span>
-                              </>
-                            ) : link.status === 'pending' ? (
-                              <span>На рассмотрении</span>
+                        <div className="shrink-0 flex items-center justify-center">
+                          {link.isPrimary ? (
+                            link.status === 'pending' ? (
+                              <div className="flex flex-col gap-1.5 items-center justify-center">
+                                <div className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs">
+                                  <Heart className="w-3.5 h-3.5 fill-current" />
+                                  <span>Домашний</span>
+                                </div>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-50 text-amber-600 border-amber-100">
+                                  <span>На рассмотрении</span>
+                                </div>
+                              </div>
+                            ) : link.status === 'rejected' ? (
+                              <div className="flex flex-col gap-1.5 items-center justify-center">
+                                <div className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs">
+                                  <Heart className="w-3.5 h-3.5 fill-current" />
+                                  <span>Домашний</span>
+                                </div>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 text-rose-600 border-rose-100">
+                                  <span>Отклонено</span>
+                                </div>
+                              </div>
                             ) : (
-                              <span>Отклонено</span>
-                            )}
-                          </div>
+                              <div className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs">
+                                <Heart className="w-3.5 h-3.5 fill-current" />
+                                <span>Домашний</span>
+                              </div>
+                            )
+                          ) : (
+                            link.status === 'pending' ? (
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-50 text-amber-600 border-amber-100">
+                                <span>На рассмотрении</span>
+                              </div>
+                            ) : link.status === 'rejected' ? (
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 text-rose-600 border-rose-100">
+                                <span>Отклонено</span>
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleSetPrimary(link.centerId)}
+                                className="inline-flex items-center gap-1 text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                              >
+                                <span>Сделать домашним</span>
+                              </button>
+                            )
+                          )}
                         </div>
                       </div>
                       
@@ -1270,22 +1316,21 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             </div>
 
             {/* Request link form */}
-            <div id="link-form" className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-8 max-w-2xl">
-              <div className="space-y-1">
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Привязать новый центр</h3>
-                <p className="text-sm text-slate-500 font-medium">Станьте донором в другом учреждении</p>
+            <div id="link-form" className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+              <div className="space-y-1 font-sans">
+                <h3 className="font-bold text-slate-800 text-lg tracking-tight leading-tight">Привязать новый центр</h3>
+                <p className="text-xs text-slate-500 font-medium">Станьте донором в другом учреждении</p>
               </div>
 
-              {linkError && <p className="text-xs md:text-sm text-red-600 bg-red-50 p-4 rounded-xl border border-red-100 font-medium leading-relaxed">{linkError}</p>}
-              {linkSuccess && <p className="text-xs md:text-sm text-emerald-700 bg-emerald-50 p-4 rounded-xl border border-emerald-100 font-medium leading-relaxed">{linkSuccess}</p>}
+              {linkError && <p className="text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 font-medium leading-relaxed">{linkError}</p>}
+              {linkSuccess && <p className="text-xs text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100 font-medium leading-relaxed">{linkSuccess}</p>}
 
-              <form onSubmit={handleCenterLink} className="space-y-6">
-                <div className="space-y-2.5">
-                  <label className="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest pl-1">Выберите учреждение:</label>
+              <form onSubmit={handleCenterLink} className="space-y-4">
+                <div>
                   <select 
                     value={selectedCenterId}
                     onChange={(e) => setSelectedCenterId(e.target.value)}
-                    className="w-full px-5 py-4 text-sm md:text-base border border-slate-200 rounded-xl focus:border-red-600 focus:ring-4 focus:ring-red-50 transition-all focus:outline-none bg-slate-50/50 font-bold text-slate-700 cursor-pointer shadow-sm appearance-none"
+                    className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-600 focus:ring-4 focus:ring-red-50 transition-all focus:outline-none bg-slate-50/50 font-semibold text-slate-700 cursor-pointer shadow-xs"
                   >
                     <option value=""> Список центров переливания </option>
                     {centers.map(center => {
@@ -1296,7 +1341,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
                 <button 
                   type="submit"
-                  className="bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs duration-200"
                 >
                   <Plus className="w-4 h-4" /> Отправить анкету
                 </button>
@@ -1318,8 +1363,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             {/* LEFT / MAIN COLUMN: INBOX (HISTORY) */}
             <div className="lg:col-span-2 bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm space-y-4">
               <div className="space-y-0.5">
-                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight flex items-center gap-2">
-                  <Inbox className="w-5 h-5 text-red-600" />
+                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">
                   Входящие уведомления и вызовы
                 </h3>
                 <p className="text-xs text-slate-500 font-medium">История сообщений, направленных вам центрами крови</p>
@@ -1407,9 +1451,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="pt-2">
                   <button 
                     type="submit"
-                    className="w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center gap-2"
+                    className="w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center"
                   >
-                    <Check className="w-[1rem] h-[1rem] stroke-[3px]" />
                     Сохранить изменения
                   </button>
                 </div>
@@ -1537,8 +1580,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   </div>
                 </div>
                 <div className="pt-4 border-t border-slate-50">
-                  <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
-                    <Check className="w-4 h-4 stroke-[3px]" />
+                  <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center">
                     Обновить пароль
                   </button>
                 </div>
@@ -1550,20 +1592,20 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
                   <Download className="w-4 h-4 text-red-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 text-sm md:text-base tracking-tight leading-tight">Установка приложения (PWA)</h3>
+                <h3 className="font-bold text-slate-800 text-sm md:text-base tracking-tight leading-tight">Установка приложения</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80 hover:border-slate-200 transition-colors">
                   <h4 className="font-bold text-slate-800 text-[11px] md:text-xs mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> iPhone / Safari
+                    iPhone / Safari
                   </h4>
-                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите иконку <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200 inline-block font-bold">«Поделиться»</span>, затем выберите пункт <span className="text-slate-800 font-bold">«На экран Домой»</span> и нажмите <span className="text-red-600 font-bold">«Добавить»</span>.</p>
+                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите иконку «Поделиться», затем выберите пункт «На экран Домой» и нажмите «Добавить».</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80 hover:border-slate-200 transition-colors">
                   <h4 className="font-bold text-slate-800 text-[11px] md:text-xs mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Android / Chrome
+                    Android / Chrome
                   </h4>
-                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите на значок <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200 inline-block font-bold">⋮</span> в строке браузера, выберите <span className="text-slate-800 font-bold">«Установить приложение»</span> или <span className="text-red-600 font-bold">«На главный экран»</span>.</p>
+                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите на значок ⋮ в строке браузера, выберите «Установить приложение» или «На главный экран».</p>
                 </div>
               </div>
             </div>
