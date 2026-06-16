@@ -74,13 +74,46 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
   // Profile edit states
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+  const formatBelarusPhone = (val: string): string => {
+    if (!val) return '+375';
+    const digits = val.replace(/\D/g, '');
+    if (digits.startsWith('375')) {
+      const remaining = digits.slice(3, 12);
+      return '+375' + remaining;
+    } else {
+      return '+375' + digits.slice(0, 9);
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    if (!val.startsWith('+375')) {
+      const digitsOnly = val.replace(/\D/g, '');
+      if (digitsOnly.startsWith('375')) {
+        val = '+375' + digitsOnly.slice(3, 12);
+      } else {
+        val = '+375';
+      }
+    } else {
+      const afterPrefix = val.slice(4).replace(/\D/g, '').slice(0, 9);
+      val = '+375' + afterPrefix;
+    }
+    setProfileForm(prev => ({ ...prev, phone: val }));
+  };
+
+  const handleNameChange = (field: 'lastName' | 'firstName' | 'middleName', val: string) => {
+    const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+    setProfileForm(prev => ({ ...prev, [field]: lettersOnly }));
+  };
+
   const [profileForm, setProfileForm] = useState({
     lastName: donor.lastName,
     firstName: donor.firstName,
     middleName: donor.middleName || '',
     birthDate: donor.birthDate ? donor.birthDate.split('T')[0] : '',
     gender: donor.gender,
-    phone: donor.phone,
+    phone: formatBelarusPhone(donor.phone),
     email: donor.email || '',
     weight: donor.weight,
     bloodGroup: donor.bloodGroup,
@@ -96,7 +129,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       middleName: donor.middleName || '',
       birthDate: donor.birthDate ? donor.birthDate.split('T')[0] : '',
       gender: donor.gender,
-      phone: donor.phone,
+      phone: formatBelarusPhone(donor.phone),
       email: donor.email || '',
       weight: donor.weight,
       bloodGroup: donor.bloodGroup,
@@ -108,6 +141,15 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     e.preventDefault();
     setEditSuccess('');
     setEditError('');
+    if (profileForm.phone.length !== 13) {
+      setEditError('Номер телефона должен содержать ровно 13 символов (например, +375XXXXXXXXX)');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+$/;
+    if (!emailRegex.test(profileForm.email)) {
+      setEditError('E-mail должен быть в формате имя@домен (например, donor@example.com)');
+      return;
+    }
     try {
       const res = await fetch(`${apiBase}/donor/profile`, {
         method: 'PUT',
@@ -425,7 +467,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         type="text" 
                         required
                         value={profileForm.lastName} 
-                        onChange={e => setProfileForm({ ...profileForm, lastName: e.target.value })}
+                        onChange={e => handleNameChange('lastName', e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
                       />
                     </div>
@@ -435,7 +477,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         type="text" 
                         required
                         value={profileForm.firstName} 
-                        onChange={e => setProfileForm({ ...profileForm, firstName: e.target.value })}
+                        onChange={e => handleNameChange('firstName', e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
                       />
                     </div>
@@ -444,7 +486,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       <input 
                         type="text" 
                         value={profileForm.middleName} 
-                        onChange={e => setProfileForm({ ...profileForm, middleName: e.target.value })}
+                        onChange={e => handleNameChange('middleName', e.target.value)}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
                       />
                     </div>
@@ -456,17 +498,19 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       <input 
                         type="date" 
                         required
+                        disabled
                         value={profileForm.birthDate} 
                         onChange={e => setProfileForm({ ...profileForm, birthDate: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-400 cursor-not-allowed opacity-70 focus:outline-none"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-500 mb-1">Пол</label>
                       <select 
                         value={profileForm.gender} 
+                        disabled
                         onChange={e => setProfileForm({ ...profileForm, gender: e.target.value as any })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-400 cursor-not-allowed opacity-70 focus:outline-none"
                       >
                         <option value="male">Мужской</option>
                         <option value="female">Женский</option>
@@ -481,7 +525,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         type="text" 
                         required
                         value={profileForm.phone} 
-                        onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })}
+                        onChange={handlePhoneChange}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
                       />
                     </div>
