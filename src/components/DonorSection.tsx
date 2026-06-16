@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Calendar, Award, ShieldAlert, Clock, AlertTriangle, 
   Settings, Check, Bell, RefreshCw, X, Plus, ExternalLink,
-  Home, User, Link, Pause, MapPin, Download, Mail, MessageSquare, Inbox
+  Home, User, Link, Pause, MapPin, Download, Mail, MessageSquare, Inbox,
+  Eye, EyeOff
 } from 'lucide-react';
 import { Donor, DonorCenter, Donation, MedicalNote, BloodCenter, formatBloodGroup, formatRhFactor, getGamificationStatus } from '../types';
 import { calculateNextDates } from '../utils/intervals';
@@ -75,6 +76,62 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   // Profile edit states
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
+  // Security password states
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+
+  const getNewPasswordErrorStr = (val: string): string => {
+    if (!val) return '';
+    if (val.length < 6) return 'Пароль должен быть не менее 6 символов';
+    const hasLetter = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(val);
+    const hasDigit = /\d/.test(val);
+    if (!hasLetter || !hasDigit) {
+      return 'пароль не надёжный должны присутствовать цифры и буквы';
+    }
+    return '';
+  };
+
+  const getRepeatPasswordErrorStr = (val: string): string => {
+    if (!val) return '';
+    if (val !== newPassword) {
+      return 'Неверный пароль';
+    }
+    return '';
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (newPassword.length < 6) {
+      setPasswordError('Пароль должен быть не менее 6 символов');
+      return;
+    }
+    const hasLetter = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(newPassword);
+    const hasDigit = /\d/.test(newPassword);
+    if (!hasLetter || !hasDigit) {
+      setPasswordError('пароль не надёжный должны присутствовать цифры и буквы');
+      return;
+    }
+
+    if (repeatPassword !== newPassword) {
+      setPasswordError('Неверный пароль');
+      return;
+    }
+
+    setPasswordSuccess('Пароль успешно обновлен!');
+    setCurrentPassword('');
+    setNewPassword('');
+    setRepeatPassword('');
+  };
+
   const formatBelarusPhone = (val: string): string => {
     if (!val) return '+375';
     const digits = val.replace(/\D/g, '');
@@ -105,6 +162,42 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const handleNameChange = (field: 'lastName' | 'firstName' | 'middleName', val: string) => {
     const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
     setProfileForm(prev => ({ ...prev, [field]: lettersOnly }));
+  };
+
+  const handleCancelEdit = () => {
+    setProfileForm({
+      lastName: donor.lastName,
+      firstName: donor.firstName,
+      middleName: donor.middleName || '',
+      birthDate: donor.birthDate ? donor.birthDate.split('T')[0] : '',
+      gender: donor.gender,
+      phone: formatBelarusPhone(donor.phone),
+      email: donor.email || '',
+      weight: donor.weight,
+      bloodGroup: donor.bloodGroup,
+      rhFactor: donor.rhFactor
+    });
+    setEditError('');
+    setEditSuccess('');
+    setIsEditingProfile(false);
+  };
+
+  const handleStartEdit = () => {
+    setProfileForm({
+      lastName: donor.lastName,
+      firstName: donor.firstName,
+      middleName: donor.middleName || '',
+      birthDate: donor.birthDate ? donor.birthDate.split('T')[0] : '',
+      gender: donor.gender,
+      phone: formatBelarusPhone(donor.phone),
+      email: donor.email || '',
+      weight: donor.weight,
+      bloodGroup: donor.bloodGroup,
+      rhFactor: donor.rhFactor
+    });
+    setEditError('');
+    setEditSuccess('');
+    setIsEditingProfile(true);
   };
 
   const [profileForm, setProfileForm] = useState({
@@ -438,7 +531,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <h3 className="font-bold text-slate-800 text-xl tracking-tight">Личная информация</h3>
                 {!isEditingProfile && (
                   <button 
-                    onClick={() => setIsEditingProfile(true)}
+                    onClick={handleStartEdit}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                   >
                     <User className="w-4 h-4" />
@@ -599,7 +692,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <div className="flex justify-end gap-3 pt-6 border-t border-slate-100/60 font-sans">
                     <button 
                       type="button"
-                      onClick={() => setIsEditingProfile(false)}
+                      onClick={handleCancelEdit}
                       className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
                     >
                       Отмена
@@ -1340,20 +1433,107 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Безопасность аккаунта</h3>
                 <p className="text-sm text-slate-500 font-medium">Управление доступом и паролями</p>
               </div>
-              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Функция изменения пароля в демо-режиме!"); }}>
+
+              {passwordError && (
+                <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-semibold">
+                  {passwordError}
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl text-xs font-semibold">
+                  {passwordSuccess}
+                </div>
+              )}
+
+              <form className="space-y-4" onSubmit={handlePasswordSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-500 mb-1">Текущий пароль</label>
-                    <input type="password" required placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 placeholder:text-slate-300 font-mono" />
+                    <div className="relative">
+                      <input 
+                        type={showCurrentPassword ? "text" : "password"} 
+                        required 
+                        placeholder="••••••••" 
+                        value={currentPassword}
+                        onChange={e => setCurrentPassword(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-11 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 placeholder:text-slate-300 font-mono" 
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none"
+                      >
+                        {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="hidden md:block"></div>
+                  
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-500 mb-1">Новый пароль</label>
-                    <input type="password" required placeholder="Минимум 8 символов" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 placeholder:text-slate-300 font-mono" />
+                    <div className="relative">
+                      <input 
+                        type={showNewPassword ? "text" : "password"} 
+                        required 
+                        placeholder="Минимум 6 символов" 
+                        value={newPassword}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setNewPassword(val);
+                          setPasswordError('');
+                          setPasswordSuccess('');
+                        }}
+                        className={`w-full bg-slate-50 border rounded-xl pl-4 pr-11 py-2.5 text-xs font-bold focus:outline-none font-mono ${
+                          getNewPasswordErrorStr(newPassword) ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-red-500'
+                        } text-slate-800 placeholder:text-slate-300`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none"
+                      >
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {getNewPasswordErrorStr(newPassword) && (
+                      <p className="text-xs text-red-500 font-semibold mt-1 animate-fade">
+                        {getNewPasswordErrorStr(newPassword)}
+                      </p>
+                    )}
                   </div>
+
                   <div className="space-y-1">
                     <label className="block text-xs font-bold text-slate-500 mb-1">Повторите пароль</label>
-                    <input type="password" required placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 placeholder:text-slate-300 font-mono" />
+                    <div className="relative">
+                      <input 
+                        type={showRepeatPassword ? "text" : "password"} 
+                        required 
+                        placeholder="••••••••" 
+                        value={repeatPassword}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setRepeatPassword(val);
+                          setPasswordError('');
+                          setPasswordSuccess('');
+                        }}
+                        className={`w-full bg-slate-50 border rounded-xl pl-4 pr-11 py-2.5 text-xs font-bold focus:outline-none font-mono ${
+                          getRepeatPasswordErrorStr(repeatPassword) ? 'border-red-300 focus:border-red-500' : 'border-slate-200 focus:border-red-500'
+                        } text-slate-800 placeholder:text-slate-300`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none"
+                      >
+                        {showRepeatPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {getRepeatPasswordErrorStr(repeatPassword) && (
+                      <p className="text-xs text-red-500 font-semibold mt-1 animate-fade">
+                        {getRepeatPasswordErrorStr(repeatPassword)}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="pt-4 border-t border-slate-50">

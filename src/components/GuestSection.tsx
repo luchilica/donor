@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, FileText, Phone, MapPin, Calendar, 
   ChevronRight, LogIn, UserPlus, HelpCircle, Check, Search, Download, User,
-  Bell, Send, X
+  Bell, Send, X, Eye, EyeOff
 } from 'lucide-react';
 import { BloodCenter, News, BloodGroup, RhFactor, Gender } from '../types';
 
@@ -162,6 +162,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const [regError, setRegError] = useState('');
   const [regLoading, setRegLoading] = useState(false);
   const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  const handleRegNameChange = (field: 'lastName' | 'firstName' | 'middleName', val: string) => {
+    const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+    setRegForm(prev => ({ ...prev, [field]: lettersOnly }));
+  };
 
   // Stats from DB for landing page
   const [totalDonorsCount, setTotalDonorsCount] = useState(20);
@@ -1065,14 +1073,23 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-700">Пароль</label>
-                  <input 
-                    type="password" 
-                    required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <input 
+                      type={showLoginPassword ? "text" : "password"} 
+                      required
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full pl-3.5 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowLoginPassword(!showLoginPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors-all"
+                    >
+                      {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="text-right">
@@ -1136,7 +1153,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           type="text" 
                           required
                           value={regForm.lastName}
-                          onChange={(e) => setRegForm({...regForm, lastName: e.target.value})}
+                          onChange={(e) => handleRegNameChange('lastName', e.target.value)}
                           placeholder="Иванов"
                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                         />
@@ -1147,7 +1164,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           type="text" 
                           required
                           value={regForm.firstName}
-                          onChange={(e) => setRegForm({...regForm, firstName: e.target.value})}
+                          onChange={(e) => handleRegNameChange('firstName', e.target.value)}
                           placeholder="Иван"
                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                         />
@@ -1159,7 +1176,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       <input 
                         type="text" 
                         value={regForm.middleName}
-                        onChange={(e) => setRegForm({...regForm, middleName: e.target.value})}
+                        onChange={(e) => handleRegNameChange('middleName', e.target.value)}
                         placeholder="Сергеевич"
                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                       />
@@ -1245,16 +1262,25 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Придумайте надежный пароль <span className="text-red-500">*</span></label>
-                      <input 
-                        type="password" 
-                        required
-                        value={regForm.password}
-                        onChange={(e) => setRegForm({...regForm, password: e.target.value})}
-                        placeholder="Минимум 6 символов"
-                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
-                          getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
-                        }`}
-                      />
+                      <div className="relative">
+                        <input 
+                          type={showPassword ? "text" : "password"} 
+                          required
+                          value={regForm.password}
+                          onChange={(e) => setRegForm({...regForm, password: e.target.value})}
+                          placeholder="Минимум 6 символов"
+                          className={`w-full pl-3 pr-10 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                            getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors-all"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                       {getPasswordHint(regForm.password) && (
                         <p className="text-xs text-orange-600 mt-1">{getPasswordHint(regForm.password)}</p>
                       )}
@@ -1262,16 +1288,25 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Подтверждение пароля <span className="text-red-500">*</span></label>
-                      <input 
-                        type="password" 
-                        required
-                        value={regConfirmPassword}
-                        onChange={(e) => setRegConfirmPassword(e.target.value)}
-                        placeholder="Повторите пароль"
-                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
-                          isConfirmPasswordInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
-                        }`}
-                      />
+                      <div className="relative">
+                        <input 
+                          type={showConfirmPassword ? "text" : "password"} 
+                          required
+                          value={regConfirmPassword}
+                          onChange={(e) => setRegConfirmPassword(e.target.value)}
+                          placeholder="Повторите пароль"
+                          className={`w-full pl-3 pr-10 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                            isConfirmPasswordInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 focus:outline-none transition-colors-all"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                       {isConfirmPasswordInvalid() && (
                         <p className="text-xs text-red-500 mt-1">Неверный пароль</p>
                       )}
