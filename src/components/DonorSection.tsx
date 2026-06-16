@@ -1159,9 +1159,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
                 <button 
                   type="submit"
-                  className="bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm md:text-base px-10 py-4 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 shadow-sm"
+                  className="bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <Plus className="w-5 h-5" /> Отправить анкету
+                  <Plus className="w-4 h-4" /> Отправить анкету
                 </button>
               </form>
             </div>
@@ -1200,22 +1200,22 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Когда центру крови понадобится ваша группа или редкий фенотип, вы увидите срочный запрос здесь.</p>
                 </div>
               ) : (
-                <div className="space-y-4 max-h-[550px] overflow-y-auto pr-1">
+                <div className="space-y-3 max-h-[550px] overflow-y-auto pr-1">
                   {notificationsHistory.map((notif: any) => (
                     <div 
                       key={notif.id} 
-                      className="p-5 rounded-2xl border border-slate-100 bg-slate-50/40 hover:bg-slate-50/85 transition-all space-y-3 shadow-sm hover:shadow-md"
+                      className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-slate-50/85 transition-all space-y-2 shadow-sm"
                     >
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="space-y-0.5">
-                          <span className="inline-block px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold bg-rose-50 text-rose-600 border border-rose-100">
+                          <span className="inline-block px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-extrabold bg-rose-50 text-rose-600 border border-rose-100">
                             Вызов донора
                           </span>
-                          <h4 className="font-bold text-slate-800 text-sm md:text-base leading-snug">
+                          <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight">
                             {notif.centerName}
                           </h4>
                         </div>
-                        <span className="text-[10px] md:text-xs text-slate-400 font-medium font-sans shrink-0">
+                        <span className="text-[10px] text-slate-400 font-medium font-sans shrink-0">
                           {new Date(notif.sentAt).toLocaleString('ru-RU', { 
                             day: 'numeric', 
                             month: 'short', 
@@ -1225,30 +1225,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         </span>
                       </div>
                       
-                      <p className="text-xs md:text-sm text-slate-600 font-medium leading-relaxed bg-white p-3.5 rounded-xl border border-slate-100 shadow-inner">
+                      <p className="text-xs text-slate-600 font-medium leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100 shadow-inner">
                         {notif.messageText}
                       </p>
-
-                      <div className="flex flex-wrap gap-2 text-[10px] font-bold text-slate-500">
-                        <span className="flex items-center gap-1 bg-slate-100 py-1 px-2.5 rounded-md">
-                          Канал: {notif.channel === 'all' ? 'Все' : notif.channel === 'push_sms' ? 'Push + SMS' : notif.channel.toUpperCase()}
-                        </span>
-                        {notif.pushStatus !== 'skipped' && (
-                          <span className={`py-1 px-2.5 rounded-md flex items-center gap-1 ${notif.pushStatus === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
-                            Push: {notif.pushStatus === 'sent' ? 'Доставлено' : 'Сбой'}
-                          </span>
-                        )}
-                        {notif.smsStatus !== 'skipped' && (
-                          <span className={`py-1 px-2.5 rounded-md flex items-center gap-1 ${notif.smsStatus === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
-                            SMS: {notif.smsStatus === 'sent' ? 'Доставлено (симулятор)' : 'Сбой'}
-                          </span>
-                        )}
-                        {notif.emailStatus !== 'skipped' && (
-                          <span className={`py-1 px-2.5 rounded-md flex items-center gap-1 ${notif.emailStatus === 'sent' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
-                            Email: {notif.emailStatus === 'sent' ? 'Отправлено' : 'Сбой'}
-                          </span>
-                        )}
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -1317,50 +1296,50 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Безопасность аккаунта</h3>
                 <p className="text-sm text-slate-500 font-medium">Управление доступом и паролями</p>
               </div>
-              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert("Функция изменения пароля в демо-режиме!"); }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2.5">
-                    <label className="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest pl-1">Текущий пароль</label>
-                    <input type="password" required placeholder="••••••••" className="w-full px-5 py-4 text-sm md:text-base bg-slate-50 border border-slate-200 rounded-xl focus:border-red-600 focus:ring-4 focus:ring-red-50 focus:outline-none transition-all placeholder:text-slate-300 font-mono" />
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Функция изменения пароля в демо-режиме!"); }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Текущий пароль</label>
+                    <input type="password" required placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 placeholder:text-slate-300 font-mono" />
                   </div>
                   <div className="hidden md:block"></div>
-                  <div className="space-y-2.5">
-                    <label className="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest pl-1">Новый пароль</label>
-                    <input type="password" required placeholder="Минимум 8 символов" className="w-full px-5 py-4 text-sm md:text-base bg-slate-50 border border-slate-200 rounded-xl focus:border-red-600 focus:ring-4 focus:ring-red-50 focus:outline-none transition-all placeholder:text-slate-300 font-mono" />
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Новый пароль</label>
+                    <input type="password" required placeholder="Минимум 8 символов" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 placeholder:text-slate-300 font-mono" />
                   </div>
-                  <div className="space-y-2.5">
-                    <label className="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-widest pl-1">Повторите пароль</label>
-                    <input type="password" required placeholder="••••••••" className="w-full px-5 py-4 text-sm md:text-base bg-slate-50 border border-slate-200 rounded-xl focus:border-red-600 focus:ring-4 focus:ring-red-50 focus:outline-none transition-all placeholder:text-slate-300 font-mono" />
+                  <div className="space-y-1">
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Повторите пароль</label>
+                    <input type="password" required placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-red-500 placeholder:text-slate-300 font-mono" />
                   </div>
                 </div>
                 <div className="pt-4 border-t border-slate-50">
-                  <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-10 rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3">
-                    <Check className="w-[1.2rem] h-[1.2rem] stroke-[3px]" />
+                  <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
+                    <Check className="w-4 h-4 stroke-[3px]" />
                     Обновить пароль
                   </button>
                 </div>
               </form>
             </div>
 
-            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                  <Download className="w-6 h-6 text-red-600" />
+            <div className="bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <Download className="w-4 h-4 text-red-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Установка приложения (PWA)</h3>
+                <h3 className="font-bold text-slate-800 text-sm md:text-base tracking-tight leading-tight">Установка приложения (PWA)</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100/80 hover:border-slate-200 transition-colors">
-                  <h4 className="font-bold text-slate-800 text-sm md:text-base mb-2 flex items-center gap-2 uppercase tracking-wide text-xs">
-                    <span className="w-2 h-2 rounded-full bg-blue-500"></span> iPhone / Safari
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80 hover:border-slate-200 transition-colors">
+                  <h4 className="font-bold text-slate-800 text-[11px] md:text-xs mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span> iPhone / Safari
                   </h4>
-                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Нажмите иконку <span className="bg-white px-2 py-0.5 rounded border border-slate-200 inline-block font-bold">«Поделиться»</span>, затем выберите пункт <span className="text-slate-800 font-bold">«На экран Домой»</span> и нажмите <span className="text-red-600 font-bold">«Добавить»</span>.</p>
+                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите иконку <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200 inline-block font-bold">«Поделиться»</span>, затем выберите пункт <span className="text-slate-800 font-bold">«На экран Домой»</span> и нажмите <span className="text-red-600 font-bold">«Добавить»</span>.</p>
                 </div>
-                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100/80 hover:border-slate-200 transition-colors">
-                  <h4 className="font-bold text-slate-800 text-sm md:text-base mb-2 flex items-center gap-2 uppercase tracking-wide text-xs">
-                    <span className="w-2 h-2 rounded-full bg-green-500"></span> Android / Chrome
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80 hover:border-slate-200 transition-colors">
+                  <h4 className="font-bold text-slate-800 text-[11px] md:text-xs mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span> Android / Chrome
                   </h4>
-                  <p className="text-xs md:text-sm text-slate-500 font-medium leading-relaxed">Нажмите на значок <span className="bg-white px-2 py-0.5 rounded border border-slate-200 inline-block font-bold">⋮</span> в строке браузера, выберите <span className="text-slate-800 font-bold">«Установить приложение»</span> или <span className="text-red-600 font-bold">«На главный экран»</span>.</p>
+                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите на значок <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200 inline-block font-bold">⋮</span> в строке браузера, выберите <span className="text-slate-800 font-bold">«Установить приложение»</span> или <span className="text-red-600 font-bold">«На главный экран»</span>.</p>
                 </div>
               </div>
             </div>
