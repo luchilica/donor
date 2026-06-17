@@ -36,7 +36,6 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
   // Notifications toggles
   const [notifForm, setNotifForm] = useState({
-    smsEnabled: donor.smsEnabled,
     pushEnabled: donor.pushEnabled,
     emailNotificationsEnabled: donor.emailNotificationsEnabled
   });
@@ -1513,7 +1512,6 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="space-y-2.5">
                   {[
                     { id: 'push', title: 'Push-уведомления', desc: 'Всплывающие окна в браузере или приложении', enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
-                    { id: 'sms', title: 'SMS-оповещения', desc: `Экстренные сообщения на номер ${donor.phone}`, enabled: notifForm.smsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, smsEnabled: val}) },
                     { id: 'email', title: 'Email-рассылки', desc: 'Письма с приглашениями и результатами', enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
                   ].map((notif, idx) => (
                     <div key={notif.id} className="flex items-center justify-between p-3.5 md:p-4 bg-slate-50/50 rounded-xl border border-slate-100 transition-hover hover:border-slate-200">

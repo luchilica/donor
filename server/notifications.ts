@@ -146,64 +146,6 @@ export async function sendTransactionalEmail(to: string, type: 'welcome' | 'cent
     }
 }
 
-export async function sendSmsNotification(phones: string[], messageText: string) {
-    if (phones.length === 0) return;
-    const text = messageText.substring(0, 160); // 160 chars max
-
-    const apiKey = process.env.SMS_API_KEY;
-    if (!apiKey) {
-        console.log(`\n============== [SMS SIMULATOR / СМС-СИМУЛЯТОР] ==============`);
-        console.log(`Статус: ИМИТАЦИЯ ОТПРАВКИ УСПЕШНА (API-ключ не задан в .env)`);
-        console.log(`Отправитель: "Donor-Alert"`);
-        console.log(`Получатели (${phones.length}): ${phones.join(', ')}`);
-        console.log(`Сообщение: "${text}"`);
-        console.log(`=============================================================\n`);
-        return;
-    }
-
-    try {
-        // Fix Belarusian numbers entered as 8029... instead of 37529...
-        const formattedPhones = phones.map(p => {
-            if (p.startsWith('80') && p.length === 11) {
-                return '375' + p.substring(2);
-            }
-            if (p.startsWith('8') && p.length === 11) {
-                return '7' + p.substring(1);
-            }
-            return p;
-        });
-
-        // Determine provider roughly by key structure or length
-        if (apiKey.length > 32 || apiKey.includes('-') || process.env.SMS_PROVIDER === 'unisender') {
-            // UNISENDER
-            const url = `https://api.unisender.com/ru/api/sendSms?format=json&api_key=${apiKey}&phone=${formattedPhones.join(',')}&sender=INFORM&text=${encodeURIComponent(text)}`;
-            console.log(`[UNISENDER] Sending via real gateway...`);
-            const response = await fetch(url);
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok || data.error) {
-                console.error('[UNISENDER] SMS notification error:', data.error || response.status);
-            } else {
-                console.log('[UNISENDER] API call completed. Status:', data);
-            }
-        } else {
-            // SMSPILOT
-            // added from=INFORM
-            const url = `https://smspilot.ru/api.php?send=${encodeURIComponent(text)}&to=${formattedPhones.join(',')}&apikey=${apiKey}&format=json&from=INFORM`;
-            console.log(`[SMSPILOT] Sending to ${formattedPhones.join(',')} via real gateway...`);
-            const response = await fetch(url);
-            const data = await response.json().catch(() => ({}));
-
-            if (!response.ok || data.error) {
-                console.error('[SMSPILOT] SMS notification error:', data.error || response.status);
-            } else {
-                console.log('[SMSPILOT] API call completed. Status:', data);
-            }
-        }
-    } catch (e) {
-        console.error('SMS notification error:', e);
-    }
-}
-
 export async function dispatchNotifications(
     donors: Donor[], 
     channel: string, 
@@ -217,8 +159,7 @@ export async function dispatchNotifications(
             const emails: string[] = [];
             const phones: string[] = [];
 
-            const needsPush = ['push', 'push_sms', 'all'].includes(channel);
-            const needsSms = ['sms', 'push_sms', 'all'].includes(channel);
+            const needsPush = ['push', 'all'].includes(channel);
             const needsEmail = ['email', 'all'].includes(channel);
 
             for (const donor of donors) {
@@ -228,15 +169,11 @@ export async function dispatchNotifications(
                 if (needsEmail && donor.emailNotificationsEnabled && donor.email) {
                     emails.push(donor.email);
                 }
-                if (needsSms && donor.smsEnabled && donor.phone) {
-                    phones.push(donor.phone.replace(/\D/g, ''));
-                }
             }
 
             const tasks = [];
             if (pushPlayerIds.length > 0) tasks.push(sendPushNotification(pushPlayerIds, messageText));
             if (emails.length > 0) tasks.push(sendEmailNotification(emails, messageText, centerPhone));
-            if (phones.length > 0) tasks.push(sendSmsNotification(phones, messageText));
 
             await Promise.allSettled(tasks);
         } catch (e) {

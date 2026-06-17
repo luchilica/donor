@@ -167,7 +167,6 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
     email: '',
     password: '',
     primaryCenterId: '',
-    smsEnabled: true,
     pushEnabled: true,
     emailNotificationsEnabled: true,
     agreeTerms: false
@@ -459,7 +458,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       setRegForm({
                         lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male',
                         bloodGroup: 'II_A', rhFactor: 'positive', weight: '70', phone: '+375', email: '', password: '',
-                        primaryCenterId: '', smsEnabled: true, pushEnabled: true, emailNotificationsEnabled: true, agreeTerms: false
+                        primaryCenterId: '', pushEnabled: true, emailNotificationsEnabled: true, agreeTerms: false
                       });
                       setRegConfirmPassword('');
                       setShowAuthModal('register');
@@ -1413,16 +1412,6 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           className="mr-2 rounded text-red-600 focus:ring-red-500 border-slate-300"
                         />
                         Браузерные всплывающие Push-уведомления
-                      </label>
-
-                      <label className="flex items-center text-xs text-slate-700 cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          checked={regForm.smsEnabled}
-                          onChange={(e) => setRegForm({...regForm, smsEnabled: e.target.checked})}
-                          className="mr-2 rounded text-red-600 focus:ring-red-500 border-slate-300"
-                        />
-                        Экстренные сотовые SMS-оповещения
                       </label>
 
                       <label className="flex items-center text-xs text-slate-700 cursor-pointer">

@@ -25,7 +25,6 @@ model BloodCenter {
   medicalNotes MedicalNote[]
   notifications Notification[]
   news        News[]
-  smsTemplates SmsTemplate[]
 
   @@map("blood_centers")
 }
@@ -72,7 +71,6 @@ model Donor {
   weight                  Decimal      @db.Decimal(5, 2)
   phone                   String       @db.VarChar(20)
   status                  DonorStatus  @default(active)
-  smsEnabled              Boolean      @default(false)
   pushEnabled             Boolean      @default(false)
   emailNotificationsEnabled Boolean    @default(true)
   onesignalPlayerId       String?      @db.VarChar(255)
@@ -210,7 +208,6 @@ model Notification {
   messageText          String   @db.Text
   recipientsCount      Int      @default(0)
   pushSent             Int      @default(0)
-  smsSent              Int      @default(0)
   emailSent            Int      @default(0)
   status               NotificationStatus
   createdAt            DateTime @default(now())
@@ -236,9 +233,7 @@ enum NotificationDonationType {
 
 enum NotificationChannel {
   push
-  sms
   email
-  push_sms
   all
 }
 
@@ -255,7 +250,6 @@ model NotificationRecipient {
   donorId        Int
   donor          Donor    @relation(fields: [donorId], references: [id])
   pushStatus     DeliveryStatus
-  smsStatus      DeliveryStatus
   emailStatus    DeliveryStatus
   sentAt         DateTime
 
@@ -280,16 +274,4 @@ model News {
   createdById Int?
 
   @@map("news")
-}
-
-model SmsTemplate {
-  id          Int      @id @default(autoincrement())
-  centerId    Int?
-  center      BloodCenter? @relation(fields: [centerId], references: [id])
-  name        String   @db.VarChar(100)
-  text        String   @db.VarChar(160)
-  isDefault   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  @@map("sms_templates")
 }

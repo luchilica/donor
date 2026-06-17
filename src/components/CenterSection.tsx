@@ -435,7 +435,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           });
           const data = await res.json();
           if (res.ok) {
-            setNotifySuccessMsg(`Рассылка отправлена! Получателей: ${data.recipientsCount}. Подробности:\n- Push получено: ${data.pushSent}\n- SMS оформлено: ${data.smsSent}\n- Email направлено: ${data.emailSent}`);
+            setNotifySuccessMsg(`Рассылка отправлена! Получателей: ${data.recipientsCount}. Подробности:\n- Push получено: ${data.pushSent}\n- Email направлено: ${data.emailSent}`);
             setNotifyForm({ ...notifyForm, messageText: '' });
             refreshDashboard();
           }
@@ -1146,10 +1146,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <label>Предпочтительный канал доставки рассылки:</label>
                 <div className="flex flex-wrap gap-4 pt-1 font-medium">
                   {[
-                    { id: 'all', label: 'Все три канала (Push + SMS + Email)' },
-                    { id: 'push_sms', label: 'Push + SMS' },
+                    { id: 'all', label: 'Оба канала (Push + Email)' },
                     { id: 'push', label: 'Только Push-уведомления' },
-                    { id: 'sms', label: 'Только сотовые SMS' },
                     { id: 'email', label: 'Только письма на E-mail' }
                   ].map(chan => (
                     <label key={chan.id} className="flex items-center text-xs cursor-pointer font-semibold text-slate-700">
@@ -1217,14 +1215,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <span>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</span>
                   </div>
                   <p className="font-semibold text-slate-850 text-slate-800 italic leading-snug">« {item.messageText} »</p>
-                  <div className="pt-2 border-t border-slate-200/60 grid grid-cols-3 text-center text-[10px] gap-1 font-semibold text-slate-500">
+                  <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 text-center text-[10px] gap-1 font-semibold text-slate-500">
                     <div>
                       <span className="block text-red-700 font-bold">{item.pushSent} / {item.recipientsCount}</span>
                       <span>Push</span>
-                    </div>
-                    <div>
-                      <span className="block text-red-700 font-bold">{item.smsSent} / {item.recipientsCount}</span>
-                      <span>SMS</span>
                     </div>
                     <div>
                       <span className="block text-red-700 font-bold">{item.emailSent} / {item.recipientsCount}</span>

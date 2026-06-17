@@ -5,7 +5,7 @@ export type RhFactor = 'positive' | 'negative';
 export type DonorStatus = 'active' | 'inactive';
 export type DonationType = 'blood' | 'plasma' | 'platelets' | 'granulocytes';
 export type DonorCenterStatus = 'pending' | 'confirmed' | 'rejected';
-export type NotificationChannel = 'push' | 'sms' | 'email' | 'push_sms' | 'all';
+export type NotificationChannel = 'push' | 'email' | 'all';
 export type NotificationStatus = 'sent' | 'partial' | 'failed';
 
 export interface BloodCenter {
@@ -46,7 +46,6 @@ export interface Donor {
   weight: number;
   phone: string;
   status: DonorStatus;
-  smsEnabled: boolean;
   pushEnabled: boolean;
   emailNotificationsEnabled: boolean;
   onesignalPlayerId?: string | null;
@@ -139,7 +138,6 @@ export interface Notification {
   messageText: string;
   recipientsCount: number;
   pushSent: number;
-  smsSent: number;
   emailSent: number;
   status: NotificationStatus;
   createdAt: string;
@@ -150,18 +148,8 @@ export interface NotificationRecipient {
   notificationId: number;
   donorId: number;
   pushStatus: 'sent' | 'failed' | 'skipped';
-  smsStatus: 'sent' | 'failed' | 'skipped';
   emailStatus: 'sent' | 'failed' | 'skipped';
   sentAt: string;
-}
-
-export interface SmsTemplate {
-  id: number;
-  centerId?: number | null;
-  name: string;
-  text: string;
-  isDefault: boolean;
-  createdAt: string;
 }
 
 // Client helper translations

@@ -38,7 +38,6 @@ export interface DatabaseState {
   news: News[];
   notifications: Notification[];
   notificationRecipients: NotificationRecipient[];
-  smsTemplates: SmsTemplate[];
 }
 
 const INITIAL_CENTERS: BloodCenter[] = [
@@ -541,7 +540,6 @@ const INITIAL_DONORS: Donor[] = [
     weight: 78,
     phone: "+375 (29) 111-22-33",
     status: "active",
-    smsEnabled: true,
     pushEnabled: true,
     emailNotificationsEnabled: true,
     onesignalPlayerId: "onesignal-player-donor-1",
@@ -637,23 +635,12 @@ const seededState: DatabaseState = {
       messageText: "Донор-Алерт: Срочно требуется кровь группы II (A) Rh+. Позвоните: +375 (17) 289-86-40 или посетите личный кабинет.",
       recipientsCount: 4,
       pushSent: 4,
-      smsSent: 3,
       emailSent: 4,
       status: "sent",
       createdAt: "2026-06-03T10:45:00Z"
     }
   ],
   notificationRecipients: [],
-  smsTemplates: [
-    {
-      id: 1,
-      centerId: 1,
-      name: "Срочный призыв",
-      text: "Внимание! Срочно требуется кровь вашей группы. Пожалуйста, придите в центр крови в ближайшее время.",
-      isDefault: true,
-      createdAt: new Date().toISOString()
-    }
-  ]
 };
 
 // Fill up dynamic databases
@@ -697,7 +684,6 @@ for (let i = 0; i < 19; i++) {
     weight,
     phone,
     status: "active",
-    smsEnabled: i % 3 !== 2,
     pushEnabled: i % 3 === 0,
     emailNotificationsEnabled: true,
     onesignalPlayerId: `onesignal-player-donor-${donorId}`,
@@ -995,7 +981,6 @@ async function seedPostgresWithSeededState() {
         messageText: item.messageText,
         recipientsCount: item.recipientsCount || 0,
         pushSent: item.pushSent || 0,
-        smsSent: item.smsSent || 0,
         emailSent: item.emailSent || 0,
         status: item.status as any,
         createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
@@ -1011,23 +996,8 @@ async function seedPostgresWithSeededState() {
         notificationId: item.notificationId,
         donorId: item.donorId,
         pushStatus: item.pushStatus as any,
-        smsStatus: item.smsStatus as any,
         emailStatus: item.emailStatus as any,
         sentAt: item.sentAt ? new Date(item.sentAt) : new Date(),
-      }
-    });
-  }
-
-  // 10. SMS Templates
-  for (const item of data.smsTemplates) {
-    await prisma.smsTemplate.create({
-      data: {
-        id: item.id,
-        centerId: item.centerId || null,
-        name: item.name,
-        text: item.text,
-        isDefault: item.isDefault !== undefined ? item.isDefault : false,
-        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
       }
     });
   }
@@ -1042,8 +1012,7 @@ async function seedPostgresWithSeededState() {
     { name: 'medical_notes', seq: 'medical_notes' },
     { name: 'news', seq: 'news' },
     { name: 'notifications', seq: 'notifications' },
-    { name: 'notification_recipients', seq: 'notification_recipients' },
-    { name: 'sms_templates', seq: 'sms_templates' }
+    { name: 'notification_recipients', seq: 'notification_recipients' }
   ];
 
   for (const table of tables) {
@@ -1108,8 +1077,7 @@ export async function getDb(): Promise<DatabaseState> {
         prisma.medicalNote.findMany(),
         prisma.news.findMany(),
         prisma.notification.findMany(),
-        prisma.notificationRecipient.findMany(),
-        prisma.smsTemplate.findMany()
+        prisma.notificationRecipient.findMany()
       ]);
 
       cachedDb = {
@@ -1149,7 +1117,6 @@ export async function getDb(): Promise<DatabaseState> {
           weight: Number(m.weight),
           phone: m.phone,
           status: m.status as any,
-          smsEnabled: m.smsEnabled,
           pushEnabled: m.pushEnabled,
           emailNotificationsEnabled: m.emailNotificationsEnabled,
           onesignalPlayerId: m.onesignalPlayerId,
@@ -1232,7 +1199,6 @@ export async function getDb(): Promise<DatabaseState> {
           messageText: m.messageText,
           recipientsCount: m.recipientsCount,
           pushSent: m.pushSent,
-          smsSent: m.smsSent,
           emailSent: m.emailSent,
           status: m.status as any,
           createdAt: m.createdAt.toISOString()
@@ -1242,17 +1208,8 @@ export async function getDb(): Promise<DatabaseState> {
           notificationId: m.notificationId,
           donorId: m.donorId,
           pushStatus: m.pushStatus as any,
-          smsStatus: m.smsStatus as any,
           emailStatus: m.emailStatus as any,
           sentAt: m.sentAt.toISOString()
-        })),
-        smsTemplates: dbSmsTemplates.map(m => ({
-          id: m.id,
-          centerId: m.centerId,
-          name: m.name,
-          text: m.text,
-          isDefault: m.isDefault,
-          createdAt: m.createdAt.toISOString()
         }))
       };
 
@@ -1365,7 +1322,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             weight: donor.weight,
             phone: donor.phone,
             status: donor.status as any,
-            smsEnabled: donor.smsEnabled,
             pushEnabled: donor.pushEnabled,
             emailNotificationsEnabled: donor.emailNotificationsEnabled,
             onesignalPlayerId: donor.onesignalPlayerId,
@@ -1397,7 +1353,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             weight: donor.weight,
             phone: donor.phone,
             status: donor.status as any,
-            smsEnabled: donor.smsEnabled,
             pushEnabled: donor.pushEnabled,
             emailNotificationsEnabled: donor.emailNotificationsEnabled,
             onesignalPlayerId: donor.onesignalPlayerId,
@@ -1574,7 +1529,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             messageText: n.messageText,
             recipientsCount: n.recipientsCount,
             pushSent: n.pushSent,
-            smsSent: n.smsSent,
             emailSent: n.emailSent,
             status: n.status as any,
           },
@@ -1592,7 +1546,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             messageText: n.messageText,
             recipientsCount: n.recipientsCount,
             pushSent: n.pushSent,
-            smsSent: n.smsSent,
             emailSent: n.emailSent,
             status: n.status as any,
             createdAt: n.createdAt ? new Date(n.createdAt) : new Date(),
@@ -1611,7 +1564,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             notificationId: rec.notificationId,
             donorId: rec.donorId,
             pushStatus: rec.pushStatus as any,
-            smsStatus: rec.smsStatus as any,
             emailStatus: rec.emailStatus as any,
           },
           create: {
@@ -1619,30 +1571,8 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             notificationId: rec.notificationId,
             donorId: rec.donorId,
             pushStatus: rec.pushStatus as any,
-            smsStatus: rec.smsStatus as any,
             emailStatus: rec.emailStatus as any,
             sentAt: rec.sentAt ? new Date(rec.sentAt) : new Date(),
-          }
-        });
-      }
-
-      // 9. Sync SMS Templates
-      for (const temp of (state.smsTemplates || [])) {
-        await prisma.smsTemplate.upsert({
-          where: { id: temp.id },
-          update: {
-            centerId: temp.centerId,
-            name: temp.name,
-            text: temp.text,
-            isDefault: temp.isDefault,
-          },
-          create: {
-            id: temp.id,
-            centerId: temp.centerId,
-            name: temp.name,
-            text: temp.text,
-            isDefault: temp.isDefault,
-            createdAt: temp.createdAt ? new Date(temp.createdAt) : new Date()
           }
         });
       }

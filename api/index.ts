@@ -174,7 +174,6 @@ app.get('/api/download/contraindications', (req, res) => {
       email,
       password,
       primaryCenterId,
-      smsEnabled,
       pushEnabled,
       emailNotificationsEnabled
     } = req.body;
@@ -232,7 +231,6 @@ app.get('/api/download/contraindications', (req, res) => {
       weight: parseFloat(weight),
       phone,
       status: 'active',
-      smsEnabled: !!smsEnabled,
       pushEnabled: !!pushEnabled,
       emailNotificationsEnabled: !!emailNotificationsEnabled,
       onesignalPlayerId: `onesignal-${newDonorId}-${Math.floor(Math.random() * 900000 + 100000)}`,
@@ -565,12 +563,11 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // UPDATE NOTIFICATION ENABLED CHANNELS
   app.put('/api/donor/notifications', async (req, res) => {
-    const { donorId, smsEnabled, pushEnabled, emailNotificationsEnabled, onesignalPlayerId } = req.body;
+    const { donorId, pushEnabled, emailNotificationsEnabled, onesignalPlayerId } = req.body;
     const db = await getDb();
     const donor = db.donors.find(d => d.id === parseInt(donorId));
     if (!donor) return res.status(404).json({ error: 'Профиль не найден' });
 
-    if (smsEnabled !== undefined) donor.smsEnabled = !!smsEnabled;
     if (pushEnabled !== undefined) donor.pushEnabled = !!pushEnabled;
     if (emailNotificationsEnabled !== undefined) donor.emailNotificationsEnabled = !!emailNotificationsEnabled;
     if (onesignalPlayerId !== undefined) donor.onesignalPlayerId = onesignalPlayerId;
@@ -599,7 +596,6 @@ app.get('/api/download/contraindications', (req, res) => {
         centerName: center?.name || 'Центр крови',
         sentAt: rec.sentAt || notif?.createdAt || new Date().toISOString(),
         pushStatus: rec.pushStatus,
-        smsStatus: rec.smsStatus,
         emailStatus: rec.emailStatus,
         channel: notif?.channel || 'all'
       };
@@ -794,7 +790,6 @@ app.get('/api/download/contraindications', (req, res) => {
       weight: parseFloat(weight),
       phone,
       status: 'active',
-      smsEnabled: true,
       pushEnabled: false,
       emailNotificationsEnabled: true,
       personalPause: false,
@@ -1087,7 +1082,7 @@ app.get('/api/download/contraindications', (req, res) => {
     res.json({ count: list.donors.length });
   });
 
-  // SEND SYSTEM ALERTS (PUSH, SMS, EMAIL)
+  // SEND SYSTEM ALERTS (PUSH, EMAIL)
   app.post('/api/center/notify/send', async (req, res) => {
     const {
       centerId,
@@ -1114,16 +1109,13 @@ app.get('/api/download/contraindications', (req, res) => {
     const newNotificationId = db.notifications.length > 0 ? Math.max(...db.notifications.map(n => n.id)) + 1 : 1;
 
     let totalPush = 0;
-    let totalSms = 0;
     let totalEmail = 0;
 
     const recipientsMap = targetDonors.map(donor => {
       let pushStatus: 'sent' | 'skipped' | 'failed' = 'skipped';
-      let smsStatus: 'sent' | 'skipped' | 'failed' = 'skipped';
       let emailStatus: 'sent' | 'skipped' | 'failed' = 'skipped';
 
-      const needsPush = ['push', 'push_sms', 'all'].includes(channel);
-      const needsSms = ['sms', 'push_sms', 'all'].includes(channel);
+      const needsPush = ['push', 'all'].includes(channel);
       const needsEmail = ['email', 'all'].includes(channel);
 
       if (needsPush) {
@@ -1132,15 +1124,6 @@ app.get('/api/download/contraindications', (req, res) => {
           totalPush++;
         } else {
           pushStatus = 'failed';
-        }
-      }
-
-      if (needsSms) {
-        if (donor.smsEnabled && donor.phone) {
-          smsStatus = 'sent';
-          totalSms++;
-        } else {
-          smsStatus = 'failed';
         }
       }
 
@@ -1159,7 +1142,6 @@ app.get('/api/download/contraindications', (req, res) => {
         notificationId: newNotificationId,
         donorId: donor.id,
         pushStatus,
-        smsStatus,
         emailStatus,
         sentAt: new Date().toISOString()
       };
@@ -1181,7 +1163,6 @@ app.get('/api/download/contraindications', (req, res) => {
       messageText,
       recipientsCount: targetDonors.length,
       pushSent: totalPush,
-      smsSent: totalSms,
       emailSent: totalEmail,
       status: targetDonors.length === 0 ? 'failed' : 'sent',
       createdAt: new Date().toISOString()
@@ -1198,7 +1179,6 @@ app.get('/api/download/contraindications', (req, res) => {
       success: true,
       recipientsCount: targetDonors.length,
       pushSent: totalPush,
-      smsSent: totalSms,
       emailSent: totalEmail
     });
   });
