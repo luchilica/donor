@@ -7,6 +7,7 @@ import {
   BloodCenter, Donor, DonorCenter, Donation, MedicalNote, 
   Notification, News, BloodGroup, RhFactor, DonationType, formatBloodGroup, formatRhFactor 
 } from '../types';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface CenterSectionProps {
   center: BloodCenter;
@@ -56,7 +57,6 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
   // New forms states inside profile card
   const [showAddDonationModal, setShowAddDonationModal] = useState(false);
-  const [deleteDonationId, setDeleteDonationId] = useState<number | null>(null);
   const [donationForm, setDonationForm] = useState({
     donationDate: new Date().toISOString().split('T')[0],
     donationType: 'blood' as DonationType,
@@ -99,6 +99,24 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   });
   const [notifyPreviewCount, setNotifyPreviewCount] = useState<number>(0);
   const [notifySuccessMsg, setNotifySuccessMsg] = useState('');
+
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'success' | 'warning' | 'info';
+    onConfirm: () => void;
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+
+  const requestConfirm = (options: Omit<typeof confirmConfig, 'isOpen'>) => {
+    setConfirmConfig({ ...options, isOpen: true });
+  };
+
+  const closeConfirm = () => {
+    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+  };
 
   // --- API CALL HANDLERS ---
 
@@ -258,124 +276,173 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   };
 
   // Confirm pending application
-  const handleConfirmPending = async (linkId: number) => {
-    try {
-      const res = await fetch(`${apiBase}/center/pending/${linkId}/resolve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'confirmed' })
-      });
-      if (res.ok) {
-        alert('Заявка донора успешно одобрена и подтверждена!');
-        loadPending();
-        refreshDashboard();
+  const handleConfirmPending = (linkId: number) => {
+    requestConfirm({
+      title: 'Одобрить заявку',
+      message: 'Вы уверены, что хотите одобрить заявку донора на прикрепление к вашему центру крови?',
+      variant: 'success',
+      confirmText: 'Одобрить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/center/pending/${linkId}/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'confirmed' })
+          });
+          if (res.ok) {
+            loadPending();
+            refreshDashboard();
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
   // Reject pending application (submits cause reason text via modal)
-  const handleRejectPendingSubmit = async (e: React.FormEvent) => {
+  const handleRejectPendingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!rejectionReason.trim()) {
       alert('Укажите причину обязательно');
       return;
     }
-    try {
-      const res = await fetch(`${apiBase}/center/pending/${rejectionModalLinkId}/resolve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'rejected', rejectionReason })
-      });
-      if (res.ok) {
-        alert('Заявка отклонена. Донору выслано извещение.');
-        setRejectionModalLinkId(null);
-        setRejectionReason('');
-        loadPending();
-        refreshDashboard();
+    requestConfirm({
+      title: 'Отклонить заявку?',
+      message: 'Вы уверены, что хотите отклонить эту заявку? Донору будет направлено соответствующее извещение с указанной вами причиной.',
+      variant: 'danger',
+      confirmText: 'Отклонить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/center/pending/${rejectionModalLinkId}/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'rejected', rejectionReason })
+          });
+          if (res.ok) {
+            setRejectionModalLinkId(null);
+            setRejectionReason('');
+            loadPending();
+            refreshDashboard();
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
   // Add Donation Record past
-  const handleAddDonation = async (e: React.FormEvent) => {
+  const handleAddDonation = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDonorId) return;
-    try {
-      const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}/donations`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ centerId: center.id, addedBy: 2, ...donationForm })
-      });
-      if (res.ok) {
-        alert('Процедура занесена в реестр донаций донора!');
-        setShowAddDonationModal(false);
-        loadDonorCard(selectedDonorId);
-        refreshDashboard();
+    requestConfirm({
+      title: 'Сохранить донацию?',
+      message: 'Вы уверены, что хотите добавить эту запись в реестр донаций донора?',
+      variant: 'success',
+      confirmText: 'Сохранить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}/donations`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ centerId: center.id, addedBy: 2, ...donationForm })
+          });
+          if (res.ok) {
+            setShowAddDonationModal(false);
+            loadDonorCard(selectedDonorId);
+            refreshDashboard();
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
   // Add Medical note restriction
-  const handleAddMedical = async (e: React.FormEvent) => {
+  const handleAddMedical = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDonorId) return;
-    try {
-      const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}/medical-notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          centerId: center.id,
-          reason: medicalForm.reason,
-          startDate: medicalForm.startDate,
-          endDate: medicalForm.isPermanent ? '' : medicalForm.endDate,
-          createdBy: 2
-        })
-      });
-      if (res.ok) {
-        alert('Медицинский отвод донора активен!');
-        setShowAddMedicalModal(false);
-        loadDonorCard(selectedDonorId);
+    requestConfirm({
+      title: 'Сохранить медотвод?',
+      message: 'Вы уверены, что хотите добавить медицинский отвод данному донору?',
+      variant: 'danger',
+      confirmText: 'Сохранить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}/medical-notes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              centerId: center.id,
+              reason: medicalForm.reason,
+              startDate: medicalForm.startDate,
+              endDate: medicalForm.isPermanent ? '' : medicalForm.endDate,
+              createdBy: 2
+            })
+          });
+          if (res.ok) {
+            setShowAddMedicalModal(false);
+            loadDonorCard(selectedDonorId);
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
-  // Lift medical note handily
-  const handleLiftMedical = async (noteId: number) => {
+  const handleLiftMedical = (noteId: number) => {
     if (!selectedDonorId) return;
-    try {
-      const res = await fetch(`${apiBase}/center/medical-notes/${noteId}/lift`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ liftNote: 'Снят досрочно лечащим врачом-трансфузиологом РНПЦ', liftedBy: 2 })
-      });
-      if (res.ok) {
-        alert('Медотвод снят!');
-        loadDonorCard(selectedDonorId);
+    requestConfirm({
+      title: 'Снять медотвод?',
+      message: 'Вы уверены, что хотите досрочно снять медицинский отвод? Это действие позволит донору снова записываться на донации.',
+      variant: 'warning',
+      confirmText: 'Снять',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/center/medical-notes/${noteId}/lift`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ liftNote: 'Снят досрочно лечащим врачом-трансфузиологом РНПЦ', liftedBy: 2 })
+          });
+          if (res.ok) {
+            // alert('Медотвод снят!');
+            loadDonorCard(selectedDonorId);
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
   // Send campaign broadcasts alertor
-  const handleSendBroadcast = async (e: React.FormEvent) => {
+  const handleSendBroadcast = (e: React.FormEvent) => {
     e.preventDefault();
     setNotifySuccessMsg('');
     if (!notifyForm.messageText.trim()) {
       alert('Текст уведомления пуст!');
       return;
     }
-    try {
-      const res = await fetch(`${apiBase}/center/notify/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ centerId: center.id, sentBy: 2, ...notifyForm })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setNotifySuccessMsg(`Рассылка отправлена! Получателей: ${data.recipientsCount}. Подробности:\n- Push получено: ${data.pushSent}\n- SMS оформлено: ${data.smsSent}\n- Email направлено: ${data.emailSent}`);
-        setNotifyForm({ ...notifyForm, messageText: '' });
-        refreshDashboard();
+    requestConfirm({
+      title: 'Подтвердите отправку оповещения',
+      message: `Потенциальное количество получателей: ${notifyPreviewCount}. Начать рассылку?`,
+      variant: 'warning',
+      confirmText: 'Отправить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/center/notify/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ centerId: center.id, sentBy: 2, ...notifyForm })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setNotifySuccessMsg(`Рассылка отправлена! Получателей: ${data.recipientsCount}. Подробности:\n- Push получено: ${data.pushSent}\n- SMS оформлено: ${data.smsSent}\n- Email направлено: ${data.emailSent}`);
+            setNotifyForm({ ...notifyForm, messageText: '' });
+            refreshDashboard();
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
   // Load alert template defaults quick
@@ -394,33 +461,49 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   };
 
   // Manage regional news CRUD
-  const handleNewsSubmit = async (e: React.FormEvent) => {
+  const handleNewsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const method = editingNews ? 'PUT' : 'POST';
-      const url = editingNews ? `${apiBase}/news/${editingNews.id}` : `${apiBase}/news`;
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ centerId: center.id, sentBy: 2, ...newsForm })
-      });
-      if (res.ok) {
-        alert(editingNews ? 'Новость отредактирована' : 'Новость опубликована!');
-        setShowNewsModal(false);
-        setEditingNews(null);
-        refreshDashboard();
+    requestConfirm({
+      title: editingNews ? 'Сохранить публикацию?' : 'Опубликовать новость?',
+      message: 'Вы уверены, что хотите сохранить изменения и опубликовать новость на портале?',
+      variant: 'info',
+      confirmText: 'Сохранить',
+      onConfirm: async () => {
+        try {
+          const method = editingNews ? 'PUT' : 'POST';
+          const url = editingNews ? `${apiBase}/news/${editingNews.id}` : `${apiBase}/news`;
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ centerId: center.id, sentBy: 2, ...newsForm })
+          });
+          if (res.ok) {
+            setShowNewsModal(false);
+            setEditingNews(null);
+            refreshDashboard();
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
-  const handleNewsDelete = async (id: number) => {
-    if (!confirm('Вы уверены, что хотите безвозвратно удалить эту новость?')) return;
-    try {
-      const res = await fetch(`${apiBase}/news/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        refreshDashboard();
+  const handleNewsDelete = (id: number) => {
+    requestConfirm({
+      title: 'Удалить новость?',
+      message: 'Вы уверены, что хотите безвозвратно удалить эту новость?',
+      variant: 'danger',
+      confirmText: 'Удалить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/news/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            refreshDashboard();
+          }
+        } catch {}
+        closeConfirm();
       }
-    } catch {}
+    });
   };
 
   const bloodSlices = [
@@ -707,7 +790,22 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                 <button 
                                   onClick={(e) => {
                                     e.preventDefault();
-                                    setDeleteDonationId(don.id);
+                                    requestConfirm({
+                                      title: 'Удалить донацию?',
+                                      message: 'Это действие необратимо. Запись будет навсегда удалена из истории донора.',
+                                      variant: 'danger',
+                                      confirmText: 'Удалить',
+                                      onConfirm: async () => {
+                                        try {
+                                          const res = await fetch(`${apiBase}/donations/${don.id}`, { method: 'DELETE' });
+                                          if (res.ok) {
+                                            loadDonorCard(donorCard.donor.id);
+                                            refreshDashboard();
+                                          }
+                                        } catch {}
+                                        closeConfirm();
+                                      }
+                                    });
                                   }}
                                   className="text-red-500 hover:text-red-700 font-semibold text-[10px] uppercase tracking-wider"
                                 >
@@ -1582,40 +1680,16 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         </div>
       )}
 
-      {/* Delete Donation Confirmation Modal */}
-      {deleteDonationId && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 sm:p-8 relative shadow-2xl">
-            <h3 className="text-xl font-bold text-slate-800 tracking-tight leading-tight mb-2">Удалить донацию?</h3>
-            <p className="text-sm text-slate-500 mb-6 font-medium leading-relaxed">
-              Это действие необратимо. Запись будет навсегда удалена из истории донора.
-            </p>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setDeleteDonationId(null)}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl transition duration-150 text-sm"
-              >
-                Отмена
-              </button>
-              <button 
-                onClick={async () => {
-                  try {
-                    const res = await fetch(`${apiBase}/donations/${deleteDonationId}`, { method: 'DELETE' });
-                    if (res.ok) {
-                      setDeleteDonationId(null);
-                      if (donorCard) loadDonorCard(donorCard.donor.id);
-                      refreshDashboard();
-                    }
-                  } catch {}
-                }}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-3 rounded-xl transition duration-150 text-sm"
-              >
-                Удалить
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal 
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        variant={confirmConfig.variant}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={closeConfirm}
+      />
     </div>
   );
 }

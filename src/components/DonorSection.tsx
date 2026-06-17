@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Donor, DonorCenter, Donation, MedicalNote, BloodCenter, formatBloodGroup, formatRhFactor, getGamificationStatus } from '../types';
 import { calculateNextDates } from '../utils/intervals';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface DonorSectionProps {
   donor: Donor;
@@ -44,6 +45,24 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   // Received notifications list states
   const [notificationsHistory, setNotificationsHistory] = useState<any[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'success' | 'warning' | 'info';
+    onConfirm: () => void;
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+
+  const requestConfirm = (options: Omit<typeof confirmConfig, 'isOpen'>) => {
+    setConfirmConfig({ ...options, isOpen: true });
+  };
+
+  const closeConfirm = () => {
+    setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+  };
 
   const fetchNotificationsHistory = async () => {
     try {
@@ -126,10 +145,19 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       return;
     }
 
-    setPasswordSuccess('Пароль успешно обновлен!');
-    setCurrentPassword('');
-    setNewPassword('');
-    setRepeatPassword('');
+    requestConfirm({
+      title: 'Обновить пароль?',
+      message: 'Вы уверены, что хотите изменить пароль вашей учетной записи?',
+      variant: 'warning',
+      confirmText: 'Обновить',
+      onConfirm: () => {
+        setPasswordSuccess('Пароль успешно обновлен!');
+        setCurrentPassword('');
+        setNewPassword('');
+        setRepeatPassword('');
+        closeConfirm();
+      }
+    });
   };
 
   const formatBelarusPhone = (val: string): string => {
@@ -230,7 +258,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     });
   }, [donor.id, donor.lastName, donor.firstName, donor.middleName, donor.birthDate, donor.gender, donor.phone, donor.email, donor.weight, donor.bloodGroup, donor.rhFactor]);
 
-  const handleProfileSubmit = async (e: React.FormEvent) => {
+  const handleProfileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setEditSuccess('');
     setEditError('');
@@ -243,28 +271,38 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       setEditError('E-mail должен быть в формате имя@домен (например, donor@example.com)');
       return;
     }
-    try {
-      const res = await fetch(`${apiBase}/donor/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({
-          donorId: donor.id,
-          ...profileForm
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Ошибка при сохранении профиля');
+
+    requestConfirm({
+      title: 'Сохранить изменения?',
+      message: 'Вы уверены, что хотите обновить личные данные профиля?',
+      variant: 'info',
+      confirmText: 'Сохранить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/donor/profile`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              donorId: donor.id,
+              ...profileForm
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Ошибка при сохранении профиля');
+          }
+          setEditSuccess('Профиль успешно сохранен и отправлен в центр крови для подтверждения!');
+          setIsEditingProfile(false);
+          onRefresh();
+        } catch (err: any) {
+          setEditError(err.message || 'Ошибка обновления профиля');
+        }
+        closeConfirm();
       }
-      setEditSuccess('Профиль успешно сохранен и отправлен в центр крови для подтверждения!');
-      setIsEditingProfile(false);
-      onRefresh();
-    } catch (err: any) {
-      setEditError(err.message || 'Ошибка обновления профиля');
-    }
+    });
   };
 
   const triggerRefresh = async () => {
@@ -274,99 +312,132 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   };
 
   // Submit pause changes
-  const handlePauseSubmit = async (e: React.FormEvent) => {
+  const handlePauseSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setPauseSuccess('');
-    try {
-      const res = await fetch(`${apiBase}/donor/pause`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({
-          donorId: donor.id,
-          ...pauseForm
-        })
-      });
-      if (res.ok) {
-        setPauseSuccess('Настройки личной паузы успешно сохранены!');
-        onRefresh();
+    requestConfirm({
+      title: 'Сохранить настройки паузы?',
+      message: 'Вы уверены, что хотите обновить статус вашей паузы? Во время активной паузы вы не будете получать приглашения на донацию.',
+      variant: 'warning',
+      confirmText: 'Сохранить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/donor/pause`, {
+            method: 'PUT',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              donorId: donor.id,
+              ...pauseForm
+            })
+          });
+          if (res.ok) {
+            setPauseSuccess('Настройки личной паузы успешно сохранены!');
+            onRefresh();
+          }
+        } catch {
+          setPauseSuccess('Не удалось сохранить изменения во внешнем сервисе');
+        }
+        closeConfirm();
       }
-    } catch {
-      setPauseSuccess('Не удалось сохранить изменения во внешнем сервисе');
-    }
+    });
   };
 
   // Submit notifications settings
-  const handleNotifSubmit = async (e: React.FormEvent) => {
+  const handleNotifSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setNotifSuccess('');
-    try {
-      const res = await fetch(`${apiBase}/donor/notifications`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({
-          donorId: donor.id,
-          ...notifForm
-        })
-      });
-      if (res.ok) {
-        setNotifSuccess('Предпочтения каналов рассылок изменены!');
-        onRefresh();
+    requestConfirm({
+      title: 'Сохранить настройки уведомлений?',
+      message: 'Текущие каналы для связи будут обновлены. Вы уверены?',
+      variant: 'info',
+      confirmText: 'Сохранить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/donor/notifications`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              donorId: donor.id,
+              ...notifForm
+            })
+          });
+          if (res.ok) {
+            setNotifSuccess('Предпочтения каналов рассылок изменены!');
+            onRefresh();
+          }
+        } catch {
+          setNotifSuccess('Ошибка сохранения настроек');
+        }
+        closeConfirm();
       }
-    } catch {
-      setNotifSuccess('Ошибка сохранения настроек');
-    }
+    });
   };
 
   // Resubmit a rejected center application
-  const handleResubmit = async (centerId: number) => {
-    try {
-      const res = await fetch(`${apiBase}/donor/resubmit/${centerId}`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({ donorId: donor.id })
-      });
-      if (res.ok) {
-        alert('Заявка успешно переподана в центр крови! Статус изменен на Ожидание.');
-        onRefresh();
+  const handleResubmit = (centerId: number) => {
+    requestConfirm({
+      title: 'Переподать заявку?',
+      message: 'Вы уверены, что хотите снова отправить заявку на прикрепление к этому центру крови?',
+      variant: 'info',
+      confirmText: 'Отправить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/donor/resubmit/${centerId}`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({ donorId: donor.id })
+          });
+          if (res.ok) {
+            // alert('Заявка успешно переподана в центр крови! Статус изменен на Ожидание.');
+            onRefresh();
+          }
+        } catch (err) {
+          // alert('Ошибка при повторной отправке');
+        }
+        closeConfirm();
       }
-    } catch (err) {
-      alert('Ошибка при повторной отправке');
-    }
+    });
   };
 
   // Set center as primary (home)
-  const handleSetPrimary = async (centerId: number) => {
-    try {
-      const res = await fetch(`${apiBase}/donor/set-primary-center`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({ donorId: donor.id, centerId })
-      });
-      if (res.ok) {
-        onRefresh();
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Ошибка при изменении домашнего центра');
+  const handleSetPrimary = (centerId: number) => {
+    requestConfirm({
+      title: 'Сделать домашним центром?',
+      message: 'Вы хотите установить этот центр крови как основной (домашний) для вашей донорской активности?',
+      variant: 'info',
+      confirmText: 'Установить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/donor/set-primary-center`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({ donorId: donor.id, centerId })
+          });
+          if (res.ok) {
+            onRefresh();
+          } else {
+            const data = await res.json();
+          }
+        } catch (err) {}
+        closeConfirm();
       }
-    } catch (err) {
-      alert('Ошибка при изменении домашнего центра');
-    }
+    });
   };
 
   // Send secondary link application
-  const handleCenterLink = async (e: React.FormEvent) => {
+  const handleCenterLink = (e: React.FormEvent) => {
     e.preventDefault();
     setLinkError('');
     setLinkSuccess('');
@@ -375,28 +446,37 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       return;
     }
 
-    try {
-      const res = await fetch(`${apiBase}/donor/link-center`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({
-          donorId: donor.id,
-          centerId: parseInt(selectedCenterId)
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error);
+    requestConfirm({
+      title: 'Отправить заявку?',
+      message: 'Вы уверены, что хотите подать заявку на прикрепление к выбранному центру крови?',
+      variant: 'info',
+      confirmText: 'Отправить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/donor/link-center`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              donorId: donor.id,
+              centerId: parseInt(selectedCenterId)
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error);
+          }
+          setLinkSuccess(data.message || 'Связь успешно добавлена!');
+          setSelectedCenterId('');
+          onRefresh();
+        } catch (err: any) {
+          setLinkError(err.message || 'Ошибка связи');
+        }
+        closeConfirm();
       }
-      setLinkSuccess(data.message || 'Связь успешно добавлена!');
-      setSelectedCenterId('');
-      onRefresh();
-    } catch (err: any) {
-      setLinkError(err.message || 'Ошибка связи');
-    }
+    });
   };
 
   // Calculate stats
@@ -1613,6 +1693,17 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
         )}
       </AnimatePresence>
       </div>
+
+      <ConfirmationModal 
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        variant={confirmConfig.variant}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={closeConfirm}
+      />
     </div>
   );
 }
