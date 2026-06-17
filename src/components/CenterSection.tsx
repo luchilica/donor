@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, Users, Bell, FileText, Search, Plus, 
   Trash2, X, Check, Eye, ChevronRight, Send, HelpCircle, ShieldAlert
@@ -562,10 +563,18 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       </div>
 
       {/* Menus Context content sections */}
+      <AnimatePresence mode="wait">
 
       {/* MENU 1: DASHBOARD STATS */}
       {activeMenu === 'stats' && (
-        <div className="space-y-6">
+        <motion.div
+          key="stats"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="space-y-6"
+        >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-red-100/30 transition-all">
               <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest mb-1">всего доноров (активных)</span>
@@ -698,12 +707,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* MENU 2: DONORS DATABASE */}
       {activeMenu === 'donors' && (
-        <div className="space-y-6">
+        <motion.div
+          key="donors"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="space-y-6"
+        >
           {/* Active single donor profile detailed view is open */}
           {selectedDonorId !== null && donorCard ? (
             <div className="bg-white p-6 rounded-2xl border border-slate-150 shadow-sm space-y-6 relative">
@@ -995,12 +1011,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* MENU 3: PENDING APPLICATIONS */}
       {activeMenu === 'pending' && (
-        <div className="space-y-6">
+        <motion.div
+          key="pending"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="space-y-6"
+        >
           <div>
             <h3 className="font-bold text-slate-800 text-base">Заявки доноров на подтверждение</h3>
             <p className="text-xs text-slate-500">Здесь отображаются кандидаты, которые зарегистрировались самостоятельно или направили запрос на привязку к вашему центру.</p>
@@ -1044,12 +1067,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <p className="text-sm text-slate-500 py-12 text-center bg-white border rounded-2xl">Новые обращения в регистратуру отсутствуют.</p>
             )}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* MENU 4: ALERTOR SEND MASS EMAILS/PUSH/SMS */}
       {activeMenu === 'notify' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <motion.div
+          key="notify"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+        >
           {/* Form alert settings rules */}
           <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
             <div>
@@ -1232,12 +1262,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* MENU 5: NEWS CRUD */}
       {activeMenu === 'news' && (
-        <div className="space-y-6">
+        <motion.div
+          key="news"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="space-y-6"
+        >
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-bold text-slate-800 text-base">Доска объявлений и новостей филиала</h3>
@@ -1293,8 +1330,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
+
+      </AnimatePresence>
 
       {/* --- FLOATING DIALOGS & MODAL FORMS --- */}
 

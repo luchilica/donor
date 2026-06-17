@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, SmsTemplate, BloodGroup, RhFactor, DonationType } from '../src/types';
+import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, BloodGroup, RhFactor, DonationType } from '../src/types';
 
 let dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
@@ -868,7 +868,6 @@ async function seedPostgresWithSeededState() {
         weight: item.weight,
         phone: item.phone,
         status: (item.status || 'active') as any,
-        smsEnabled: item.smsEnabled !== undefined ? item.smsEnabled : false,
         pushEnabled: item.pushEnabled !== undefined ? item.pushEnabled : false,
         emailNotificationsEnabled: item.emailNotificationsEnabled !== undefined ? item.emailNotificationsEnabled : true,
         onesignalPlayerId: item.onesignalPlayerId || null,
@@ -1066,8 +1065,7 @@ export async function getDb(): Promise<DatabaseState> {
         dbMedicalNotes,
         dbNews,
         dbNotifications,
-        dbNotificationRecipients,
-        dbSmsTemplates
+        dbNotificationRecipients
       ] = await Promise.all([
         prisma.bloodCenter.findMany(),
         prisma.user.findMany(),

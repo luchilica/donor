@@ -9,6 +9,7 @@ import {
 import { Donor, DonorCenter, Donation, MedicalNote, BloodCenter, formatBloodGroup, formatRhFactor, getGamificationStatus } from '../types';
 import { calculateNextDates } from '../utils/intervals';
 import { ConfirmationModal } from './ConfirmationModal';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 interface DonorSectionProps {
   donor: Donor;
@@ -505,6 +506,41 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const totalPaidDonations = bloodPaid + compPaid;
 
   const gameStatus = getGamificationStatus(bloodFree, compFree, bloodPaid, compPaid);
+
+  const last12MonthsData = React.useMemo(() => {
+    const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+    const result: { name: string; count: number; volume: number }[] = [];
+    
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const mIndex = d.getMonth();
+      const year = d.getFullYear() % 100;
+      const label = `${months[mIndex]} '${year}`;
+      
+      let mCount = 0;
+      let mVolume = 0;
+      
+      donations.forEach(don => {
+        const donDateStr = don.donationDate || don.date;
+        if (donDateStr) {
+          const donDate = new Date(donDateStr);
+          if (donDate.getMonth() === mIndex && donDate.getFullYear() === d.getFullYear()) {
+            mCount++;
+            mVolume += don.volumeMl || don.volume || 450;
+          }
+        }
+      });
+
+      result.push({
+        name: label,
+        count: mCount,
+        volume: mVolume
+      });
+    }
+    return result;
+  }, [donations]);
+
   const homeCenter = centers.find(c => {
     const primaryLink = links.find(l => l.donorId === donor.id && l.isPrimary);
     return c.id === primaryLink?.centerId;
@@ -1032,6 +1068,74 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* График активности донаций за последний год */}
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
+              <div className="space-y-1">
+                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Активность донаций за год</h3>
+                <p className="text-sm text-slate-500 font-medium font-sans">Объем сданных компонентов и динамика по месяцам</p>
+              </div>
+              
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={last12MonthsData}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorVolume" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="name" 
+                      tickLine={false}
+                      axisLine={false}
+                      stroke="#94a3b8" 
+                      fontSize={11}
+                    />
+                    <YAxis 
+                      tickLine={false}
+                      axisLine={false}
+                      stroke="#94a3b8"
+                      fontSize={11}
+                      tickFormatter={(v) => `${v} мл`}
+                    />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload as { name: string; count: number; volume: number };
+                          return (
+                            <div className="bg-slate-950 text-white p-3 rounded-xl border border-slate-800 shadow-xl text-xs space-y-1">
+                              <p className="font-semibold text-slate-400">{data.name}</p>
+                              <div className="flex justify-between gap-4">
+                                <span className="text-slate-300">Объем:</span>
+                                <span className="font-bold text-red-400">{data.volume} мл</span>
+                              </div>
+                              <div className="flex justify-between gap-4">
+                                <span className="text-slate-300">Донаций:</span>
+                                <span className="font-bold text-red-500">{data.count}</span>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="volume" 
+                      stroke="#ef4444" 
+                      strokeWidth={2.5}
+                      fillOpacity={1} 
+                      fill="url(#colorVolume)" 
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 

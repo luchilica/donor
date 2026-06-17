@@ -322,6 +322,19 @@ app.get('/api/download/contraindications', (req, res) => {
     res.json(db.centers);
   });
 
+  // GET PUBLIC STATS
+  app.get('/api/public-stats', async (req, res) => {
+    const db = await getDb();
+    const activeDonors = db.donors.filter(d => d.status === 'active').length;
+    const centersCount = db.centers.length;
+    const sentAlerts = db.notifications.length;
+    res.json({
+      totalDonorsCount: activeDonors,
+      centersCount: centersCount,
+      sentAlertsCount: sentAlerts
+    });
+  });
+
   // GET GLOBAL NEWS
   app.get('/api/news', async (req, res) => {
     const db = await getDb();

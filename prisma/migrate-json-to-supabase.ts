@@ -26,7 +26,6 @@ async function main() {
   await prisma.donor.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.news.deleteMany({});
-  await prisma.smsTemplate.deleteMany({});
   await prisma.bloodCenter.deleteMany({});
   console.log('Database cleaned successfully.');
 
@@ -87,7 +86,6 @@ async function main() {
           weight: item.weight,
           phone: item.phone,
           status: (item.status || 'active') as DonorStatus,
-          smsEnabled: item.smsEnabled !== undefined ? item.smsEnabled : false,
           pushEnabled: item.pushEnabled !== undefined ? item.pushEnabled : false,
           emailNotificationsEnabled: item.emailNotificationsEnabled !== undefined ? item.emailNotificationsEnabled : true,
           onesignalPlayerId: item.onesignalPlayerId || null,
@@ -208,7 +206,6 @@ async function main() {
           messageText: item.messageText,
           recipientsCount: item.recipientsCount || 0,
           pushSent: item.pushSent || 0,
-          smsSent: item.smsSent || 0,
           emailSent: item.emailSent || 0,
           status: item.status as NotificationStatus,
           createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
@@ -227,7 +224,6 @@ async function main() {
           notificationId: item.notificationId,
           donorId: item.donorId,
           pushStatus: item.pushStatus as DeliveryStatus,
-          smsStatus: item.smsStatus as DeliveryStatus,
           emailStatus: item.emailStatus as DeliveryStatus,
           sentAt: item.sentAt ? new Date(item.sentAt) : new Date(),
         }
@@ -235,22 +231,7 @@ async function main() {
     }
   }
 
-  // 10. SMS Templates
-  if (data.smsTemplates && data.smsTemplates.length > 0) {
-    console.log(`Migrating ${data.smsTemplates.length} SMS templates...`);
-    for (const item of data.smsTemplates) {
-      await prisma.smsTemplate.create({
-        data: {
-          id: item.id,
-          centerId: item.centerId || null,
-          name: item.name,
-          text: item.text,
-          isDefault: item.isDefault !== undefined ? item.isDefault : false,
-          createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
-        }
-      });
-    }
-  }
+  // No SMS Templates to migrate
 
   // Reset the PostgreSQL sequences for auto-increment fields to prevent future registration key collisions
   console.log('Resetting PostgreSQL sequences...');
@@ -263,8 +244,7 @@ async function main() {
     { name: 'medical_notes', seq: 'medical_notes' },
     { name: 'news', seq: 'news' },
     { name: 'notifications', seq: 'notifications' },
-    { name: 'notification_recipients', seq: 'notification_recipients' },
-    { name: 'sms_templates', seq: 'sms_templates' }
+    { name: 'notification_recipients', seq: 'notification_recipients' }
   ];
 
   for (const table of tables) {

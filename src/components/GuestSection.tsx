@@ -6,6 +6,7 @@ import {
   Bell, Send, X, Eye, EyeOff
 } from 'lucide-react';
 import { BloodCenter, News, BloodGroup, RhFactor, Gender } from '../types';
+import BloodCentersMap from './BloodCentersMap';
 
 const AccordionItem = ({ title, children }: { title: string; children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,6 +53,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const [activeTab, setActiveTab] = useState<'home' | 'info' | 'docs' | 'centers' | 'news'>('home');
   const [regionFilter, setRegionFilter] = useState<string>('all');
   const [centerSearch, setCenterSearch] = useState<string>('');
+  const [selectedCenter, setSelectedCenter] = useState<BloodCenter | null>(null);
   
   // News filter states
   const [newsSearch, setNewsSearch] = useState<string>('');
@@ -186,14 +188,23 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   // Stats from DB for landing page
   const [totalDonorsCount, setTotalDonorsCount] = useState(20);
   const [sentAlertsCount, setSentAlertsCount] = useState(15);
+  const [centersCount, setCentersCount] = useState(42);
 
   useEffect(() => {
     // Fetch statistical estimates dynamically
-    fetch(`${apiBase}/centers`)
+    fetch(`${apiBase}/public-stats`)
       .then(r => r.json())
       .then(data => {
-        if (Array.isArray(data)) {
-          setTotalDonorsCount(data.length * 3 + 12);
+        if (data) {
+          if (typeof data.totalDonorsCount === 'number') {
+            setTotalDonorsCount(data.totalDonorsCount);
+          }
+          if (typeof data.sentAlertsCount === 'number') {
+            setSentAlertsCount(data.sentAlertsCount);
+          }
+          if (typeof data.centersCount === 'number') {
+            setCentersCount(data.centersCount);
+          }
         }
       })
       .catch(() => {});
@@ -497,7 +508,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   transition={{ delay: 0.2, duration: 0.5 }}
                   className="text-3xl md:text-4xl font-bold whitespace-nowrap block mb-1"
                 >
-                  {totalDonorsCount}+
+                  {totalDonorsCount}
                 </motion.span>
                 <span className="text-xs text-rose-100 font-medium leading-relaxed block">Доноров</span>
               </div>
@@ -509,7 +520,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   transition={{ delay: 0.3, duration: 0.5 }}
                   className="text-3xl md:text-4xl font-bold whitespace-nowrap block mb-1"
                 >
-                  42
+                  {centersCount}
                 </motion.span>
                 <span className="text-xs text-rose-100 font-medium leading-relaxed block">Центра РБ</span>
               </div>
@@ -521,7 +532,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   transition={{ delay: 0.4, duration: 0.5 }}
                   className="text-3xl md:text-4xl font-bold whitespace-nowrap block mb-1"
                 >
-                  3
+                  2
                 </motion.span>
                 <span className="text-xs text-rose-100 font-medium leading-relaxed block">Канала связи</span>
               </div>
@@ -643,9 +654,9 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
               <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center">
                 <Heart className="w-5 h-5 text-red-500 mr-2" />
-                Трёхканальная система оповещений
+                Двухканальная система оповещений
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2 group cursor-default">
                   <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
                     <Bell className="w-5 h-5" />
@@ -653,16 +664,6 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Push-уведомления</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">
                     Мгновенно в браузер или на экран смартфона.
-                  </p>
-                </div>
-                
-                <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">SMS-сообщения</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Работает без интернета на любом телефоне.
                   </p>
                 </div>
                 
@@ -930,16 +931,28 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 </div>
 
                 <div className="flex justify-between items-center pt-3 border-t border-slate-100 flex-wrap gap-2">
-                  <a 
-                    href={center.mapLink || "https://yandex.by/maps"} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-xs text-red-600 hover:text-red-700 font-medium hover:underline flex items-center"
-                  >
-                    Посмотреть на карте
-                  </a>
-                  {center.eRegistrationLink ? (
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => {
+                        setSelectedCenter(center);
+                        document.getElementById('centers-leaflet-map')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                      className="text-xs text-red-650 hover:text-red-700 font-semibold flex items-center transition-all bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg border border-red-100/45 shadow-sm"
+                    >
+                      <MapPin className="w-3.5 h-3.5 mr-1" /> Показать на карте
+                    </button>
                     <a 
+                      href={center.mapLink || "https://yandex.by/maps"} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs text-slate-500 hover:text-slate-800 font-medium hover:underline flex items-center px-1.5"
+                      title="Открыть во внешних картах"
+                    >
+                      в Yandex
+                    </a>
+                  </div>
+                  {center.eRegistrationLink ? (
+                     <a 
                       href={center.eRegistrationLink} 
                       target="_blank" 
                       rel="noreferrer"
@@ -962,6 +975,17 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               <p className="text-sm text-slate-500 col-span-2 text-center py-12">Центры переливания не найдены. Попробуйте другой запрос.</p>
             )}
           </div>
+
+          {/* Interactive Map */}
+          {filteredCenters.length > 0 && (
+            <div className="mt-8">
+              <BloodCentersMap 
+                centers={filteredCenters}
+                selectedCenter={selectedCenter}
+                onSelectCenter={(center) => setSelectedCenter(center)}
+              />
+            </div>
+          )}
         </div>
       )}
 
