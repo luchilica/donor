@@ -1074,7 +1074,7 @@ let cachedDb: DatabaseState | null = null;
 // Load state of store
 export async function getDb(): Promise<DatabaseState> {
   if (cachedDb) {
-    return cachedDb;
+    return JSON.parse(JSON.stringify(cachedDb));
   }
 
   const isPostgresActive = checkPostgresActive();
@@ -1255,7 +1255,21 @@ export async function getDb(): Promise<DatabaseState> {
           createdAt: m.createdAt.toISOString()
         }))
       };
-      return cachedDb;
+
+      // Clean up expired medical notes automatically
+      const today = new Date().toISOString().split('T')[0];
+      let notesChanged = false;
+      cachedDb.medicalNotes.forEach(m => {
+        if (m.isActive && m.endDate && m.endDate < today) {
+          m.isActive = false;
+          notesChanged = true;
+        }
+      });
+      if (notesChanged) {
+        saveDb(JSON.parse(JSON.stringify(cachedDb))).catch(console.error);
+      }
+
+      return JSON.parse(JSON.stringify(cachedDb));
     } catch (e) {
       console.error('Failed to load from PostgreSQL, falling back to JSON storage...', e);
     }
@@ -1266,7 +1280,20 @@ export async function getDb(): Promise<DatabaseState> {
     try {
       const data = fs.readFileSync(STORE_PATH, 'utf-8');
       cachedDb = JSON.parse(data);
-      return cachedDb!;
+
+      // Clean up expired medical notes automatically
+      const todayStr = new Date().toISOString().split('T')[0];
+      let notesChanged = false;
+      cachedDb.medicalNotes.forEach(m => {
+        if (m.isActive && m.endDate && m.endDate < todayStr) {
+          m.isActive = false;
+          notesChanged = true;
+        }
+      });
+      if (notesChanged) {
+        saveDb(JSON.parse(JSON.stringify(cachedDb))).catch(console.error);
+      }
+      return JSON.parse(JSON.stringify(cachedDb));
     } catch (e) {
       console.error('Database file corrupt. Seeding again...');
       saveState(seededState);
@@ -1281,14 +1308,19 @@ export async function getDb(): Promise<DatabaseState> {
 }
 
 export async function saveDb(state: DatabaseState): Promise<void> {
-  cachedDb = state; // Update memory cache instantly so all subsequent reads are lightning fast!
+  // Update memory cache instantly so all subsequent reads are lightning fast!
+  const oldDb = cachedDb;
+  cachedDb = JSON.parse(JSON.stringify(state));
+
   const isPostgresActive = checkPostgresActive();
 
   if (isPostgresActive) {
     try {
       // 1. Sync User table
-      await Promise.all(state.users.map(user => 
-        prisma.user.upsert({
+      await Promise.all(state.users.map(async user => {
+        const prev = oldDb && oldDb.users && oldDb.users.find(x => x.id === user.id );
+        if (prev && JSON.stringify(prev) === JSON.stringify(user)) return;
+        return prisma.user.upsert({
           where: { id: user.id },
           update: {
             email: user.email,
@@ -1311,10 +1343,14 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
           }
         })
-      ));
+      
+      }));
 
       // 2. Sync Donor table
       for (const donor of state.donors) {
+        const prev = oldDb && oldDb.donors && oldDb.donors.find(x => x.id === donor.id );
+        if (prev && JSON.stringify(prev) === JSON.stringify(donor)) continue;
+
         await prisma.donor.upsert({
           where: { id: donor.id },
           update: {
@@ -1386,6 +1422,9 @@ export async function saveDb(state: DatabaseState): Promise<void> {
 
       // 3. Sync DonorCenter connections
       for (const dc of state.donorCenters) {
+        const prev = oldDb && oldDb.donorCenters && oldDb.donorCenters.find(x => x.id === dc.id || (x.donorId === dc.donorId && x.centerId === dc.centerId));
+        if (prev && JSON.stringify(prev) === JSON.stringify(dc)) continue;
+
         await prisma.donorCenter.upsert({
           where: { donorId_centerId: { donorId: dc.donorId, centerId: dc.centerId } },
           update: {
@@ -1419,6 +1458,9 @@ export async function saveDb(state: DatabaseState): Promise<void> {
         where: { id: { notIn: donationIds } }
       });
       for (const don of state.donations) {
+        const prev = oldDb && oldDb.donations && oldDb.donations.find(x => x.id === don.id );
+        if (prev && JSON.stringify(prev) === JSON.stringify(don)) continue;
+
         await prisma.donation.upsert({
           where: { id: don.id },
           update: {
@@ -1452,6 +1494,9 @@ export async function saveDb(state: DatabaseState): Promise<void> {
         where: { id: { notIn: noteIds } }
       });
       for (const note of state.medicalNotes) {
+        const prev = oldDb && oldDb.medicalNotes && oldDb.medicalNotes.find(x => x.id === note.id );
+        if (prev && JSON.stringify(prev) === JSON.stringify(note)) continue;
+
         await prisma.medicalNote.upsert({
           where: { id: note.id },
           update: {
@@ -1557,6 +1602,9 @@ export async function saveDb(state: DatabaseState): Promise<void> {
 
       // 8. Sync Recipients
       for (const rec of state.notificationRecipients) {
+        const prev = oldDb && oldDb.notificationRecipients && oldDb.notificationRecipients.find(x => x.id === rec.id );
+        if (prev && JSON.stringify(prev) === JSON.stringify(rec)) continue;
+
         await prisma.notificationRecipient.upsert({
           where: { id: rec.id },
           update: {

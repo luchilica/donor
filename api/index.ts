@@ -2,6 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { Resend } from 'resend';
 import * as OneSignal from 'onesignal-node';
 import { getDb, saveDb } from '../server/db.js';
@@ -43,12 +44,15 @@ function verifyPassword(password: string, hash: string): boolean {
   if (hash === "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC" && password === "password123") {
     return true;
   }
+  if (hash.startsWith('$2')) {
+    return bcrypt.compareSync(password, hash);
+  }
   const sha = crypto.createHash('sha256').update(password).digest('hex');
   return hash === sha || hash === password;
 }
 
 function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  return bcrypt.hashSync(password, 12);
 }
 
 // Recalculates stats for a single donor based on their donations
@@ -979,10 +983,25 @@ app.get('/api/download/contraindications', (req, res) => {
       link.confirmedAt = new Date().toISOString();
       link.confirmedById = confirmedById ? parseInt(confirmedById) : 2;
       link.rejectionReason = undefined;
+      
+      const donor = db.donors.find(d => d.id === link.donorId);
+      if (donor && donor.emailNotificationsEnabled) {
+          try {
+              sendTransactionalEmail(donor.email, 'confirmed');
+          } catch(e) {}
+      }
+
     } else {
       link.rejectionReason = rejectionReason || 'Не указана';
       link.confirmedAt = null;
       link.confirmedById = null;
+      
+      const donor = db.donors.find(d => d.id === link.donorId);
+      if (donor && donor.emailNotificationsEnabled) {
+          try {
+              sendTransactionalEmail(donor.email, 'rejected', { reason: link.rejectionReason });
+          } catch(e) {}
+      }
     }
 
     await saveDb(db);

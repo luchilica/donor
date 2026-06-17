@@ -74,7 +74,7 @@ export async function sendEmailNotification(emails: string[], messageText: strin
     try {
         const info = await transporter.sendMail({
             from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
-            to: emails,
+            bcc: emails,
             subject: 'Донор-Алерт: требуется кровь',
             html: htmlContent,
         });
@@ -84,7 +84,7 @@ export async function sendEmailNotification(emails: string[], messageText: strin
     }
 }
 
-export async function sendTransactionalEmail(to: string, type: 'welcome' | 'center_added' | 'reset', extra?: any) {
+export async function sendTransactionalEmail(to: string, type: 'welcome' | 'center_added' | 'reset' | 'confirmed' | 'rejected', extra?: any) {
     const transporter = getTransporter();
     if (!transporter) return;
 
@@ -115,6 +115,21 @@ export async function sendTransactionalEmail(to: string, type: 'welcome' | 'cent
             <p>Ваш код для сброса пароля: <strong>${extra?.code}</strong></p>
             <p>Или перейдите по ссылке (действительна 1 час):</p>
             <a href="https://donor-by.vercel.app/reset-password?code=${extra?.code}&email=${extra?.email}">Сбросить пароль</a>
+        `;
+    } else if (type === 'confirmed') {
+        subject = 'Ваша заявка подтверждена';
+        htmlContent = `
+            <h2>Ваша заявка подтверждена!</h2>
+            <p>Центр крови успешно подтвердил вашу заявку.</p>
+            <a href="https://donor-by.vercel.app">Перейти в личный кабинет</a>
+        `;
+    } else if (type === 'rejected') {
+        subject = 'Ваша заявка отклонена';
+        htmlContent = `
+            <h2>Ваша заявка на привязку к центру крови отклонена</h2>
+            <p><strong>Причина:</strong> ${extra?.reason || 'Не указана'}</p>
+            <p>Вы можете исправить данные в личном кабинете и отправить заявку повторно.</p>
+            <a href="https://donor-by.vercel.app">Войти в кабинет</a>
         `;
     }
 
