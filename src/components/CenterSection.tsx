@@ -56,6 +56,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
   // New forms states inside profile card
   const [showAddDonationModal, setShowAddDonationModal] = useState(false);
+  const [deleteDonationId, setDeleteDonationId] = useState<number | null>(null);
   const [donationForm, setDonationForm] = useState({
     donationDate: new Date().toISOString().split('T')[0],
     donationType: 'blood' as DonationType,
@@ -704,19 +705,14 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                               <td className="p-3 text-[10px] text-slate-500 italic max-w-[120px] truncate" title={don.note || ''}>{don.note || '—'}</td>
                               <td className="p-3 text-right">
                                 <button 
-                                  onClick={async () => {
-                                    if (!confirm('Удалить эту запись?')) return;
-                                    const res = await fetch(`${apiBase}/donations/${don.id}`, { method: 'DELETE' });
-                                  if (res.ok) {
-                                    alert('Запись удалена!');
-                                    loadDonorCard(donorCard.donor.id);
-                                    refreshDashboard();
-                                  }
-                                }}
-                                className="text-red-650 hover:text-red-700 font-semibold text-[10px]"
-                              >
-                                Удалить
-                              </button>
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setDeleteDonationId(don.id);
+                                  }}
+                                  className="text-red-500 hover:text-red-700 font-semibold text-[10px] uppercase tracking-wider"
+                                >
+                                  Удалить
+                                </button>
                             </td>
                           </tr>
                           );
@@ -1257,6 +1253,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <input 
                   type="date"
                   required
+                  max={new Date().toISOString().split('T')[0]}
                   value={donationForm.donationDate}
                   onChange={(e) => setDonationForm({ ...donationForm, donationDate: e.target.value })}
                   className="w-full px-3 py-2 border rounded-xl focus:outline-none"
@@ -1585,6 +1582,40 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         </div>
       )}
 
+      {/* Delete Donation Confirmation Modal */}
+      {deleteDonationId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl w-full max-w-sm p-6 sm:p-8 relative shadow-2xl">
+            <h3 className="text-xl font-bold text-slate-800 tracking-tight leading-tight mb-2">Удалить донацию?</h3>
+            <p className="text-sm text-slate-500 mb-6 font-medium leading-relaxed">
+              Это действие необратимо. Запись будет навсегда удалена из истории донора.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setDeleteDonationId(null)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl transition duration-150 text-sm"
+              >
+                Отмена
+              </button>
+              <button 
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`${apiBase}/donations/${deleteDonationId}`, { method: 'DELETE' });
+                    if (res.ok) {
+                      setDeleteDonationId(null);
+                      if (donorCard) loadDonorCard(donorCard.donor.id);
+                      refreshDashboard();
+                    }
+                  } catch {}
+                }}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-3 rounded-xl transition duration-150 text-sm"
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

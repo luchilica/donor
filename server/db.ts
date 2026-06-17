@@ -1430,11 +1430,11 @@ export async function saveDb(state: DatabaseState): Promise<void> {
           update: {
             status: dc.status as any,
             isPrimary: dc.isPrimary,
-            rejectionReason: dc.rejectionReason,
+            rejectionReason: dc.rejectionReason ?? null,
             resubmissionCount: dc.resubmissionCount,
             resubmittedAt: dc.resubmittedAt ? new Date(dc.resubmittedAt) : null,
             confirmedAt: dc.confirmedAt ? new Date(dc.confirmedAt) : null,
-            confirmedById: dc.confirmedById,
+            confirmedById: dc.confirmedById ?? null,
           },
           create: {
             id: dc.id,
