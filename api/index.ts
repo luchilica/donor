@@ -721,7 +721,16 @@ app.get('/api/download/contraindications', (req, res) => {
       donors = donors.filter(d => d.status === statusFilter);
     }
 
-    res.json(donors);
+    const todayStr2 = new Date().toISOString().split('T')[0];
+    const donorsWithReadiness = donors.map(d => {
+      const notes = db.medicalNotes.filter(m => m.donorId === d.id);
+      return {
+        ...d,
+        readiness: isDonorReady(d, todayStr2, notes, true)
+      };
+    });
+
+    res.json(donorsWithReadiness);
   });
 
   // GET DETAILED DONOR CARD FOR CENTER

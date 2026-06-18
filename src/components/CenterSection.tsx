@@ -1,14 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, Users, Bell, FileText, Search, Plus, 
-  Trash2, X, Check, Eye, ChevronRight, Send, HelpCircle, ShieldAlert
+  Trash2, X, Check, Eye, ChevronRight, Send, HelpCircle, ShieldAlert,
+  ArrowUp, ArrowDown
 } from 'lucide-react';
 import { 
   BloodCenter, Donor, DonorCenter, Donation, MedicalNote, 
   Notification, News, BloodGroup, RhFactor, DonationType, formatBloodGroup, formatRhFactor 
 } from '../types';
 import { ConfirmationModal } from './ConfirmationModal';
+
+const CenterAccordionItem = ({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <div className={`mb-3.5 rounded-2xl border transition-all duration-300 overflow-hidden ${isOpen ? 'border-slate-200 shadow-md' : 'border-slate-100/70 hover:border-slate-200 shadow-sm'}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex justify-between items-center px-5 py-4 transition-all duration-300 ${isOpen ? 'bg-gradient-to-r from-red-50/20 to-white' : 'bg-white hover:bg-slate-50'}`}
+      >
+        <span className={`font-bold text-xs uppercase tracking-wider text-left transition-colors ${isOpen ? 'text-red-800' : 'text-slate-800'}`}>
+          {title}
+        </span>
+        <div className={`p-1 rounded-full transition-transform duration-300 ${isOpen ? 'bg-red-50 text-red-650 rotate-90' : 'bg-slate-50 text-slate-500'}`}>
+          <ChevronRight className="w-4 h-4" />
+        </div>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+          >
+            <div className="p-5 bg-white border-t border-slate-100">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 interface CenterSectionProps {
   center: BloodCenter;
@@ -45,6 +80,35 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const [filterRhs, setFilterRhs] = useState<RhFactor[]>([]);
   const [filterReadiness, setFilterReadiness] = useState<string>('all'); // all, ready, not_ready
   const [donorList, setDonorList] = useState<Donor[]>([]);
+  const [donorSortField, setDonorSortField] = useState<'lastName' | 'bloodGroup' | 'lastDonation' | 'donationsCount'>('lastName');
+  const [donorSortOrder, setDonorSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  const sortedDonorList = useMemo(() => {
+    return [...donorList].sort((a, b) => {
+      let comparison = 0;
+      if (donorSortField === 'lastName') {
+        comparison = a.lastName.localeCompare(b.lastName, 'ru');
+      } else if (donorSortField === 'bloodGroup') {
+        const bgOrder: Record<string, number> = { 'I_O': 1, 'II_A': 2, 'III_B': 3, 'IV_AB': 4 };
+        const bgA = bgOrder[a.bloodGroup] || 0;
+        const bgB = bgOrder[b.bloodGroup] || 0;
+        if (bgA !== bgB) {
+          comparison = bgA - bgB;
+        } else {
+          comparison = (a.rhFactor || '').localeCompare(b.rhFactor || '');
+        }
+      } else if (donorSortField === 'lastDonation') {
+        if (!a.lastDonationDate && !b.lastDonationDate) comparison = 0;
+        else if (!a.lastDonationDate) comparison = -1;
+        else if (!b.lastDonationDate) comparison = 1;
+        else comparison = new Date(a.lastDonationDate).getTime() - new Date(b.lastDonationDate).getTime();
+      } else if (donorSortField === 'donationsCount') {
+        comparison = (a.donationsCount || 0) - (b.donationsCount || 0);
+      }
+
+      return donorSortOrder === 'asc' ? comparison : -comparison;
+    });
+  }, [donorList, donorSortField, donorSortOrder]);
 
   // Selected single donor profile detailed view
   const [selectedDonorId, setSelectedDonorId] = useState<number | null>(null);
@@ -53,7 +117,18 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     link: DonorCenter;
     donations: Donation[];
     medicalNotes: MedicalNote[];
-    readiness: { ready: boolean; reason?: string };
+    readiness: { ready: boolean; reason?: string; pendingConfirmation?: boolean };
+  } | null>(null);
+
+  const [pendingDonorProfile, setPendingDonorProfile] = useState<{
+    card: {
+      donor: Donor;
+      link: DonorCenter;
+      donations: Donation[];
+      medicalNotes: MedicalNote[];
+      readiness: { ready: boolean; reason?: string; pendingConfirmation?: boolean };
+    };
+    linkId: number;
   } | null>(null);
 
   // New forms states inside profile card
@@ -178,6 +253,16 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         const data = await res.json();
         setDonorCard(data);
         setSelectedDonorId(donorId);
+      }
+    } catch {}
+  };
+
+  const handleViewPendingProfile = async (donorId: number, linkId: number) => {
+    try {
+      const res = await fetch(`${apiBase}/center/donors/${donorId}?centerId=${center.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setPendingDonorProfile({ card: data, linkId });
       }
     } catch {}
   };
@@ -722,33 +807,18 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         >
           {/* Active single donor profile detailed view is open */}
           {selectedDonorId !== null && donorCard ? (
-            <div className="bg-white p-6 rounded-2xl border border-slate-150 shadow-sm space-y-6 relative">
+            <div className="bg-white p-6 rounded-2xl shadow-sm space-y-6 relative">
               <button 
                 onClick={() => { setSelectedDonorId(null); setDonorCard(null); }}
-                className="absolute right-4 top-4 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1"
+                className="absolute right-4 top-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
+                title="Закрыть"
               >
-                ← Вернуться в реестр
+                <X className="w-5 h-5" />
               </button>
 
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pt-4 border-b pb-4 border-slate-100">
                 <div>
                   <h3 className="text-lg font-bold text-slate-800">Медицинская карта донора: {donorCard.donor.lastName} {donorCard.donor.firstName}</h3>
-                  <p className="text-xs text-slate-500">Телефоны: {donorCard.donor.phone} | Электронная почта: {donorCard.donor.emailNotificationsEnabled ? donorCard.donor.onesignalPlayerId : 'не указана/отключена'}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-bold ${
-                    donorCard.readiness.ready 
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
-                      : donorCard.readiness.pendingConfirmation 
-                        ? 'bg-amber-50 text-amber-600 border border-amber-100' 
-                        : 'bg-red-50 text-red-700 border border-red-100'
-                  }`}>
-                    {donorCard.readiness.ready 
-                      ? 'Готов к донации цельной крови' 
-                      : donorCard.readiness.pendingConfirmation 
-                        ? 'На подтверждении изменений' 
-                        : 'Медотвод/Ограничение'}
-                  </span>
                 </div>
               </div>
 
@@ -768,24 +838,81 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </button>
               </div>
 
-              {/* Grid donor card specifics */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              {/* Collapsible Accordions for Donor Card details */}
+              <div className="space-y-4 pt-2">
                 
-                {/* Columns left: History list of donations */}
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-800 text-xs uppercase tracking-wider">История процедур сдачи крови ({donorCard.donations.length}):</h4>
-                  <div className="border rounded-2xl overflow-hidden">
+                <CenterAccordionItem title="Личные данные донора" defaultOpen={false}>
+                  <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90 rounded-2xl p-4.5 bg-slate-50/40 border border-slate-100">
+                    <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">ФИО</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {donorCard.donor.lastName} {donorCard.donor.firstName} {donorCard.donor.middleName || ''}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Дата рождения</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {new Date(donorCard.donor.birthDate).toLocaleDateString('ru-RU')} ({
+                          (() => {
+                            const birthDate = new Date(donorCard.donor.birthDate);
+                            const today = new Date();
+                            let age = today.getFullYear() - birthDate.getFullYear();
+                            const m = today.getMonth() - birthDate.getMonth();
+                            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                            return age;
+                          })()
+                        } лет)
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Пол</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {donorCard.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Вес</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {donorCard.donor.weight} кг
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center justify-between py-2.5 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Группа и Резус-фактор</span>
+                      <div className="flex gap-2">
+                        <span className="bg-red-50 border border-red-100 text-red-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                          {formatBloodGroup(donorCard.donor.bloodGroup)}
+                        </span>
+                        <span className="font-bold px-1 py-0.5 text-xs text-slate-800">
+                          {formatRhFactor(donorCard.donor.rhFactor)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Телефон</span>
+                      <span className="font-bold text-slate-800 text-right">{donorCard.donor.phone}</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">E-mail / Личный ID</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {donorCard.donor.email || donorCard.donor.onesignalPlayerId || 'Не указан'}
+                      </span>
+                    </div>
+                  </div>
+                </CenterAccordionItem>
+
+                <CenterAccordionItem title={`История процедур сдачи крови (${donorCard.donations.length})`}>
+                  <div className="overflow-x-auto border border-slate-100 rounded-2xl bg-white dark:border-slate-800">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="bg-slate-50 text-slate-500 border-b">
-                          <th className="p-3 font-medium">Дата сдачи</th>
-                          <th className="p-3 font-medium">Тип заготовки</th>
-                          <th className="p-3 font-medium">Объем (мл)</th>
-                          <th className="p-3 font-medium">Примечание</th>
-                          <th className="p-3 font-medium"></th>
+                        <tr className="bg-slate-50 text-slate-500 border-b border-slate-100 dark:border-slate-800">
+                          <th className="p-3 font-semibold text-slate-500">Дата сдачи</th>
+                          <th className="p-3 font-semibold text-slate-500">Тип заготовки</th>
+                          <th className="p-3 font-semibold text-slate-500">Объем (мл)</th>
+                          <th className="p-3 font-semibold text-slate-500">Примечание</th>
+                          <th className="p-3 font-semibold text-slate-500"></th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y text-slate-600">
+                      <tbody className="divide-y divide-slate-100 text-slate-600 dark:divide-slate-800">
                         {donorCard.donations.map(don => {
                           const donType = don.donationType || don.type;
                           const typeLabel = donType === 'blood' ? 'Кровь' : donType === 'plasma' ? 'Плазма' : donType === 'platelets' ? 'Тромбоциты' : donType;
@@ -839,11 +966,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       </tbody>
                     </table>
                   </div>
-                </div>
+                </CenterAccordionItem>
 
-                {/* Columns right: Medical restrictions (Медотводы) list */}
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-slate-800 text-xs uppercase tracking-wider">Медицинские отводы и ограничения:</h4>
+                <CenterAccordionItem title={`Медицинские отводы и ограничения (${donorCard.medicalNotes.length})`}>
                   <div className="space-y-2.5">
                     {donorCard.medicalNotes.map(note => (
                       <div key={note.id} className={`p-4 rounded-xl border flex justify-between items-start gap-4 ${note.isActive ? 'bg-red-50/55 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
@@ -870,7 +995,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       <p className="text-xs text-slate-400 py-6 text-center">У донора отсутствуют медотводы в истории.</p>
                     )}
                   </div>
-                </div>
+                </CenterAccordionItem>
 
               </div>
 
@@ -901,7 +1026,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
 
               {/* Query filter box */}
-              <div className="bg-slate-50 p-4 rounded-2xl border flex flex-col gap-3.5">
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col gap-3.5">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3.5" />
@@ -914,82 +1039,136 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     />
                   </div>
 
-                  <div className="space-y-1 sm:w-48 text-xs font-semibold">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:w-[420px] text-xs font-semibold">
                     <select 
                       value={filterReadiness} 
                       onChange={(e) => setFilterReadiness(e.target.value)}
-                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:border-red-500 focus:outline-none h-11"
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:border-red-500 focus:outline-none h-11 cursor-pointer"
                     >
                       <option value="all">Все доноры</option>
                       <option value="ready">Готовы к сдаче сейчас</option>
                       <option value="not_ready">Временно ограничены</option>
                     </select>
+
+                    <select 
+                      value={donorSortField} 
+                      onChange={(e) => setDonorSortField(e.target.value as any)}
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:border-red-500 focus:outline-none h-11 cursor-pointer text-slate-700 font-semibold"
+                    >
+                      <option value="lastName">По Фамилии</option>
+                      <option value="bloodGroup">По Группе и Резусу</option>
+                      <option value="lastDonation">По Последней сдаче</option>
+                      <option value="donationsCount">По количеству сдач</option>
+                    </select>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-700 pt-2 border-t border-slate-200/60 items-center">
-                  <span>Область группы:</span>
-                  <div className="flex gap-2">
-                    {['I_O', 'II_A', 'III_B', 'IV_AB'].map(bg => (
-                      <label key={bg} className="flex items-center text-xs font-semibold cursor-pointer">
-                        <input 
-                          type="checkbox"
-                          checked={filterBgs.includes(bg as any)}
-                          onChange={(e) => {
-                            if (e.target.checked) setFilterBgs([...filterBgs, bg as any]);
-                            else setFilterBgs(filterBgs.filter(b => b !== bg));
-                          }}
-                          className="mr-1 rounded text-red-600 focus:ring-red-500 border-slate-300"
-                        />
-                        {formatBloodGroup(bg as any)}
-                      </label>
-                    ))}
+                {/* Controls and filters in one line */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs font-medium text-slate-700 pt-2 border-t border-slate-200/60">
+                  <div className="flex flex-wrap gap-4 items-center">
+                    <span>Область группы:</span>
+                    <div className="flex gap-2">
+                      {['I_O', 'II_A', 'III_B', 'IV_AB'].map(bg => (
+                        <label key={bg} className="flex items-center text-xs font-semibold cursor-pointer">
+                          <input 
+                            type="checkbox"
+                            checked={filterBgs.includes(bg as any)}
+                            onChange={(e) => {
+                              if (e.target.checked) setFilterBgs([...filterBgs, bg as any]);
+                              else setFilterBgs(filterBgs.filter(b => b !== bg));
+                            }}
+                            className="mr-1 rounded text-red-600 focus:ring-red-500 border-slate-300"
+                          />
+                          {formatBloodGroup(bg as any)}
+                        </label>
+                      ))}
+                    </div>
+
+                    <span className="ml-2">Резус:</span>
+                    <div className="flex gap-2">
+                      {['positive', 'negative'].map(rh => (
+                        <label key={rh} className="flex items-center text-xs font-semibold cursor-pointer">
+                          <input 
+                            type="checkbox"
+                            checked={filterRhs.includes(rh as any)}
+                            onChange={(e) => {
+                              if (e.target.checked) setFilterRhs([...filterRhs, rh as any]);
+                              else setFilterRhs(filterRhs.filter(r => r !== rh));
+                            }}
+                            className="mr-1 rounded text-red-600 focus:ring-red-500 border-slate-300"
+                          />
+                          {rh === 'positive' ? 'Rh+' : 'Rh-'}
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
-                  <span className="ml-2">Резус:</span>
-                  <div className="flex gap-2">
-                    {['positive', 'negative'].map(rh => (
-                      <label key={rh} className="flex items-center text-xs font-semibold cursor-pointer">
-                        <input 
-                          type="checkbox"
-                          checked={filterRhs.includes(rh as any)}
-                          onChange={(e) => {
-                            if (e.target.checked) setFilterRhs([...filterRhs, rh as any]);
-                            else setFilterRhs(filterRhs.filter(r => r !== rh));
-                          }}
-                          className="mr-1 rounded text-red-600 focus:ring-red-500 border-slate-300"
-                        />
-                        {rh === 'positive' ? 'Rh+' : 'Rh-'}
-                      </label>
-                    ))}
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setDonorSortOrder('asc')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
+                        donorSortOrder === 'asc' 
+                          ? 'bg-rose-50 border-rose-200 text-rose-600 shadow-xs' 
+                          : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                      }`}
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                      <span>по возрастанию</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDonorSortOrder('desc')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold transition-all cursor-pointer ${
+                        donorSortOrder === 'desc' 
+                          ? 'bg-rose-50 border-rose-200 text-rose-600 shadow-xs' 
+                          : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                      }`}
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                      <span>по убыванию</span>
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Table Donor results */}
-              <div className="border rounded-2xl overflow-hidden bg-white">
+              <div className="overflow-x-auto border border-slate-100 rounded-2xl bg-white dark:border-slate-800">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 text-slate-500 border-b">
-                      <th className="p-3 font-medium">ФИО</th>
-                      <th className="p-3 font-medium">Группа и Резус</th>
-                      <th className="p-3 font-medium">Последняя сдача</th>
-                      <th className="p-3 font-medium">Тип</th>
-                      <th className="p-3 font-medium">Всего сд.</th>
-                      <th className="p-3 font-medium">Действия</th>
+                    <tr className="bg-slate-50 text-slate-500 border-b border-slate-100 dark:border-slate-800">
+                      <th className="p-3 font-semibold text-slate-500">ФИО</th>
+                      <th className="p-3 font-semibold text-slate-500">Группа и Резус</th>
+                      <th className="p-3 font-semibold text-slate-500">Статус</th>
+                      <th className="p-3 font-semibold text-slate-500">Последняя сдача</th>
+                      <th className="p-3 font-semibold text-slate-500">Всего сд.</th>
+                      <th className="p-3 font-semibold text-slate-500">Действия</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y text-slate-650 text-slate-600">
-                    {donorList.map(item => (
+                  <tbody className="divide-y divide-slate-100 text-slate-650 text-slate-600 dark:divide-slate-800">
+                    {sortedDonorList.map(item => (
                       <tr key={item.id} className="hover:bg-slate-50/50">
                         <td className="p-3 text-slate-900 font-semibold">{item.lastName} {item.firstName} {item.middleName}</td>
                         <td className="p-3">
-                          <span className="font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100">
+                          <span className="font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100 text-[10px] tracking-wide inline-block uppercase">
                             {formatBloodGroup(item.bloodGroup)} {formatRhFactor(item.rhFactor)}
                           </span>
                         </td>
+                        <td className="p-3">
+                          {item.readiness?.ready ? (
+                            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wide">
+                              Готов к сдаче
+                            </span>
+                          ) : (
+                            <span 
+                              className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-wide cursor-help"
+                              title={item.readiness?.reason || 'Имеет ограничения или отвод'}
+                            >
+                              Медотвод
+                            </span>
+                          )}
+                        </td>
                         <td className="p-3 font-mono">{item.lastDonationDate || 'Ни разу'}</td>
-                        <td className="p-3 uppercase text-[10px] tracking-wider font-semibold text-slate-400">{item.lastDonationType || '—'}</td>
                         <td className="p-3 font-semibold text-slate-800">{item.donationsCount}</td>
                         <td className="p-3">
                           <button 
@@ -1001,7 +1180,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         </td>
                       </tr>
                     ))}
-                    {donorList.length === 0 && (
+                    {sortedDonorList.length === 0 && (
                       <tr>
                         <td colSpan={6} className="text-sm py-12 text-center text-slate-400">Свободные доноры по заданным фильтрам не найдены.</td>
                       </tr>
@@ -1024,49 +1203,250 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="space-y-6"
         >
-          <div>
-            <h3 className="font-bold text-slate-800 text-base">Заявки доноров на подтверждение</h3>
-            <p className="text-xs text-slate-500">Здесь отображаются кандидаты, которые зарегистрировались самостоятельно или направили запрос на привязку к вашему центру.</p>
-          </div>
+          {pendingDonorProfile !== null ? (
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-150 shadow-sm space-y-6 relative">
+              <button 
+                onClick={() => setPendingDonorProfile(null)}
+                className="absolute right-4 top-4 bg-slate-100 hover:bg-slate-200 text-slate-750 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                ← Вернуться к заявкам
+              </button>
 
-          <div className="space-y-3.5">
-            {pendingTies.map(item => (
-              <div key={item.link.id} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-slate-900 text-sm">{item.donor.lastName} {item.donor.firstName} {item.donor.middleName}</h4>
-                    {item.link.resubmissionCount > 0 && (
-                      <span className="bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                        Повторная подача ({item.link.resubmissionCount})
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-xs text-slate-600 space-y-1 font-light">
-                    <p>Медицинские: <strong className="font-semibold text-red-700">{formatBloodGroup(item.donor.bloodGroup)} {formatRhFactor(item.donor.rhFactor)}</strong> (Вес: {item.donor.weight} кг, ДР: {new Date(item.donor.birthDate).toLocaleDateString('ru-RU')})</p>
-                    <p>Связь: Телефон — {item.donor.phone} | Дата отправки заявки: {item.link.resubmittedAt ? new Date(item.link.resubmittedAt).toLocaleDateString('ru-RU') : new Date(item.link.createdAt).toLocaleDateString('ru-RU')}</p>
-                  </div>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pt-4 border-b pb-4 border-slate-100">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">Анкета кандидата на подтверждение: {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName}</h3>
+                  <p className="text-xs text-slate-500 mt-1">Отправлено: {pendingDonorProfile.card.link.resubmittedAt ? new Date(pendingDonorProfile.card.link.resubmittedAt).toLocaleDateString('ru-RU') : new Date(pendingDonorProfile.card.link.createdAt).toLocaleDateString('ru-RU')}</p>
                 </div>
-
-                <div className="flex gap-2 shrink-0">
-                  <button 
-                    onClick={() => handleConfirmPending(item.link.id)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs"
-                  >
-                    <Check className="w-4 h-4 mr-1" /> Одобрить анкету
-                  </button>
-                  <button 
-                    onClick={() => { setRejectionModalLinkId(item.link.id); setRejectionReason(''); }}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4 py-2 rounded-xl flex items-center"
-                  >
-                    <X className="w-4 h-4 mr-1" /> Отклонить
-                  </button>
+                <div className="flex items-center gap-2">
+                  <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-bold ${
+                    pendingDonorProfile.card.readiness.ready 
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' 
+                      : 'bg-red-50 text-red-700 border border-red-100'
+                  }`}>
+                    {pendingDonorProfile.card.readiness.ready 
+                      ? 'Готов к донации цельной крови' 
+                      : 'Медотвод / Ограничение'}
+                  </span>
                 </div>
               </div>
-            ))}
-            {pendingTies.length === 0 && (
-              <p className="text-sm text-slate-500 py-12 text-center bg-white border rounded-2xl">Новые обращения в регистратуру отсутствуют.</p>
-            )}
-          </div>
+
+              {/* Two Column Grid on analogy of "Личная информация" */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">
+                {/* Left Column: Personal info */}
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-slate-800 text-xs uppercase tracking-wider">Личные данные анкеты</h4>
+                  
+                  <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90 rounded-2xl border border-slate-150 p-4.5 bg-slate-50/40">
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">ФИО</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Дата рождения</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {new Date(pendingDonorProfile.card.donor.birthDate).toLocaleDateString('ru-RU')} ({
+                          (() => {
+                            const birthDate = new Date(pendingDonorProfile.card.donor.birthDate);
+                            const today = new Date();
+                            let age = today.getFullYear() - birthDate.getFullYear();
+                            const m = today.getMonth() - birthDate.getMonth();
+                            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                            return age;
+                          })()
+                        } лет)
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Пол</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Телефон</span>
+                      <span className="font-bold text-slate-800 text-right">{pendingDonorProfile.card.donor.phone}</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">E-mail / Личный идентификатор</span>
+                      <span className="font-bold text-slate-800 text-right">
+                        {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Вес</span>
+                      <span className="font-bold text-slate-800 text-right">{pendingDonorProfile.card.donor.weight} кг</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Группа / Резус</span>
+                      <div className="flex gap-2">
+                        <span className="bg-white border border-slate-150 text-red-600 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                          {formatBloodGroup(pendingDonorProfile.card.donor.bloodGroup)}
+                        </span>
+                        <span className="text-slate-800 font-bold px-1 py-0.5 text-xs">
+                          {formatRhFactor(pendingDonorProfile.card.donor.rhFactor)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">Уведомления</span>
+                      <span className="font-semibold text-slate-650 text-right text-xs">
+                        {pendingDonorProfile.card.donor.pushEnabled ? 'Push' : ''} {pendingDonorProfile.card.donor.emailNotificationsEnabled ? 'Email' : ''} 
+                        {!pendingDonorProfile.card.donor.pushEnabled && !pendingDonorProfile.card.donor.emailNotificationsEnabled ? 'Отключены' : ''}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
+                      <span className="text-slate-500 font-medium font-sans">В системе с</span>
+                      <span className="font-bold text-slate-800 text-right font-mono">{new Date(pendingDonorProfile.card.donor.createdAt).toLocaleDateString('ru-RU')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Medical exclusions / Limitations & History */}
+                <div className="space-y-6">
+                  {/* Medical limitations */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-slate-800 text-xs uppercase tracking-wider">Медицинские ограничения и отводы ({pendingDonorProfile.card.medicalNotes.length})</h4>
+                    {pendingDonorProfile.card.medicalNotes.length > 0 ? (
+                      <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
+                        {pendingDonorProfile.card.medicalNotes.map((note: any) => (
+                          <div key={note.id} className="p-3.5 rounded-xl border border-red-150 bg-red-50/30 text-xs text-slate-700">
+                            <p className="font-semibold text-red-800">Причина: {note.reason}</p>
+                            <p className="text-[11px] text-slate-500 mt-1">
+                              Срок проведения отвода: с {new Date(note.startDate).toLocaleDateString('ru-RU')} по {note.endDate ? new Date(note.endDate).toLocaleDateString('ru-RU') : 'бессрочно'}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-emerald-50/20 border border-emerald-100 rounded-2xl text-xs text-emerald-800 italic">
+                        Противопоказания и временные ограничения отсутствуют.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* History of Donations */}
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-slate-800 text-xs uppercase tracking-wider">История предыдущих процедур ({pendingDonorProfile.card.donations.length})</h4>
+                    {pendingDonorProfile.card.donations.length > 0 ? (
+                      <div className="border border-slate-100 rounded-2xl overflow-hidden bg-white text-xs max-h-48 overflow-y-auto">
+                        <table className="w-full text-left">
+                          <thead className="bg-slate-50 text-[10px] text-slate-500 uppercase font-bold tracking-wider border-b border-slate-150">
+                            <tr>
+                              <th className="p-3 border-r border-slate-100">Дата</th>
+                              <th className="p-3 border-r border-slate-100">Заготовка</th>
+                              <th className="p-3">Объем</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 text-slate-600">
+                            {pendingDonorProfile.card.donations.map((don: any) => (
+                              <tr key={don.id}>
+                                <td className="p-3 border-r border-slate-100 font-bold text-slate-800">
+                                  {new Date(don.donationDate || don.date).toLocaleDateString('ru-RU')}
+                                </td>
+                                <td className="p-3 border-r border-slate-100 capitalize">
+                                  {don.donationType === 'blood' ? 'кровь' : don.donationType === 'plasma' ? 'плазма' : 'тромбоциты'}
+                                </td>
+                                <td className="p-3 font-semibold text-slate-800">
+                                  {don.volumeMl || don.volume || '—'} мл
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs text-slate-400 italic">
+                        История донаций в системе не найдена.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action operations button layout */}
+              <div className="border-t border-slate-205 pt-6 flex flex-col sm:flex-row justify-end gap-3 border-slate-100">
+                <button 
+                  onClick={() => {
+                    handleConfirmPending(pendingDonorProfile.linkId);
+                    setPendingDonorProfile(null);
+                  }}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md cursor-pointer transition-all"
+                >
+                  <Check className="w-4 h-4" /> Одобрить анкету кандидата
+                </button>
+                <button 
+                  onClick={() => {
+                    setRejectionModalLinkId(pendingDonorProfile.linkId);
+                    setRejectionReason('');
+                    setPendingDonorProfile(null);
+                  }}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                >
+                  <X className="w-4 h-4" /> Отклонить обращение
+                </button>
+                <button 
+                  onClick={() => setPendingDonorProfile(null)}
+                  className="border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-6 py-3 rounded-xl cursor-pointer transition-colors"
+                >
+                  Вернуться назад
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">Заявки доноров на подтверждение</h3>
+                <p className="text-xs text-slate-500">Здесь отображаются кандидаты, которые зарегистрировались самостоятельно или направили запрос на привязку к вашему центру.</p>
+              </div>
+
+              <div className="space-y-3.5">
+                {pendingTies.map(item => (
+                  <div key={item.link.id} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-slate-900 text-sm">{item.donor.lastName} {item.donor.firstName} {item.donor.middleName}</h4>
+                        {item.link.resubmissionCount > 0 && (
+                          <span className="bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            Повторная подача ({item.link.resubmissionCount})
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-slate-600 space-y-1 font-light">
+                        <p>Медицинские: <strong className="font-semibold text-red-700">{formatBloodGroup(item.donor.bloodGroup)} {formatRhFactor(item.donor.rhFactor)}</strong> (Вес: {item.donor.weight} кг, ДР: {new Date(item.donor.birthDate).toLocaleDateString('ru-RU')})</p>
+                        <p>Связь: Телефон — {item.donor.phone} | Дата отправки заявки: {item.link.resubmittedAt ? new Date(item.link.resubmittedAt).toLocaleDateString('ru-RU') : new Date(item.link.createdAt).toLocaleDateString('ru-RU')}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 shrink-0">
+                      <button 
+                        onClick={() => handleViewPendingProfile(item.donor.id, item.link.id)}
+                        className="bg-red-50 hover:bg-red-150 border border-red-200 text-red-700 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1 transition-all cursor-pointer"
+                      >
+                        <Eye className="w-4 h-4" /> Посмотреть анкету
+                      </button>
+                      <button 
+                        onClick={() => handleConfirmPending(item.link.id)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs"
+                      >
+                        <Check className="w-4 h-4 mr-1" /> Одобрить анкету
+                      </button>
+                      <button 
+                        onClick={() => { setRejectionModalLinkId(item.link.id); setRejectionReason(''); }}
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4 py-2 rounded-xl flex items-center"
+                      >
+                        <X className="w-4 h-4 mr-1" /> Отклонить
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {pendingTies.length === 0 && (
+                  <p className="text-sm text-slate-500 py-12 text-center bg-white border border-slate-100 rounded-2xl">Новые обращения в регистратуру отсутствуют.</p>
+                )}
+              </div>
+            </>
+          )}
         </motion.div>
       )}
 
@@ -1239,7 +1619,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
             <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
               {notifHistory.map(item => (
-                <div key={item.id} className="p-3.5 bg-slate-50 border rounded-xl space-y-2.5 text-xs text-slate-600">
+                <div key={item.id} className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-2.5 text-xs text-slate-600">
                   <div className="flex justify-between items-center text-[10px] uppercase font-semibold text-slate-400">
                     <span>Телеметрия #{item.id}</span>
                     <span>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</span>
@@ -1709,6 +2089,143 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 Создать профиль донора (Подтвержден на месте)
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {pendingDonorProfile !== null && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
+            <button 
+              onClick={() => setPendingDonorProfile(null)} 
+              className="absolute right-6 top-6 p-1.5 text-slate-400 hover:bg-slate-105 hover:text-slate-700 rounded-full transition-all cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Header section with profile name and status badge */}
+            <div>
+              <span className="inline-block bg-rose-50 text-rose-600 text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-2">
+                Анкета кандидата на подтверждение
+              </span>
+              <h3 className="text-xl font-bold text-slate-900 leading-tight">
+                {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
+              </h3>
+              <p className="text-xs text-slate-500 font-light mt-1">
+                Дата регистрации: {new Date(pendingDonorProfile.card.donor.createdAt).toLocaleDateString('ru-RU')}
+              </p>
+            </div>
+
+            {/* Styled Personal Information Block */}
+            <div className="space-y-4">
+              <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90 rounded-2xl p-4.5 bg-slate-50/40">
+                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                  <span className="text-slate-500 font-medium font-sans">ФИО</span>
+                  <span className="font-bold text-slate-800 text-right">
+                    {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                  <span className="text-slate-500 font-medium font-sans">Дата рождения</span>
+                  <span className="font-bold text-slate-800 text-right">
+                    {new Date(pendingDonorProfile.card.donor.birthDate).toLocaleDateString('ru-RU')} ({
+                      (() => {
+                        const birthDate = new Date(pendingDonorProfile.card.donor.birthDate);
+                        const today = new Date();
+                        let age = today.getFullYear() - birthDate.getFullYear();
+                        const m = today.getMonth() - birthDate.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+                        return age;
+                      })()
+                    } лет)
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                  <span className="text-slate-500 font-medium font-sans">Пол</span>
+                  <span className="font-bold text-slate-800 text-right">
+                    {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                  <span className="text-slate-500 font-medium font-sans">Вес</span>
+                  <span className="font-bold text-slate-800 text-right">
+                    {pendingDonorProfile.card.donor.weight} кг
+                  </span>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-between py-2.5 gap-2">
+                  <span className="text-slate-500 font-medium font-sans">Группа и Резус-фактор</span>
+                  <div className="flex gap-2">
+                    <span className="bg-red-50 border border-red-100 text-red-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                      {formatBloodGroup(pendingDonorProfile.card.donor.bloodGroup)}
+                    </span>
+                    <span className="font-bold px-1 py-0.5 text-xs text-slate-800">
+                      {formatRhFactor(pendingDonorProfile.card.donor.rhFactor)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                  <span className="text-slate-500 font-medium font-sans">Телефон</span>
+                  <span className="font-bold text-slate-800 text-right">{pendingDonorProfile.card.donor.phone}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
+                  <span className="text-slate-500 font-medium font-sans">E-mail / Личный ID</span>
+                  <span className="font-bold text-slate-800 text-right">
+                    {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Exclusions or Medical limitations */}
+            {pendingDonorProfile.card.medicalNotes && pendingDonorProfile.card.medicalNotes.length > 0 && (
+              <div className="space-y-2.5 border-t border-slate-100 pt-4">
+                <span className="block text-[10px] text-red-500 uppercase tracking-wider font-bold">Медицинские ограничения и медотводы ({pendingDonorProfile.card.medicalNotes.length})</span>
+                <div className="space-y-2">
+                  {pendingDonorProfile.card.medicalNotes.map((note: any) => (
+                    <div key={note.id} className="p-3.5 rounded-xl border border-red-150 bg-red-50/30 text-xs text-slate-700">
+                      <p className="font-semibold text-red-800">Причина: {note.reason}</p>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Период: с {new Date(note.startDate).toLocaleDateString('ru-RU')} по {note.endDate ? new Date(note.endDate).toLocaleDateString('ru-RU') : 'бессрочно'}
+                      </p>
+                      {note.isActive && (
+                        <span className="inline-block mt-1 bg-red-150 text-red-900 border border-red-200 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                          Действует в настоящий момент
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Footer controls inside modal */}
+            <div className="border-t border-slate-200/80 pt-4 flex flex-col sm:flex-row justify-end gap-2.5">
+              <button 
+                onClick={() => {
+                  handleConfirmPending(pendingDonorProfile.linkId);
+                  setPendingDonorProfile(null);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-colors"
+              >
+                <Check className="w-4 h-4" /> Одобрить анкету
+              </button>
+              <button 
+                onClick={() => {
+                  setRejectionModalLinkId(pendingDonorProfile.linkId);
+                  setRejectionReason('');
+                  setPendingDonorProfile(null);
+                }}
+                className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              >
+                <X className="w-4 h-4" /> Отклонить
+              </button>
+              <button 
+                onClick={() => setPendingDonorProfile(null)}
+                className="border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-4.5 py-2.5 rounded-xl cursor-pointer transition-colors"
+              >
+                Закрыть
+              </button>
+            </div>
           </div>
         </div>
       )}

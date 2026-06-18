@@ -65,6 +65,7 @@ export interface Donor {
   nextAvailableDate?: string | null;
   email?: string;
   createdAt: string;
+  readiness?: { ready: boolean; reason?: string; pendingConfirmation?: boolean };
 }
 
 export interface DonorCenter {
