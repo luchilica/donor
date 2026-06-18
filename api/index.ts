@@ -848,13 +848,12 @@ app.get('/api/download/contraindications', (req, res) => {
   // UPDATE DONOR PROFILE FROM CENTER
   app.put('/api/center/donors/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const { lastName, firstName, middleName, weight, phone, birthDate, gender, bloodGroup, rhFactor, status } = req.body;
+    const { lastName, firstName, middleName, weight, phone, email, birthDate, gender, bloodGroup, rhFactor, status } = req.body;
 
     const db = await getDb();
     const donor = db.donors.find(d => d.id === id);
     if (!donor) return res.status(404).json({ error: 'Донор не найден' });
 
-    // Validate blood group changes warning (front-end alerts, server forces validation)
     donor.lastName = lastName || donor.lastName;
     donor.firstName = firstName || donor.firstName;
     donor.middleName = middleName !== undefined ? middleName : donor.middleName;
@@ -865,6 +864,19 @@ app.get('/api/download/contraindications', (req, res) => {
     donor.rhFactor = rhFactor || donor.rhFactor;
     if (weight) donor.weight = parseFloat(weight);
     if (status) donor.status = status;
+
+    const user = db.users.find(u => u.id === donor.userId);
+    if (user && email) {
+      const cleanEmail = email.toLowerCase().trim();
+      if (cleanEmail !== user.email) {
+        const existing = db.users.find(u => u.email.toLowerCase() === cleanEmail);
+        if (existing) {
+          return res.status(400).json({ error: 'Пользователь с таким email уже существует' });
+        }
+        user.email = cleanEmail;
+      }
+      donor.email = cleanEmail;
+    }
 
     await saveDb(db);
     await recalculateDonorStats(id);

@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, Users, Bell, FileText, Search, Plus, 
   Trash2, X, Check, Eye, ChevronRight, Send, HelpCircle, ShieldAlert,
-  ArrowUp, ArrowDown
+  ArrowUp, ArrowDown, Edit3
 } from 'lucide-react';
 import { 
   BloodCenter, Donor, DonorCenter, Donation, MedicalNote, 
-  Notification, News, BloodGroup, RhFactor, DonationType, formatBloodGroup, formatRhFactor 
+  Notification, News, BloodGroup, RhFactor, DonationType, DonorStatus, formatBloodGroup, formatRhFactor 
 } from '../types';
 import { ConfirmationModal } from './ConfirmationModal';
 
@@ -147,6 +147,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     startDate: new Date().toISOString().split('T')[0],
     endDate: '',
     isPermanent: false
+  });
+
+  const [showEditDonorModal, setShowEditDonorModal] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [editDonorForm, setEditDonorForm] = useState({
+    lastName: '', firstName: '', middleName: '', birthDate: '', gender: 'male' as 'male'|'female',
+    bloodGroup: 'I_O' as BloodGroup, rhFactor: 'positive' as RhFactor, weight: '70', phone: '', email: '', status: 'active' as DonorStatus
   });
 
   // Manual Donor Registration from Center
@@ -470,6 +477,112 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             loadDonorCard(selectedDonorId);
           }
         } catch {}
+        closeConfirm();
+      }
+    });
+  };
+
+  const handleEditDonorNameChange = (field: 'lastName' | 'firstName' | 'middleName', val: string) => {
+    const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+    setEditDonorForm(prev => ({ ...prev, [field]: lettersOnly }));
+  };
+
+  const handleEditDonorPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    if (!val.startsWith('+375')) {
+      const digitsOnly = val.replace(/\D/g, '');
+      if (digitsOnly.startsWith('375')) {
+        val = '+375' + digitsOnly.slice(3, 12);
+      } else {
+        val = '+375' + digitsOnly.slice(0, 9);
+      }
+    } else {
+      const afterPrefix = val.slice(4).replace(/\D/g, '').slice(0, 9);
+      val = '+375' + afterPrefix;
+    }
+    setEditDonorForm(prev => ({ ...prev, phone: val }));
+  };
+
+  const handleOpenEditDonor = () => {
+    if (donorCard) {
+      setEditDonorForm({
+        lastName: donorCard.donor.lastName,
+        firstName: donorCard.donor.firstName,
+        middleName: donorCard.donor.middleName || '',
+        birthDate: donorCard.donor.birthDate,
+        gender: donorCard.donor.gender,
+        bloodGroup: donorCard.donor.bloodGroup,
+        rhFactor: donorCard.donor.rhFactor,
+        weight: donorCard.donor.weight?.toString() || '',
+        phone: donorCard.donor.phone,
+        email: donorCard.donor.email || '',
+        status: donorCard.donor.status
+      });
+      setShowEditDonorModal(true);
+    }
+  };
+
+  const handleEditDonorSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDonorId) return;
+
+    setEditError('');
+
+    // 1. Birth Date check: age between 18 and 65
+    const birthDateObj = new Date(editDonorForm.birthDate);
+    if (isNaN(birthDateObj.getTime())) {
+      setEditError('Пожалуйста, введите корректную дату рождения');
+      return;
+    }
+    const today = new Date();
+    let age = today.getFullYear() - birthDateObj.getFullYear();
+    const m = today.getMonth() - birthDateObj.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+      age--;
+    }
+    if (age < 18 || age > 65) {
+      setEditError('Возраст донора должен быть от 18 до 65 лет');
+      return;
+    }
+
+    // 2. Email pattern check: *@* (at least 1 character before and after @)
+    const emailRegex = /^.+@.+$/;
+    if (!emailRegex.test(editDonorForm.email)) {
+      setEditError('Укажите корректный e-mail в формате user@example.com (должен содержать символы до и после @)');
+      return;
+    }
+
+    // 3. Weight check: not less than 55 kg
+    const weightVal = parseFloat(editDonorForm.weight);
+    if (isNaN(weightVal) || weightVal < 55) {
+      setEditError('Минимальный вес донора для сдачи крови — 55 кг');
+      return;
+    }
+
+    requestConfirm({
+      title: 'Сохранить изменения?',
+      message: 'Вы уверены, что хотите обновить данные донора?',
+      variant: 'success',
+      confirmText: 'Сохранить',
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(editDonorForm)
+          });
+          
+          if (res.ok) {
+            setShowEditDonorModal(false);
+            loadDonorCard(selectedDonorId);
+            loadDonors();
+          } else {
+            const data = await res.json();
+            setEditError(data.error || 'Произошла ошибка при сохранении');
+          }
+        } catch {
+          setEditError('Произошла ошибка сети');
+        }
         closeConfirm();
       }
     });
@@ -825,6 +938,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               {/* Sub actions block */}
               <div className="flex flex-wrap gap-2.5">
                 <button 
+                  onClick={handleOpenEditDonor}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs px-4 py-2 rounded-xl flex items-center"
+                >
+                  <Edit3 className="w-4 h-4 mr-1" /> Редактировать данные донора
+                </button>
+                <button 
                   onClick={() => setShowAddDonationModal(true)}
                   className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center"
                 >
@@ -1066,7 +1185,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 {/* Controls and filters in one line */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs font-medium text-slate-700 pt-2 border-t border-slate-200/60">
                   <div className="flex flex-wrap gap-4 items-center">
-                    <span>Область группы:</span>
+                    <span>Группы:</span>
                     <div className="flex gap-2">
                       {['I_O', 'II_A', 'III_B', 'IV_AB'].map(bg => (
                         <label key={bg} className="flex items-center text-xs font-semibold cursor-pointer">
@@ -1463,8 +1582,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           {/* Form alert settings rules */}
           <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
             <div>
-              <h3 className="font-bold text-slate-800 text-base">Сверхманевренный АЛЕРТОР оповещений доноров</h3>
-              <p className="text-xs text-slate-500 font-light mt-0.5">Таргетированная рассылка для закрытия оперативных дефицитов крови.</p>
+              <h3 className="font-bold text-slate-800 text-base">Быстрая рассылка оповещений о дефицитах</h3>
+              <p className="text-xs text-slate-500 font-light mt-0.5">Оперативная рассылка для закрытия дефицитов крови.</p>
             </div>
 
             {notifySuccessMsg && (
@@ -1478,7 +1597,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 
                 {/* Target blood selection */}
                 <div className="space-y-1.5 text-xs text-slate-700 font-semibold border-b sm:border-b-0 pb-3 sm:pb-0">
-                  <label>Группа крови (целевой дефицит):</label>
+                  <label>Группа крови:</label>
                   <div className="space-y-1 pt-1 font-medium">
                     {['I_O', 'II_A', 'III_B', 'IV_AB'].map(bg => (
                       <label key={bg} className="flex items-center text-xs font-semibold cursor-pointer">
@@ -1576,7 +1695,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
               <div className="space-y-2 border-t pt-4">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-semibold text-slate-700">Текст извещения донорам (до 160 симв. для SMS):</label>
+                  <label className="font-semibold text-slate-700">Текст извещения донорам (до 160 символов):</label>
                   <div className="flex gap-2">
                     <button type="button" onClick={() => loadTemplate('urgent_color')} className="text-red-700 hover:underline font-semibold text-[10px]">Шаблон: Дефицит крови</button>
                     <button type="button" onClick={() => loadTemplate('plasma_call')} className="text-[10px] text-slate-500 hover:underline">Шаблон: Аферез плазмы</button>
@@ -1827,6 +1946,189 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           </div>
         </div>
       )}
+
+      {/* EDIT DONOR DETAILS MODAL */}
+      {showEditDonorModal && (() => {
+        const editDonorAgeError = (() => {
+          if (!editDonorForm.birthDate) return null;
+          const birthDateObj = new Date(editDonorForm.birthDate);
+          if (isNaN(birthDateObj.getTime())) return 'Пожалуйста, введите корректную дату рождения';
+          const today = new Date();
+          let age = today.getFullYear() - birthDateObj.getFullYear();
+          const m = today.getMonth() - birthDateObj.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+            age--;
+          }
+          if (age < 18 || age > 65) {
+            return `Возраст донора должен быть от 18 до 65 лет (сейчас: ${age < 0 ? 0 : age})`;
+          }
+          return null;
+        })();
+
+        const editDonorEmailError = (() => {
+          if (!editDonorForm.email) return null;
+          const emailRegex = /^.+@.+$/;
+          if (!emailRegex.test(editDonorForm.email)) {
+            return 'E-mail должен быть вида *@* (символы до и после @)';
+          }
+          return null;
+        })();
+
+        const editDonorWeightError = (() => {
+          if (!editDonorForm.weight) return null;
+          const w = parseFloat(editDonorForm.weight);
+          if (isNaN(w) || w < 55) {
+            return 'Минимальный вес должен быть не менее 55 кг';
+          }
+          return null;
+        })();
+
+        return (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-fade">
+              <button type="button" onClick={() => setShowEditDonorModal(false)} className="absolute right-4 top-4 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all">✕</button>
+              <h3 className="font-bold text-slate-800 text-xl tracking-tight mb-8">Редактировать данные донора</h3>
+              
+              {editError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-bold font-sans">
+                  {editError}
+                </div>
+              )}
+
+              <form onSubmit={handleEditDonorSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Фамилия <span className="text-red-500">*</span></label>
+                    <input required type="text" value={editDonorForm.lastName} onChange={e => handleEditDonorNameChange('lastName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Имя <span className="text-red-500">*</span></label>
+                    <input required type="text" value={editDonorForm.firstName} onChange={e => handleEditDonorNameChange('firstName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Отчество</label>
+                    <input type="text" value={editDonorForm.middleName} onChange={e => handleEditDonorNameChange('middleName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  <div className="relative group/field">
+                    <label className="block text-xs font-bold text-slate-500 mb-1 flex items-center justify-between">
+                      <span>Дата рождения <span className="text-red-500">*</span></span>
+                    </label>
+                    <input 
+                      required 
+                      type="date" 
+                      min={new Date(new Date().setFullYear(new Date().getFullYear() - 65)).toISOString().split('T')[0]}
+                      max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+                      value={editDonorForm.birthDate} 
+                      onChange={e => setEditDonorForm({...editDonorForm, birthDate: e.target.value})} 
+                      className={`w-full text-sm font-bold rounded-xl px-4 py-2.5 focus:outline-none transition-colors ${
+                        editDonorAgeError 
+                          ? 'border-red-500 bg-red-50 focus:border-red-600 text-slate-800' 
+                          : 'bg-slate-50 border border-slate-200 text-slate-800 focus:border-red-500'
+                      }`} 
+                    />
+                    {editDonorAgeError && (
+                      <p className="text-xs text-red-500 mt-1">Возраст донора должен быть от 18 до 65 лет</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Пол</label>
+                    <select value={editDonorForm.gender} onChange={e => setEditDonorForm({...editDonorForm, gender: e.target.value as 'male'|'female'})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500">
+                      <option value="male">Мужской</option>
+                      <option value="female">Женский</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Телефон <span className="text-red-500">*</span></label>
+                    <input required type="tel" value={editDonorForm.phone} onChange={handleEditDonorPhoneChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500" />
+                  </div>
+                  <div className="relative group/field">
+                    <label className="block text-xs font-bold text-slate-500 mb-1 flex items-center justify-between">
+                      <span>E-mail <span className="text-red-500">*</span></span>
+                    </label>
+                    <input 
+                      required 
+                      type="email" 
+                      value={editDonorForm.email} 
+                      onChange={e => setEditDonorForm({...editDonorForm, email: e.target.value})} 
+                      className={`w-full text-sm font-bold rounded-xl px-4 py-2.5 focus:outline-none transition-colors ${
+                        editDonorEmailError 
+                          ? 'border-red-500 bg-red-50 focus:border-red-600 text-slate-800' 
+                          : 'bg-slate-50 border border-slate-200 text-slate-800 focus:border-red-500'
+                      }`} 
+                    />
+                    {editDonorEmailError && (
+                      <p className="text-xs text-red-500 mt-1">Введите корректный почтовый ящик (с символом @)</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Дополнительный статус</label>
+                    <select value={editDonorForm.status} onChange={e => setEditDonorForm({...editDonorForm, status: e.target.value as DonorStatus})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500">
+                      <option value="active">Активный</option>
+                      <option value="inactive">Неактивный</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                  <div className="relative group/field">
+                    <label className="block text-xs font-bold text-slate-500 mb-1 flex items-center justify-between">
+                      <span>Вес (кг) <span className="text-red-500">*</span></span>
+                    </label>
+                    <input 
+                      required 
+                      type="number" 
+                      min="55" 
+                      max="250" 
+                      step="0.1" 
+                      value={editDonorForm.weight} 
+                      onChange={e => setEditDonorForm({...editDonorForm, weight: e.target.value})} 
+                      className={`w-full text-sm font-bold rounded-xl px-4 py-2.5 focus:outline-none transition-colors ${
+                        editDonorWeightError 
+                          ? 'border-red-500 bg-red-50 focus:border-red-600 text-slate-800' 
+                          : 'bg-slate-50 border border-slate-200 text-slate-800 focus:border-red-500'
+                      }`} 
+                    />
+                    {editDonorWeightError && (
+                      <p className="text-xs text-red-500 mt-1">Минимальный вес — 55 кг.</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Группа крови</label>
+                    <select value={editDonorForm.bloodGroup} onChange={e => setEditDonorForm({...editDonorForm, bloodGroup: e.target.value as BloodGroup})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500">
+                      <option value="I_O">I (O)</option>
+                      <option value="II_A">II (A)</option>
+                      <option value="III_B">III (B)</option>
+                      <option value="IV_AB">IV (AB)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Резус-фактор</label>
+                    <select value={editDonorForm.rhFactor} onChange={e => setEditDonorForm({...editDonorForm, rhFactor: e.target.value as RhFactor})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500">
+                      <option value="positive">Rh+</option>
+                      <option value="negative">Rh-</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-6 border-t border-slate-100/60 mt-8 font-sans">
+                  <button type="button" onClick={() => setShowEditDonorModal(false)} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
+                    Отмена
+                  </button>
+                  <button type="submit" className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade">
+                    Сохранить изменения
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ADD MEDICAL RESTRICTION FORM MODAL */}
       {showAddMedicalModal && (
