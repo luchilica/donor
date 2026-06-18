@@ -1596,7 +1596,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 {/* Target blood selection */}
-                <div className="space-y-1.5 text-xs text-slate-700 font-semibold border-b sm:border-b-0 pb-3 sm:pb-0">
+                <div className="space-y-1.5 text-xs text-slate-700 font-semibold pb-3 sm:pb-0">
                   <label>Группа крови:</label>
                   <div className="space-y-1 pt-1 font-medium">
                     {['I_O', 'II_A', 'III_B', 'IV_AB'].map(bg => (
@@ -1643,7 +1643,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t pt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                 <label className="flex items-start text-xs text-slate-700 cursor-pointer">
                   <input 
                     type="checkbox" 
@@ -1671,7 +1671,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </label>
               </div>
 
-              <div className="space-y-1.5 border-t pt-4 text-xs font-semibold">
+              <div className="space-y-1.5 pt-4 text-xs font-semibold">
                 <label>Предпочтительный канал доставки рассылки:</label>
                 <div className="flex flex-wrap gap-4 pt-1 font-medium">
                   {[
@@ -1693,7 +1693,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </div>
               </div>
 
-              <div className="space-y-2 border-t pt-4">
+              <div className="space-y-2 pt-4">
                 <div className="flex justify-between items-center text-xs">
                   <label className="font-semibold text-slate-700">Текст извещения донорам (до 160 символов):</label>
                   <div className="flex gap-2">
