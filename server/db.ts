@@ -523,6 +523,14 @@ const INITIAL_USERS: User[] = [
     centerId: 1, // ГУ «РНПЦ трансфузиологии и медицинских биотехнологий» (Минск)
     isActive: true,
     createdAt: new Date().toISOString()
+  },
+  {
+    id: 99,
+    email: "admin@test.by",
+    passwordHash: "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC", // "password123"
+    role: "admin",
+    isActive: true,
+    createdAt: new Date().toISOString()
   }
 ];
 
@@ -1051,8 +1059,23 @@ let cachedDb: DatabaseState | null = null;
 
 // Load state of store
 export async function getDb(): Promise<DatabaseState> {
+  const ensureAdmin = (state: DatabaseState): DatabaseState => {
+    if (state && state.users && !state.users.some(u => u.email === "admin@test.by")) {
+      state.users.push({
+        id: 99,
+        email: "admin@test.by",
+        passwordHash: "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC", // password123
+        role: "admin",
+        isActive: true,
+        createdAt: new Date().toISOString()
+      });
+      saveState(state);
+    }
+    return state;
+  };
+
   if (cachedDb) {
-    return JSON.parse(JSON.stringify(cachedDb));
+    return ensureAdmin(JSON.parse(JSON.stringify(cachedDb)));
   }
 
   const isPostgresActive = checkPostgresActive();
@@ -1235,7 +1258,7 @@ export async function getDb(): Promise<DatabaseState> {
         saveDb(JSON.parse(JSON.stringify(cachedDb))).catch(console.error);
       }
 
-      return JSON.parse(JSON.stringify(cachedDb));
+      return ensureAdmin(JSON.parse(JSON.stringify(cachedDb)));
     } catch (e) {
       console.error('Failed to load from PostgreSQL, falling back to JSON storage...', e);
     }
@@ -1276,17 +1299,17 @@ export async function getDb(): Promise<DatabaseState> {
       if (notesChanged) {
         saveDb(JSON.parse(JSON.stringify(cachedDb))).catch(console.error);
       }
-      return JSON.parse(JSON.stringify(cachedDb));
+      return ensureAdmin(JSON.parse(JSON.stringify(cachedDb)));
     } catch (e) {
       console.error('Database file corrupt. Seeding again...');
       saveState(seededState);
       cachedDb = seededState;
-      return seededState;
+      return ensureAdmin(seededState);
     }
   } else {
     saveState(seededState);
     cachedDb = seededState;
-    return seededState;
+    return ensureAdmin(seededState);
   }
 }
 

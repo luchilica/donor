@@ -5,6 +5,7 @@ import { BloodCenter, News, Donor, DonorCenter, MedicalNote, Donation } from './
 import GuestSection from './components/GuestSection.tsx';
 import DonorSection from './components/DonorSection.tsx';
 import CenterSection from './components/CenterSection.tsx';
+import AdminSection from './components/AdminSection.tsx';
 import { BY_DICT } from './i18n.ts';
 import { LanguageProvider } from './LanguageContext.tsx';
 
@@ -180,7 +181,7 @@ export default function App() {
   };
 
   // Quick Evaluator Simulator Session set-up
-  const simulateRole = async (role: 'guest' | 'donor' | 'center') => {
+  const simulateRole = async (role: 'guest' | 'donor' | 'center' | 'admin') => {
     if (role === 'guest') {
       handleLogout();
     } else if (role === 'donor') {
@@ -200,6 +201,17 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: 'center@test.by', password: 'password123' })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        handleLoginSuccess(data);
+      }
+    } else if (role === 'admin') {
+      // Login System Administrator
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'admin@test.by', password: 'password123' })
       });
       if (res.ok) {
         const data = await res.json();
@@ -234,7 +246,7 @@ export default function App() {
         <div className="flex flex-wrap justify-center gap-1 select-none">
           <button 
             onClick={() => simulateRole('guest')}
-            className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${!session ? 'bg-rose-500 border-rose-500 text-white' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
+            className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${!session ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
           >
             {t("Гость (Публичный сайт)")}
           </button>
@@ -249,6 +261,12 @@ export default function App() {
             className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'center' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
           >
             {t("Координатор: Минский РНПЦ")}
+          </button>
+          <button 
+            onClick={() => simulateRole('admin')}
+            className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'admin' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
+          >
+            {t("Админ: Система")}
           </button>
         </div>
       </div>
@@ -366,6 +384,13 @@ export default function App() {
               onRefresh={loadGlobalData}
               apiBase={API_BASE}
               token={session.token}
+            />
+          )}
+
+          {view === 'dashboard' && session?.user.role === 'admin' && (
+            <AdminSection 
+              token={session.token}
+              t={t}
             />
           )}
         </LanguageProvider>
