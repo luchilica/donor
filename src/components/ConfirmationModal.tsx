@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../LanguageContext.tsx';
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
 
 interface ConfirmationModalProps {

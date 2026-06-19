@@ -8,6 +8,17 @@ export type DonorCenterStatus = 'pending' | 'confirmed' | 'rejected';
 export type NotificationChannel = 'push' | 'email' | 'all';
 export type NotificationStatus = 'sent' | 'partial' | 'failed';
 
+export interface BloodNeeds {
+  I_pos: number;
+  I_neg: number;
+  II_pos: number;
+  II_neg: number;
+  III_pos: number;
+  III_neg: number;
+  IV_pos: number;
+  IV_neg: number;
+}
+
 export interface BloodCenter {
   id: number;
   name: string;
@@ -19,6 +30,7 @@ export interface BloodCenter {
   mapLink?: string;
   eRegistrationLink?: string;
   createdAt: string;
+  bloodNeeds?: BloodNeeds;
 }
 
 export interface User {

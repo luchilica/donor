@@ -830,6 +830,16 @@ async function seedPostgresWithSeededState() {
         workingHours: item.workingHours || null,
         mapLink: item.mapLink || null,
         eRegistrationLink: item.eRegistrationLink || null,
+        bloodNeeds: item.bloodNeeds ? (item.bloodNeeds as any) : {
+          I_pos: Math.floor(Math.random() * 101),
+          I_neg: Math.floor(Math.random() * 101),
+          II_pos: Math.floor(Math.random() * 101),
+          II_neg: Math.floor(Math.random() * 101),
+          III_pos: Math.floor(Math.random() * 101),
+          III_neg: Math.floor(Math.random() * 101),
+          IV_pos: Math.floor(Math.random() * 101),
+          IV_neg: Math.floor(Math.random() * 101)
+        },
         createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
       }
     });
@@ -1084,10 +1094,11 @@ export async function getDb(): Promise<DatabaseState> {
           name: m.name,
           address: m.address,
           phone: m.phone,
-          email: m.email,
-          workingHours: m.workingHours,
-          mapLink: m.mapLink,
-          eRegistrationLink: m.eRegistrationLink,
+          email: m.email || undefined,
+          workingHours: m.workingHours || undefined,
+          mapLink: m.mapLink || undefined,
+          eRegistrationLink: m.eRegistrationLink || undefined,
+          bloodNeeds: m.bloodNeeds ? (m.bloodNeeds as any) : undefined,
           createdAt: m.createdAt.toISOString()
         })),
         users: dbUsers.map(m => ({
@@ -1236,6 +1247,23 @@ export async function getDb(): Promise<DatabaseState> {
       const data = fs.readFileSync(STORE_PATH, 'utf-8');
       cachedDb = JSON.parse(data);
 
+      if (cachedDb && cachedDb.centers) {
+        cachedDb.centers.forEach((c: any) => {
+          if (!c.bloodNeeds) {
+            c.bloodNeeds = {
+              I_pos: Math.floor(Math.random() * 101),
+              I_neg: Math.floor(Math.random() * 101),
+              II_pos: Math.floor(Math.random() * 101),
+              II_neg: Math.floor(Math.random() * 101),
+              III_pos: Math.floor(Math.random() * 101),
+              III_neg: Math.floor(Math.random() * 101),
+              IV_pos: Math.floor(Math.random() * 101),
+              IV_neg: Math.floor(Math.random() * 101)
+            };
+          }
+        });
+      }
+
       // Clean up expired medical notes automatically
       const todayStr = new Date().toISOString().split('T')[0];
       let notesChanged = false;
@@ -1271,6 +1299,30 @@ export async function saveDb(state: DatabaseState): Promise<void> {
 
   if (isPostgresActive) {
     try {
+      // 0. Sync Centers table
+      await Promise.all(state.centers.map(async center => {
+        const prev = oldDb && oldDb.centers && oldDb.centers.find((x: any) => x.id === center.id);
+        if (prev && JSON.stringify(prev) === JSON.stringify(center)) return;
+        return prisma.bloodCenter.upsert({
+          where: { id: center.id },
+          update: {
+            bloodNeeds: center.bloodNeeds ? (center.bloodNeeds as any) : null,
+          },
+          create: {
+            id: center.id,
+            name: center.name,
+            address: center.address,
+            phone: center.phone,
+            email: center.email || null,
+            workingHours: center.workingHours || null,
+            mapLink: center.mapLink || null,
+            eRegistrationLink: center.eRegistrationLink || null,
+            bloodNeeds: center.bloodNeeds ? (center.bloodNeeds as any) : null,
+            createdAt: center.createdAt ? new Date(center.createdAt) : new Date(),
+          }
+        });
+      }));
+
       // 1. Sync User table
       await Promise.all(state.users.map(async user => {
         const prev = oldDb && oldDb.users && oldDb.users.find(x => x.id === user.id );

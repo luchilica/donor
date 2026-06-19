@@ -17,6 +17,7 @@ model BloodCenter {
   workingHours        String?  @db.Text
   mapLink             String?  @db.Text
   eRegistrationLink   String?  @db.Text
+  bloodNeeds          Json?
   createdAt           DateTime @default(now())
 
   users       User[]

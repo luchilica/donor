@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../LanguageContext.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Calendar, Award, ShieldAlert, Clock, AlertTriangle, 
@@ -24,6 +25,8 @@ interface DonorSectionProps {
 }
 
 export default function DonorSection({ donor, links, donations, medicalNotes, readiness, centers, onRefresh, apiBase, token }: DonorSectionProps) {
+  const { t } = useLanguage();
+
   const [activeMenu, setActiveMenu] = useState<'dashboard' | 'profile' | 'history' | 'links' | 'pause' | 'notifications' | 'account'>('dashboard');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -590,34 +593,34 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           <h2 className="font-bold text-slate-800 text-lg leading-tight tracking-tight">
             {donor.lastName} {donor.firstName}
           </h2>
-          <p className="text-xs text-slate-400 mt-1 font-medium">Донор с {new Date(donor.createdAt).toLocaleDateString('ru-RU')}</p>
+          <p className="text-xs text-slate-400 mt-1 font-medium">{t("Донор с")} {new Date(donor.createdAt).toLocaleDateString('ru-RU')}</p>
 
           <div className="grid grid-cols-2 gap-3 mt-6 mb-6">
             <div className="bg-red-50 py-3 rounded-xl flex flex-col items-center justify-center">
               <span className="font-bold text-red-600 text-lg leading-none">{formatBloodGroup(donor.bloodGroup)}</span>
-              <span className="text-slate-500 text-[10px] font-bold mt-1 leading-none">Группа</span>
+              <span className="text-slate-500 text-[10px] font-bold mt-1 leading-none">{t("Группа")}</span>
             </div>
             <div className="bg-red-50 py-3 rounded-xl flex flex-col items-center justify-center">
               <span className="font-bold text-red-600 text-lg leading-none">{formatRhFactor(donor.rhFactor)}</span>
-              <span className="text-slate-500 text-[10px] font-bold mt-1 leading-none">Резус</span>
+              <span className="text-slate-500 text-[10px] font-bold mt-1 leading-none">{t("Резус")}</span>
             </div>
           </div>
 
           <div className="space-y-3 text-sm text-left">
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">Вес:</span>
+              <span className="text-slate-500 font-bold">{t("Вес:")}</span>
               <span className="text-slate-700 font-medium">{donor.weight || '—'} кг</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">Возраст:</span>
+              <span className="text-slate-500 font-bold">{t("Возраст:")}</span>
               <span className="text-slate-700 font-medium">{calcAge(donor.birthDate)} лет</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">Донаций:</span>
+              <span className="text-slate-500 font-bold">{t("Донаций:")}</span>
               <span className="text-slate-700 font-medium">{totalDonations}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">Статус:</span>
+              <span className="text-slate-500 font-bold">{t("Статус:")}</span>
               <span className={readiness.ready ? 'text-emerald-500 font-bold' : readiness.pendingConfirmation ? 'text-amber-500 font-bold' : 'text-red-700 font-bold'}>
                 {readiness.ready ? 'Готов к сдаче' : readiness.pendingConfirmation ? 'На подтверждении' : 'Отвод'}
               </span>
@@ -665,7 +668,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             >
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm">
               <div className="flex justify-between items-center mb-8">
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight">Личная информация</h3>
+                <h3 className="font-bold text-slate-800 text-xl tracking-tight">{t("Личная информация")}</h3>
                 {!isEditingProfile && (
                   <button 
                     onClick={handleStartEdit}
@@ -692,7 +695,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <form onSubmit={handleProfileSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Фамилия</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Фамилия")}</label>
                       <input 
                         type="text" 
                         required
@@ -702,7 +705,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Имя</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Имя")}</label>
                       <input 
                         type="text" 
                         required
@@ -712,7 +715,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Отчество</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Отчество")}</label>
                       <input 
                         type="text" 
                         value={profileForm.middleName} 
@@ -724,7 +727,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Дата рождения</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Дата рождения")}</label>
                       <input 
                         type="date" 
                         required
@@ -735,22 +738,22 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Пол</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Пол")}</label>
                       <select 
                         value={profileForm.gender} 
                         disabled
                         onChange={e => setProfileForm({ ...profileForm, gender: e.target.value as any })}
                         className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-400 cursor-not-allowed opacity-70 focus:outline-none"
                       >
-                        <option value="male">Мужской</option>
-                        <option value="female">Женский</option>
+                        <option value="male">{t("Мужской")}</option>
+                        <option value="female">{t("Женский")}</option>
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Телефон</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Телефон")}</label>
                       <input 
                         type="text" 
                         required
@@ -773,7 +776,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Вес (кг)</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Вес (кг)")}</label>
                       <input 
                         type="number" 
                         required
@@ -784,7 +787,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Группа крови</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Группа крови")}</label>
                       <select 
                         value={profileForm.bloodGroup} 
                         onChange={e => setProfileForm({ ...profileForm, bloodGroup: e.target.value as any })}
@@ -797,7 +800,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-500 mb-1">Резус-фактор</label>
+                      <label className="block text-xs font-bold text-slate-500 mb-1">{t("Резус-фактор")}</label>
                       <select 
                         value={profileForm.rhFactor} 
                         onChange={e => setProfileForm({ ...profileForm, rhFactor: e.target.value as any })}
@@ -811,17 +814,17 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
                   <div className="divide-y divide-slate-100/80 text-sm mt-6 pt-4 border-t border-slate-100">
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                      <span className="text-slate-400 font-medium font-sans">Всего донаций (накапливается автоматически)</span>
+                      <span className="text-slate-400 font-medium font-sans">{t("Всего донаций (накапливается автоматически)")}</span>
                       <span className="font-bold text-slate-500 text-right">{totalDonations}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                      <span className="text-slate-400 font-medium font-sans">Последняя сдача (вносится автоматически)</span>
+                      <span className="text-slate-400 font-medium font-sans">{t("Последняя сдача (вносится автоматически)")}</span>
                       <span className="font-bold text-slate-500 text-right font-mono">
                         {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
-                      <span className="text-slate-400 font-medium font-sans">В системе с</span>
+                      <span className="text-slate-400 font-medium font-sans">{t("В системе с")}</span>
                       <span className="font-bold text-slate-500 text-right font-mono">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
                     </div>
                   </div>
@@ -845,19 +848,19 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               ) : (
                 <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90">
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">ФИО</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
                     <span className="font-bold text-slate-800 text-right">{donor.lastName} {donor.firstName} {donor.middleName || ''}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">Дата рождения</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
                     <span className="font-bold text-slate-800 text-right">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">Пол</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
                     <span className="font-bold text-slate-800 text-right">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">Телефон</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("Телефон")}</span>
                     <span className="font-bold text-slate-800 text-right">{donor.phone}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
@@ -865,28 +868,28 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     <span className="font-bold text-slate-800 text-right">{donor.email}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">Вес</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
                     <span className="font-bold text-slate-800 text-right">{donor.weight} кг</span>
                   </div>
                   <div className="flex flex-col sm:flex-row items-center justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">Группа / Резус</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("Группа / Резус")}</span>
                     <div className="flex gap-2">
                       <span className="bg-slate-100 text-red-600 font-bold px-2.5 py-0.5 rounded-full text-[10px]">{formatBloodGroup(donor.bloodGroup)}</span>
                       <span className="text-slate-800 font-bold px-1 py-0.5 text-xs">{formatRhFactor(donor.rhFactor)}</span>
                     </div>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">Всего донаций</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("Всего донаций")}</span>
                     <span className="font-bold text-slate-800 text-right">{totalDonations}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">Последняя сдача</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("Последняя сдача")}</span>
                     <span className="font-bold text-slate-800 text-right font-mono">
                       {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">В системе с</span>
+                    <span className="text-slate-500 font-medium font-sans">{t("В системе с")}</span>
                     <span className="font-bold text-slate-800 text-right font-mono">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
                   </div>
                 </div>
@@ -910,7 +913,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-center relative group cursor-pointer hover:bg-red-100/30 transition-all">
                 <span className="text-3xl font-bold text-red-600 leading-none mb-1">{totalDonations}</span>
-                <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">всего донаций</span>
+                <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">{t("всего донаций")}</span>
                 
                 {/* Popover summary list on hover */}
                 <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 bg-slate-900 border border-slate-800 text-white rounded-xl p-3.5 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[12px] space-y-1.5 font-sans">
@@ -921,19 +924,19 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     Статистика по типам
                   </div>
                   <div className="flex justify-between items-center text-slate-200">
-                    <span>Цельная кровь:</span>
+                    <span>{t("Цельная кровь:")}</span>
                     <span className="font-bold text-rose-300">{bCounts}</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-200">
-                    <span>Плазма:</span>
+                    <span>{t("Плазма:")}</span>
                     <span className="font-bold text-rose-300">{pCounts}</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-200">
-                    <span>Тромбоциты:</span>
+                    <span>{t("Тромбоциты:")}</span>
                     <span className="font-bold text-rose-300">{plCounts}</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-200">
-                    <span>Гранулоциты:</span>
+                    <span>{t("Гранулоциты:")}</span>
                     <span className="font-bold text-rose-300">{grCounts}</span>
                   </div>
                 </div>
@@ -941,11 +944,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center">
                 <div className="space-y-2 font-sans">
                   <div className="flex justify-between items-center transition-colors">
-                    <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">безвозмездно</span>
+                    <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">{t("безвозмездно")}</span>
                     <span className="text-xl sm:text-2xl font-bold text-emerald-600 leading-none">{totalFreeDonations}</span>
                   </div>
                   <div className="flex justify-between items-center transition-colors">
-                    <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">возмездно</span>
+                    <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest">{t("возмездно")}</span>
                     <span className="text-xl sm:text-2xl font-bold text-emerald-600 leading-none">{totalPaidDonations}</span>
                   </div>
                 </div>
@@ -954,13 +957,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-amber-500 leading-none mb-1 tracking-tight">
                   {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : '—'}
                 </span>
-                <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">последняя сдача</span>
+                <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest">{t("последняя сдача")}</span>
               </div>
               <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex flex-col justify-center overflow-hidden">
                 <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-500 leading-none mb-1 font-sans tracking-tight">
                   {readiness.ready ? '—' : (donor.nextAvailableDate ? new Date(donor.nextAvailableDate).toLocaleDateString('ru-RU') : '—')}
                 </span>
-                <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest">следующая дата</span>
+                <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest">{t("следующая дата")}</span>
               </div>
             </div>
 
@@ -970,8 +973,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               {/* Header from screenshot */}
               <div className="flex flex-row items-center justify-between gap-4 pb-4 border-b border-slate-100/60">
                 <div>
-                  <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">Донорский ранг</h3>
-                  <p className="text-xs md:text-sm text-slate-500 mt-0.5">Прогресс и доступные льготы</p>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">{t("Донорский ранг")}</h3>
+                  <p className="text-xs md:text-sm text-slate-500 mt-0.5">{t("Прогресс и доступные льготы")}</p>
                 </div>
                 <div>
                   <span className={`inline-flex items-center px-4 py-1.5 rounded-full border text-xs sm:text-sm font-semibold tracking-wide shadow-xs ${gameStatus.color}`}>
@@ -985,10 +988,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="space-y-3 mt-5">
                   <div className="flex justify-between items-end">
                     <div className="relative group flex items-center gap-1.5 cursor-help">
-                      <span className="text-[13px] font-bold text-slate-800">До следующего ранга (баллы)</span>
+                      <span className="text-[13px] font-bold text-slate-800">{t("До следующего ранга (баллы)")}</span>
                       <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
                       <div className="absolute bottom-full left-0 mb-2 w-72 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal text-left">
-                        <strong className="block text-red-400 border-b border-white/10 pb-1 mb-1">Расчет баллов донаций:</strong>
+                        <strong className="block text-red-400 border-b border-white/10 pb-1 mb-1">{t("Расчет баллов донаций:")}</strong>
                         • 4 балла — Кровь (безвозм)<br/>
                         • 2 балла — Кровь (возм) или Компонент (безвозм)<br/>
                         • 1 балл — Компонент (возм)
@@ -1019,7 +1022,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       100% больничный
                       <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
                     </h4>
-                    <p className="text-xs text-slate-500 font-semibold mt-1">4+ донаций в год</p>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">{t("4+ донаций в год")}</p>
                   </div>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal border border-slate-800 animate-fade">
                     При систематической сдаче крови (4+ раза в год) гарантируется выплата пособия по временной нетрудоспособности в размере 100% среднего заработка.
@@ -1027,7 +1030,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
                   <div className="space-y-1.5 mt-3">
                     <div className="flex justify-between items-end">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Прогресс</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t("Прогресс")}</span>
                       <span className="text-xs font-bold text-slate-800">{Math.min(4, totalDonations)}/4</span>
                     </div>
                     <div className="w-full bg-slate-100 border border-slate-200/50 h-2.5 rounded-full overflow-hidden">
@@ -1049,7 +1052,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       «Ганаровы донар»
                       <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
                     </h4>
-                    <p className="text-xs text-slate-500 font-semibold mt-1">Знак отличия и льготы</p>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">{t("Знак отличия и льготы")}</p>
                   </div>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal border border-slate-800">
                     20+ безвозмездных сдач крови (или эквивалент в баллах) дают право на знак отличия «Почётный донор Республики Беларусь» и полный пакет гос. льгот.
@@ -1057,7 +1060,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
                   <div className="space-y-1.5 mt-3">
                     <div className="flex justify-between items-end">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Прогресс</span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t("Прогресс")}</span>
                       <span className="text-xs font-bold text-slate-800">{gameStatus.currentPoints}/80</span>
                     </div>
                     <div className="w-full bg-slate-100 border border-slate-200/50 h-2.5 rounded-full overflow-hidden">
@@ -1074,8 +1077,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             {/* График активности донаций за последний год */}
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
               <div className="space-y-1">
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Активность донаций за год</h3>
-                <p className="text-sm text-slate-500 font-medium font-sans">Объем сданных компонентов и динамика по месяцам</p>
+                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">{t("Активность донаций за год")}</h3>
+                <p className="text-sm text-slate-500 font-medium font-sans">{t("Объем сданных компонентов и динамика по месяцам")}</p>
               </div>
               
               <div className="h-64 w-full">
@@ -1113,11 +1116,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                             <div className="bg-slate-950 text-white p-3 rounded-xl border border-slate-800 shadow-xl text-xs space-y-1">
                               <p className="font-semibold text-slate-400">{data.name}</p>
                               <div className="flex justify-between gap-4">
-                                <span className="text-slate-300">Объем:</span>
+                                <span className="text-slate-300">{t("Объем:")}</span>
                                 <span className="font-bold text-red-400">{data.volume} мл</span>
                               </div>
                               <div className="flex justify-between gap-4">
-                                <span className="text-slate-300">Донаций:</span>
+                                <span className="text-slate-300">{t("Донаций:")}</span>
                                 <span className="font-bold text-red-500">{data.count}</span>
                               </div>
                             </div>
@@ -1142,8 +1145,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             {/* Next available dates per donation type in RBP */}
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
               <div className="space-y-1">
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">График восстановления</h3>
-                <p className="text-sm text-slate-500 font-medium">Рекомендованные даты по нормативам Минздрава РБ</p>
+                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">{t("График восстановления")}</h3>
+                <p className="text-sm text-slate-500 font-medium">{t("Рекомендованные даты по нормативам Минздрава РБ")}</p>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -1199,13 +1202,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
                     <ShieldAlert className="w-6 h-6 text-red-600" />
                   </div>
-                  <h4 className="font-bold text-red-800 text-lg tracking-tight">Важные ограничения</h4>
+                  <h4 className="font-bold text-red-800 text-lg tracking-tight">{t("Важные ограничения")}</h4>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {medicalNotes.filter(m => m.isActive).map(note => (
                     <div key={note.id} className="p-5 bg-white border border-red-200/50 rounded-2xl shadow-sm flex flex-col justify-between">
                       <div className="space-y-1.5">
-                        <span className="text-[10px] uppercase font-bold text-red-700 tracking-widest block">Медотвод</span>
+                        <span className="text-[10px] uppercase font-bold text-red-700 tracking-widest block">{t("Медотвод")}</span>
                         <p className="text-sm text-slate-800 font-bold leading-tight">{note.reason}</p>
                       </div>
                       <div className="mt-4 pt-4 border-t border-slate-50">
@@ -1235,8 +1238,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight">История донаций</h3>
-                <p className="text-sm text-slate-500 mt-1">Все зарегистрированные процедуры</p>
+                <h3 className="font-bold text-slate-800 text-xl tracking-tight">{t("История донаций")}</h3>
+                <p className="text-sm text-slate-500 mt-1">{t("Все зарегистрированные процедуры")}</p>
               </div>
               <span className="bg-slate-100 text-red-600 font-bold px-3 py-1 rounded-full text-xs">
                 {donations.length} записей
@@ -1247,11 +1250,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
                   <tr className="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-100">
-                    <th className="px-5 py-4 font-bold">Дата</th>
-                    <th className="px-5 py-4 font-bold">Тип</th>
-                    <th className="px-5 py-4 font-bold">Центр</th>
-                    <th className="px-5 py-4 font-bold">Объём</th>
-                    <th className="px-5 py-4 font-bold">Примечание</th>
+                    <th className="px-5 py-4 font-bold">{t("Дата")}</th>
+                    <th className="px-5 py-4 font-bold">{t("Тип")}</th>
+                    <th className="px-5 py-4 font-bold">{t("Центр")}</th>
+                    <th className="px-5 py-4 font-bold">{t("Объём")}</th>
+                    <th className="px-5 py-4 font-bold">{t("Примечание")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-600 bg-white">
@@ -1301,8 +1304,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           >
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
               <div>
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight">Личная пауза</h3>
-                <p className="text-sm text-slate-500 mt-1">Временно исключает вас из всех рассылок. Никто не потревожит.</p>
+                <h3 className="font-bold text-slate-800 text-xl tracking-tight">{t("Личная пауза")}</h3>
+                <p className="text-sm text-slate-500 mt-1">{t("Временно исключает вас из всех рассылок. Никто не потревожит.")}</p>
               </div>
 
               {pauseSuccess && (
@@ -1314,8 +1317,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <form onSubmit={handlePauseSubmit} className="space-y-6">
                 <div className="flex items-center justify-between py-2">
                   <div className="space-y-1 pr-4">
-                    <h4 className="text-sm md:text-base font-bold text-red-600">Включить паузу</h4>
-                    <p className="text-xs md:text-sm text-slate-500">Вы исчезнете из фильтров рассылки</p>
+                    <h4 className="text-sm md:text-base font-bold text-red-600">{t("Включить паузу")}</h4>
+                    <p className="text-xs md:text-sm text-slate-500">{t("Вы исчезнете из фильтров рассылки")}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer shrink-0">
                     <input 
@@ -1331,22 +1334,22 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 {pauseForm.personalPause && (
                   <div className="space-y-5 animate-in fade-in slide-in-from-top-2 duration-300">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-800">Действует до (дата):</label>
+                      <label className="text-sm font-bold text-slate-800">{t("Действует до (дата):")}</label>
                       <input 
                         type="date"
                         value={pauseForm.personalPauseUntil}
                         onChange={(e) => setPauseForm({ ...pauseForm, personalPauseUntil: e.target.value })}
                         className="w-full px-4 py-3 text-sm md:text-base border border-slate-200 rounded-lg focus:border-red-600 focus:outline-none"
                       />
-                      <span className="text-[11px] text-slate-400 block font-medium">*Если оставить пустым, пауза будет считаться бессрочной</span>
+                      <span className="text-[11px] text-slate-400 block font-medium">{t("*Если оставить пустым, пауза будет считаться бессрочной")}</span>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-800">Причина (только для вас):</label>
+                      <label className="text-sm font-bold text-slate-800">{t("Причина (только для вас):")}</label>
                       <textarea 
                         value={pauseForm.personalPauseNote}
                         onChange={(e) => setPauseForm({ ...pauseForm, personalPauseNote: e.target.value })}
-                        placeholder="Командировка, личные обстоятельства..."
+                        placeholder={t("Командировка, личные обстоятельства...")}
                         rows={3}
                         className="w-full px-4 py-3 text-sm md:text-base border border-slate-200 rounded-lg focus:border-red-600 focus:outline-none"
                       />
@@ -1380,8 +1383,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-8">
               <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                 <div className="space-y-1">
-                  <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Мои центры переливания</h3>
-                  <p className="text-sm text-slate-500 font-medium">Станции, к которым вы привязаны в системе</p>
+                  <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">{t("Мои центры переливания")}</h3>
+                  <p className="text-sm text-slate-500 font-medium">{t("Станции, к которым вы привязаны в системе")}</p>
                 </div>
                 <button 
                   onClick={() => { const el = document.getElementById('link-form'); el?.scrollIntoView({ behavior: 'smooth' }); }}
@@ -1432,36 +1435,36 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                               <div className="flex flex-col gap-1.5 items-center justify-center">
                                 <div className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs">
                                   <Heart className="w-3.5 h-3.5 fill-current" />
-                                  <span>Домашний</span>
+                                  <span>{t("Домашний")}</span>
                                 </div>
                                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-50 text-amber-600 border-amber-100">
-                                  <span>На рассмотрении</span>
+                                  <span>{t("На рассмотрении")}</span>
                                 </div>
                               </div>
                             ) : link.status === 'rejected' ? (
                               <div className="flex flex-col gap-1.5 items-center justify-center">
                                 <div className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs">
                                   <Heart className="w-3.5 h-3.5 fill-current" />
-                                  <span>Домашний</span>
+                                  <span>{t("Домашний")}</span>
                                 </div>
                                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 text-rose-600 border-rose-100">
-                                  <span>Отклонено</span>
+                                  <span>{t("Отклонено")}</span>
                                 </div>
                               </div>
                             ) : (
                               <div className="inline-flex items-center gap-1 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs">
                                 <Heart className="w-3.5 h-3.5 fill-current" />
-                                <span>Домашний</span>
+                                <span>{t("Домашний")}</span>
                               </div>
                             )
                           ) : (
                             link.status === 'pending' ? (
                               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-amber-50 text-amber-600 border-amber-100">
-                                <span>На рассмотрении</span>
+                                <span>{t("На рассмотрении")}</span>
                               </div>
                             ) : link.status === 'rejected' ? (
                               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border bg-rose-50 text-rose-600 border-rose-100">
-                                <span>Отклонено</span>
+                                <span>{t("Отклонено")}</span>
                               </div>
                             ) : (
                               <button
@@ -1469,7 +1472,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                                 onClick={() => handleSetPrimary(link.centerId)}
                                 className="inline-flex items-center gap-1 text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 text-xs font-bold px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
                               >
-                                <span>Сделать домашним</span>
+                                <span>{t("Сделать домашним")}</span>
                               </button>
                             )
                           )}
@@ -1480,7 +1483,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         <div className="p-5 bg-red-50/50 text-red-900 border border-red-100 rounded-2xl text-xs md:text-sm mt-5 leading-relaxed font-medium shadow-inner">
                           <div className="flex gap-3">
                             <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
-                            <p><strong>Причина отклонения:</strong> {link.rejectionReason}</p>
+                            <p><strong>{t("Причина отклонения:")}</strong> {link.rejectionReason}</p>
                           </div>
                           <div className="mt-4 pt-4 border-t border-red-100 flex justify-end">
                             <button 
@@ -1501,8 +1504,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             {/* Request link form */}
             <div id="link-form" className="bg-white p-5 md:p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
               <div className="space-y-1 font-sans">
-                <h3 className="font-bold text-slate-800 text-lg tracking-tight leading-tight">Привязать новый центр</h3>
-                <p className="text-xs text-slate-500 font-medium">Станьте донором в другом учреждении</p>
+                <h3 className="font-bold text-slate-800 text-lg tracking-tight leading-tight">{t("Привязать новый центр")}</h3>
+                <p className="text-xs text-slate-500 font-medium">{t("Станьте донором в другом учреждении")}</p>
               </div>
 
               {linkError && <p className="text-xs text-red-600 bg-red-50 p-3 rounded-lg border border-red-100 font-medium leading-relaxed">{linkError}</p>}
@@ -1549,19 +1552,19 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">
                   Входящие уведомления и вызовы
                 </h3>
-                <p className="text-xs text-slate-500 font-medium">История сообщений, направленных вам центрами крови</p>
+                <p className="text-xs text-slate-500 font-medium">{t("История сообщений, направленных вам центрами крови")}</p>
               </div>
 
               {loadingNotifications ? (
                 <div className="flex flex-col items-center justify-center py-6 space-y-2">
                   <RefreshCw className="w-6 h-6 text-red-500 animate-spin" />
-                  <p className="text-xs text-slate-400 font-medium font-sans">Загрузка истории...</p>
+                  <p className="text-xs text-slate-400 font-medium font-sans">{t("Загрузка истории...")}</p>
                 </div>
               ) : notificationsHistory.length === 0 ? (
                 <div className="text-center py-8 border border-dashed border-slate-100 rounded-xl bg-slate-50/30">
                   <Bell className="w-8 h-8 text-slate-300 mx-auto mb-2 animate-pulse" />
-                  <p className="text-xs text-slate-500 font-semibold">У вас пока нет активных уведомлений</p>
-                  <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto px-4">Когда центру крови понадобится ваша группа или редкий фенотип, вы увидите срочный запрос здесь.</p>
+                  <p className="text-xs text-slate-500 font-semibold">{t("У вас пока нет активных уведомлений")}</p>
+                  <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto px-4">{t("Когда центру крови понадобится ваша группа или редкий фенотип, вы увидите срочный запрос здесь.")}</p>
                 </div>
               ) : (
                 <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
@@ -1601,8 +1604,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             {/* RIGHT SIDEBAR COLUMN: NOTIFICATION SETTINGS */}
             <div className="bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm space-y-4 h-fit">
               <div className="space-y-0.5">
-                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">Каналы связи</h3>
-                <p className="text-xs text-slate-500 font-medium">Отметьте удобные каналы вызова</p>
+                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">{t("Каналы связи")}</h3>
+                <p className="text-xs text-slate-500 font-medium">{t("Отметьте удобные каналы вызова")}</p>
               </div>
 
               {notifSuccess && (
@@ -1655,8 +1658,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           >
             <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-8">
               <div className="space-y-1">
-                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">Безопасность аккаунта</h3>
-                <p className="text-sm text-slate-500 font-medium">Управление доступом и паролями</p>
+                <h3 className="font-bold text-slate-800 text-xl tracking-tight leading-tight">{t("Безопасность аккаунта")}</h3>
+                <p className="text-sm text-slate-500 font-medium">{t("Управление доступом и паролями")}</p>
               </div>
 
               {passwordError && (
@@ -1674,7 +1677,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <form className="space-y-4" onSubmit={handlePasswordSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Текущий пароль</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">{t("Текущий пароль")}</label>
                     <div className="relative">
                       <input 
                         type={showCurrentPassword ? "text" : "password"} 
@@ -1696,12 +1699,12 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <div className="hidden md:block"></div>
                   
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Новый пароль</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">{t("Новый пароль")}</label>
                     <div className="relative">
                       <input 
                         type={showNewPassword ? "text" : "password"} 
                         required 
-                        placeholder="Минимум 6 символов" 
+                        placeholder={t("Минимум 6 символов")} 
                         value={newPassword}
                         onChange={e => {
                           const val = e.target.value;
@@ -1729,7 +1732,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Повторите пароль</label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">{t("Повторите пароль")}</label>
                     <div className="relative">
                       <input 
                         type={showRepeatPassword ? "text" : "password"} 
@@ -1774,20 +1777,20 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
                   <Download className="w-4 h-4 text-red-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 text-sm md:text-base tracking-tight leading-tight">Установка приложения</h3>
+                <h3 className="font-bold text-slate-800 text-sm md:text-base tracking-tight leading-tight">{t("Установка приложения")}</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80 hover:border-slate-200 transition-colors">
                   <h4 className="font-bold text-slate-800 text-[11px] md:text-xs mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
                     iPhone / Safari
                   </h4>
-                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите иконку «Поделиться», затем выберите пункт «На экран Домой» и нажмите «Добавить».</p>
+                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">{t("Нажмите иконку «Поделиться», затем выберите пункт «На экран Домой» и нажмите «Добавить».")}</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/80 hover:border-slate-200 transition-colors">
                   <h4 className="font-bold text-slate-800 text-[11px] md:text-xs mb-1.5 flex items-center gap-1.5 uppercase tracking-wider">
                     Android / Chrome
                   </h4>
-                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">Нажмите на значок ⋮ в строке браузера, выберите «Установить приложение» или «На главный экран».</p>
+                  <p className="text-[11px] md:text-xs text-slate-500 font-medium leading-relaxed">{t("Нажмите на значок ⋮ в строке браузера, выберите «Установить приложение» или «На главный экран».")}</p>
                 </div>
               </div>
             </div>

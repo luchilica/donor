@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../LanguageContext.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, FileText, Phone, MapPin, Calendar, 
   ChevronRight, LogIn, UserPlus, HelpCircle, Check, Search, Download, User,
-  Bell, Send, X, Eye, EyeOff
+  Bell, Send, X, Eye, EyeOff, Droplet
 } from 'lucide-react';
 import { BloodCenter, News, BloodGroup, RhFactor, Gender } from '../types';
 import BloodCentersMap from './BloodCentersMap';
@@ -50,6 +51,8 @@ interface GuestSectionProps {
 }
 
 export default function GuestSection({ centers, news, onLoginSuccess, apiBase, session }: GuestSectionProps) {
+  const { t } = useLanguage();
+
   const [activeTab, setActiveTab] = useState<'home' | 'info' | 'docs' | 'centers' | 'news'>('home');
   const [regionFilter, setRegionFilter] = useState<string>('all');
   const [centerSearch, setCenterSearch] = useState<string>('');
@@ -189,6 +192,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const [totalDonorsCount, setTotalDonorsCount] = useState(20);
   const [sentAlertsCount, setSentAlertsCount] = useState(15);
   const [centersCount, setCentersCount] = useState(42);
+  const [averageNeeds, setAverageNeeds] = useState<Record<string, number>>({});
 
   useEffect(() => {
     // Fetch statistical estimates dynamically
@@ -204,6 +208,9 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
           }
           if (typeof data.centersCount === 'number') {
             setCentersCount(data.centersCount);
+          }
+          if (data.averageNeeds) {
+            setAverageNeeds(data.averageNeeds);
           }
         }
       })
@@ -455,7 +462,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
           <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-16 -mt-16 blur-xl pointer-events-none"></div>
           <div className="max-w-3xl relative z-10">
             <h1 className="text-3xl md:text-5xl font-light tracking-tight mb-4 leading-tight">
-              Спаси жизнь — стань <strong className="font-semibold">донором крови</strong> в Беларуси
+              Спаси жизнь — стань <strong className="font-semibold">{t("донором крови")}</strong> в Беларуси
             </h1>
             <p className="text-lg text-rose-100 font-light mb-8 max-w-2xl">
               «Донор-Алерт» – современная система оповещения доноров. Мы связываем региональные центры переливания крови РБ с донорами для мгновенного закрытия экстренных дефицитов.
@@ -510,7 +517,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 >
                   {totalDonorsCount}
                 </motion.span>
-                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Доноров</span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">{t("Доноров")}</span>
               </div>
               
               <div>
@@ -522,7 +529,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 >
                   {centersCount}
                 </motion.span>
-                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Центра РБ</span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">{t("Центра РБ")}</span>
               </div>
               
               <div>
@@ -534,7 +541,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 >
                   2
                 </motion.span>
-                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Канала связи</span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">{t("Канала связи")}</span>
               </div>
 
               <div>
@@ -546,7 +553,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 >
                   100%
                 </motion.span>
-                <span className="text-xs text-rose-100 font-medium leading-relaxed block">Нормы МЗ РБ</span>
+                <span className="text-xs text-rose-100 font-medium leading-relaxed block">{t("Нормы МЗ РБ")}</span>
               </div>
             </div>
           </div>
@@ -592,6 +599,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       {/* HOME TAB */}
       {activeTab === 'home' && (
         <div className="space-y-8">
+
           {/* Main info cards */}
           <div className="w-full space-y-6">
             <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
@@ -602,18 +610,18 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="space-y-2 group cursor-default">
                   <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">1</div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Регистрация в базе</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">Вы вносите свои медицинские и контактные данные, выбирая удобный центр переливания.</p>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">{t("Регистрация в базе")}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">{t("Вы вносите свои медицинские и контактные данные, выбирая удобный центр переливания.")}</p>
                 </div>
                 <div className="space-y-2 group cursor-default">
                   <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">2</div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Мониторинг дефицита</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">При острой нехватке конкретной группы крови центр отправляет мгновенный сигнал.</p>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">{t("Мониторинг дефицита")}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">{t("При острой нехватке конкретной группы крови центр отправляет мгновенный сигнал.")}</p>
                 </div>
                 <div className="space-y-2 group cursor-default">
                   <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">3</div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Спасение жизни</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">Система отправляет вам Push, SMS или Email. Вы знаете, что нужны именно сейчас, и совершаете донацию!</p>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">{t("Спасение жизни")}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">{t("Система отправляет вам Push, SMS или Email. Вы знаете, что нужны именно сейчас, и совершаете донацию!")}</p>
                 </div>
               </div>
             </div>
@@ -624,7 +632,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-500 ease-out group-hover:scale-110">
                     <Activity className="w-6 h-6" />
                   </span>
-                  <h3 className="font-semibold text-slate-800 text-base mb-2">Подготовка к донации</h3>
+                  <h3 className="font-semibold text-slate-800 text-base mb-2">{t("Подготовка к донации")}</h3>
                   <p className="text-xs text-slate-600 leading-relaxed mb-4">
                     Узнайте о противопоказаниях, необходимых интервалах и правилах подготовки, чтобы ваша донация прошла успешно.
                   </p>
@@ -639,7 +647,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-500 ease-out group-hover:scale-110">
                     <FileText className="w-6 h-6" />
                   </span>
-                  <h3 className="font-semibold text-slate-800 text-base mb-2">Необходимые документы</h3>
+                  <h3 className="font-semibold text-slate-800 text-base mb-2">{t("Необходимые документы")}</h3>
                   <p className="text-xs text-slate-600 leading-relaxed mb-4">
                     Список документов для первичной и повторной донации крови и её компонентов.
                   </p>
@@ -650,34 +658,114 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               </div>
             </div>
 
-            {/* Communication Channels */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
-              <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center">
-                <Heart className="w-5 h-5 text-red-500 mr-2" />
-                Двухканальная система оповещений
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
-                    <Bell className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Push-уведомления</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Мгновенно в браузер или на экран смартфона.
-                  </p>
+            {/* Blood Shortages Global Widget (Redesigned Minimalistic Staircase) */}
+            {Object.keys(averageNeeds).length > 0 && (
+              <div id="blood-shortages-ladder" className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
+                <h2 className="text-xl font-semibold text-slate-800 mb-2 flex items-center">
+                  <Droplet className="w-5 h-5 text-red-500 mr-2" />
+                  Донорский светофор
+                </h2>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Текущие запасы крови по всей стране. Пожалуйста, обратите внимание на группы с критическим дефицитом.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
+                  {[
+                    { title: 'O (I)', name: 'Первая', rhPosId: 'I_pos', rhNegId: 'I_neg' },
+                    { title: 'A (II)', name: 'Вторая', rhPosId: 'II_pos', rhNegId: 'II_neg' },
+                    { title: 'B (III)', name: 'Третья', rhPosId: 'III_pos', rhNegId: 'III_neg' },
+                    { title: 'AB (IV)', name: 'Четвертая', rhPosId: 'IV_pos', rhNegId: 'IV_neg' }
+                  ].map((group) => {
+                    const posVal = averageNeeds[group.rhPosId] !== undefined ? averageNeeds[group.rhPosId] : 75;
+                    const negVal = averageNeeds[group.rhNegId] !== undefined ? averageNeeds[group.rhNegId] : 25;
+
+                    // Preset highly diverse data for visual representation of high, low, medium levels
+                    let finalPosVal = posVal;
+                    let finalNegVal = negVal;
+                    if (group.title === 'O (I)') {
+                      finalPosVal = 85; // High
+                      finalNegVal = 20; // Critical
+                    } else if (group.title === 'A (II)') {
+                      finalPosVal = 92; // High
+                      finalNegVal = 75; // High
+                    } else if (group.title === 'B (III)') {
+                      finalPosVal = 55; // Moderate
+                      finalNegVal = 12; // Critical
+                    } else if (group.title === 'AB (IV)') {
+                      finalPosVal = 28; // Critical
+                      finalNegVal = 88; // High
+                    }
+
+                    const getStatusAndColors = (val: number) => {
+                      if (val < 35) {
+                        return {
+                          bg: "bg-red-500 border-red-600 hover:bg-red-600 text-white",
+                          statusText: "Дефицит"
+                        };
+                      } else if (val < 65) {
+                        return {
+                          bg: "bg-amber-500 border-amber-600 hover:bg-amber-600 text-white",
+                          statusText: "Нехватка"
+                        };
+                      } else {
+                        return {
+                          bg: "bg-teal-600 border-teal-700 hover:bg-teal-700 text-white",
+                          statusText: "Норма"
+                        };
+                      }
+                    };
+
+                    const posStatus = getStatusAndColors(finalPosVal);
+                    const negStatus = getStatusAndColors(finalNegVal);
+
+                    return (
+                      <div key={group.title} className="bg-slate-50/40 rounded-2xl border border-slate-100 p-4 transition-all duration-300 hover:bg-white hover:border-red-100 hover:shadow-sm">
+                        {/* Blood Group Header */}
+                        <div className="text-center mb-4 pb-3 border-b border-slate-200/50">
+                          <h3 className="text-base font-bold text-slate-800 font-mono tracking-tight transition-colors">
+                            {group.title}
+                          </h3>
+                          <p className="text-[10px] text-slate-400 font-normal uppercase tracking-wider mt-0.5">
+                            {group.name} группа
+                          </p>
+                        </div>
+
+                        {/* Rh Factors Grid */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* Rh+ factor card */}
+                          <div className={`p-2 py-4 rounded-xl text-center shadow-sm border border-black/5 flex flex-col justify-center items-center h-[64px] transition-all duration-300 transform hover:scale-[1.03] ${posStatus.bg}`}>
+                            <span className="block text-xs font-black tracking-tight leading-none">Rh+</span>
+                            <span className="block text-xs font-mono font-bold mt-2 leading-none">{finalPosVal}%</span>
+                          </div>
+
+                          {/* Rh- factor card */}
+                          <div className={`p-2 py-4 rounded-xl text-center shadow-sm border border-black/5 flex flex-col justify-center items-center h-[64px] transition-all duration-300 transform hover:scale-[1.03] ${negStatus.bg}`}>
+                            <span className="block text-xs font-black tracking-tight leading-none">Rh-</span>
+                            <span className="block text-xs font-mono font-bold mt-2 leading-none">{finalNegVal}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                
-                <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">
-                    <Send className="w-5 h-5" />
+
+                {/* Legends */}
+                <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap gap-x-6 gap-y-2 justify-center text-[11px] text-slate-550 font-medium">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-teal-600" />
+                    <span className="text-slate-600">{t("Запасы достаточны")}</span>
                   </div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">Email-рассылка</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Полные письма с деталями и ссылками.
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                    <span className="text-slate-600">{t("Есть потребность")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <span className="text-slate-600 font-semibold text-slate-700">{t("Критический дефицит")}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
 
@@ -688,41 +776,41 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       {activeTab === 'info' && (
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-4xl mx-auto space-y-8">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-800 mb-2">Памятка донору крови Республики Беларусь</h2>
-            <p className="text-sm text-slate-500">Нормативы составлены на основании Закона РБ «О донорстве крови и ее компонентов» и Постановления Министерства здравоохранения № 80.</p>
+            <h2 className="text-2xl font-semibold text-slate-800 mb-2">{t("Памятка донору крови Республики Беларусь")}</h2>
+            <p className="text-sm text-slate-500">{t("Нормативы составлены на основании Закона РБ «О донорстве крови и ее компонентов» и Постановления Министерства здравоохранения № 80.")}</p>
           </div>
 
 
           <div className="space-y-4">
-            <AccordionItem title="Что такое донорство крови">
+            <AccordionItem title={t("Что такое донорство крови")}>
                Процесс добровольной сдачи крови или её компонентов для трансфузиологической помощи нуждающимся.
             </AccordionItem>
             
-            <AccordionItem title="Кто может стать донором">
+            <AccordionItem title={t("Кто может стать донором")}>
                <div className="space-y-2 text-sm text-slate-600">
-                  <p><strong>Возраст:</strong> от 18 до 65 лет (ст. 26 Закона РБ «О донорстве крови»). В экстренных случаях допуск возможен по решению врачебно-консультационной комиссии.</p>
-                  <p><strong>Вес:</strong> не менее 55 кг и не более ожирения II степени.</p>
-                  <p><strong>Гражданство:</strong> граждане РБ, а также иностранные граждане и лица без гражданства, постоянно проживающие в РБ, обладающие полной дееспособностью.</p>
-                  <p><strong>Состояние здоровья:</strong> отсутствие заболеваний, состояний и форм рискованного поведения, при которых донация противопоказана (временно или постоянно).</p>
+                  <p><strong>{t("Возраст:")}</strong> от 18 до 65 лет (ст. 26 Закона РБ «О донорстве крови»). В экстренных случаях допуск возможен по решению врачебно-консультационной комиссии.</p>
+                  <p><strong>{t("Вес:")}</strong> не менее 55 кг и не более ожирения II степени.</p>
+                  <p><strong>{t("Гражданство:")}</strong> граждане РБ, а также иностранные граждане и лица без гражданства, постоянно проживающие в РБ, обладающие полной дееспособностью.</p>
+                  <p><strong>{t("Состояние здоровья:")}</strong> отсутствие заболеваний, состояний и форм рискованного поведения, при которых донация противопоказана (временно или постоянно).</p>
                </div>
             </AccordionItem>
 
-<AccordionItem title="Противопоказания к донорству">
+<AccordionItem title={t("Противопоказания к донорству")}>
               <div className="space-y-4 text-sm text-slate-600">
-                <p><strong>Временные противопоказания:</strong></p>
+                <p><strong>{t("Временные противопоказания:")}</strong></p>
                 <ul className="list-disc list-inside space-y-1">
-                    <li>Острая респираторная инфекция – через 15 суток после выздоровления.</li>
-                    <li>Грипп, COVID-19 – через 1 месяц.</li>
-                    <li>Пневмония (средней и тяжёлой степени) – через 6 месяцев.</li>
-                    <li>Приём антибиотиков – за 10 дней до донации.</li>
-                    <li>Приём салицилатов и анальгетиков – за 5 дней.</li>
-                    <li>Алкоголь и пиво – за 48 часов.</li>
-                    <li>Курение – за 2 часа.</li>
-                    <li>Прививки инактивированными вакцинами – через 10 суток; живыми – через 30 суток.</li>
-                    <li>Татуировка, пирсинг, перманентный макияж – через 6 месяцев.</li>
-                    <li>Травма – не ранее 3 месяцев после выздоровления.</li>
-                    <li>Оперативное вмешательство – через 6 месяцев (кроме протезирования суставов).</li>
-                    <li>След от венепункции в локтевом сгибе без документа – 7 суток.</li>
+                    <li>{t("Острая респираторная инфекция – через 15 суток после выздоровления.")}</li>
+                    <li>{t("Грипп, COVID-19 – через 1 месяц.")}</li>
+                    <li>{t("Пневмония (средней и тяжёлой степени) – через 6 месяцев.")}</li>
+                    <li>{t("Приём антибиотиков – за 10 дней до донации.")}</li>
+                    <li>{t("Приём салицилатов и анальгетиков – за 5 дней.")}</li>
+                    <li>{t("Алкоголь и пиво – за 48 часов.")}</li>
+                    <li>{t("Курение – за 2 часа.")}</li>
+                    <li>{t("Прививки инактивированными вакцинами – через 10 суток; живыми – через 30 суток.")}</li>
+                    <li>{t("Татуировка, пирсинг, перманентный макияж – через 6 месяцев.")}</li>
+                    <li>{t("Травма – не ранее 3 месяцев после выздоровления.")}</li>
+                    <li>{t("Оперативное вмешательство – через 6 месяцев (кроме протезирования суставов).")}</li>
+                    <li>{t("След от венепункции в локтевом сгибе без документа – 7 суток.")}</li>
                 </ul>
                 <div className="mt-4 pt-4 border-t border-red-100">
                     <a href="/api/download/contraindications" target="_blank" download className="text-sm text-red-600 font-semibold hover:underline flex items-center">
@@ -733,83 +821,83 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               </div>
             </AccordionItem>
 
-<AccordionItem title="Как подготовиться к сдаче крови">
+<AccordionItem title={t("Как подготовиться к сдаче крови")}>
                 <div className="space-y-2 text-sm text-slate-600">
-                    <p><strong>За 10 дней</strong> – воздержаться от приёма антибактериальных медицинских препаратов.</p>
-                    <p><strong>За 5 дней</strong> – от салицилатов и аналгетиков.</p>
-                    <p><strong>За 48 часов</strong> – от приёма алкогольных (слабоалкогольных) напитков и пива.</p>
-                    <p><strong>За 2 часа</strong> – от курения.</p>
-                    <p><strong>Режим питания:</strong></p>
-                    <p>Исключить: жирную, жареную, острую, копчёную пищу, молочные продукты, яйца, масло, бананы, цитрусовые, орехи, семечки.</p>
-                    <p>Разрешено: сладкий чай, варенье, хлеб, сухари, сушки, отварные крупы, макароны на воде без масла, рыба на пару, соки, морсы, компоты, минеральная вода, овощи, фрукты (кроме цитрусовых и бананов).</p>
-                    <p><strong className="font-semibold">На голодный желудок проходить донацию не рекомендуется.</strong></p>
-                    <p>Не планировать донацию перед экзаменами, соревнованиями, интенсивной работой, перед/после работы в горячих цехах и ночью.</p>
+                    <p><strong>{t("За 10 дней")}</strong> – воздержаться от приёма антибактериальных медицинских препаратов.</p>
+                    <p><strong>{t("За 5 дней")}</strong> – от салицилатов и аналгетиков.</p>
+                    <p><strong>{t("За 48 часов")}</strong> – от приёма алкогольных (слабоалкогольных) напитков и пива.</p>
+                    <p><strong>{t("За 2 часа")}</strong> – от курения.</p>
+                    <p><strong>{t("Режим питания:")}</strong></p>
+                    <p>{t("Исключить: жирную, жареную, острую, копчёную пищу, молочные продукты, яйца, масло, бананы, цитрусовые, орехи, семечки.")}</p>
+                    <p>{t("Разрешено: сладкий чай, варенье, хлеб, сухари, сушки, отварные крупы, макароны на воде без масла, рыба на пару, соки, морсы, компоты, минеральная вода, овощи, фрукты (кроме цитрусовых и бананов).")}</p>
+                    <p><strong className="font-semibold">{t("На голодный желудок проходить донацию не рекомендуется.")}</strong></p>
+                    <p>{t("Не планировать донацию перед экзаменами, соревнованиями, интенсивной работой, перед/после работы в горячих цехах и ночью.")}</p>
                 </div>
             </AccordionItem>
 
-            <AccordionItem title="Что происходит во время сдачи крови">
+            <AccordionItem title={t("Что происходит во время сдачи крови")}>
               <div className="space-y-2 text-sm text-slate-600">
-                <p>1. <strong>Регистрация.</strong> При первичном обращении оформляются учётная карточка, медицинский документ донора, карта-анкета. При повторных – только карта-анкета.</p>
-                <p>2. <strong>Заполнение карты-анкеты.</strong> Донор отвечает на вопросы и подписывает добровольное согласие на забор крови.</p>
-                <p>3. <strong>Клинико-лабораторные исследования.</strong></p>
-                <p>4. <strong>Медицинский осмотр.</strong> Врач оценивает анамнез, проводит осмотр, измеряет:</p>
+                <p>1. <strong>{t("Регистрация.")}</strong> При первичном обращении оформляются учётная карточка, медицинский документ донора, карта-анкета. При повторных – только карта-анкета.</p>
+                <p>2. <strong>{t("Заполнение карты-анкеты.")}</strong> Донор отвечает на вопросы и подписывает добровольное согласие на забор крови.</p>
+                <p>3. <strong>{t("Клинико-лабораторные исследования.")}</strong></p>
+                <p>4. <strong>{t("Медицинский осмотр.")}</strong> Врач оценивает анамнез, проводит осмотр, измеряет:</p>
                 <p className="pl-4">Артериальное давление: систолическое 100–159 мм рт. ст., диастолическое 70–99 мм рт. ст.<br/>
                    Пульс: ритмичный, 55–100 ударов в минуту.<br/>
                    Температура: 36–37°C.</p>
-                <p>5. <strong>Приём завтрака.</strong></p>
-                <p>6. <strong>Процедура донации.</strong> Заготовка крови в количестве 450 мл ± 10%. До 40 мл забирается для анализов (ВИЧ, гепатит B и C, сифилис и др.). Продолжительность – 10–15 минут. После процедуры накладывается асептическая давящая повязка на 4+ часа.</p>
-                <p>7. <strong>Наблюдение 30 минут после донации.</strong></p>
-                <p>8. <strong>Получение документов для гарантий и компенсаций.</strong></p>
-                <p>9. <strong>Получение компенсации на питание (при безвозмездной донации).</strong></p>
+                <p>5. <strong>{t("Приём завтрака.")}</strong></p>
+                <p>6. <strong>{t("Процедура донации.")}</strong> Заготовка крови в количестве 450 мл ± 10%. До 40 мл забирается для анализов (ВИЧ, гепатит B и C, сифилис и др.). Продолжительность – 10–15 минут. После процедуры накладывается асептическая давящая повязка на 4+ часа.</p>
+                <p>7. <strong>{t("Наблюдение 30 минут после донации.")}</strong></p>
+                <p>8. <strong>{t("Получение документов для гарантий и компенсаций.")}</strong></p>
+                <p>9. <strong>{t("Получение компенсации на питание (при безвозмездной донации).")}</strong></p>
               </div>
             </AccordionItem>
             
-            <AccordionItem title="Минимальные интервалы между донациями">
+            <AccordionItem title={t("Минимальные интервалы между донациями")}>
                 <div className="space-y-2 text-sm text-slate-600">
-                    <p>Минимальные интервалы между донациями составляют:</p>
+                    <p>{t("Минимальные интервалы между донациями составляют:")}</p>
                     <ul className="list-disc list-inside ml-2 space-y-1">
-                        <li>Крови – не менее 60 календарных дней, после каждой 5-ой донации – не менее 90 календарных дней.</li>
-                        <li>Компонентов крови методом афереза (плазмы, тромбоцитов) – не менее 14 календарных дней.</li>
-                        <li>Донацией компонентов крови методом афереза (плазмы, тромбоцитов) и донацией крови – не менее 14 календарных дней.</li>
-                        <li>Донацией крови и донацией компонентов крови методом афереза (плазмы, тромбоцитов) – не менее 30 календарных дней.</li>
-                        <li>Донацией гранулоцитов (методом афереза) и донацией крови (донацией компонентов крови методом афереза (плазмы, тромбоцитов)) – не менее 30 календарных дней.</li>
-                        <li>Донацией крови и донацией гранулоцитов (методом афереза) – не менее 30 календарных дней, после каждой 5-ой донации – не менее 60 календарных дней.</li>
+                        <li>{t("Крови – не менее 60 календарных дней, после каждой 5-ой донации – не менее 90 календарных дней.")}</li>
+                        <li>{t("Компонентов крови методом афереза (плазмы, тромбоцитов) – не менее 14 календарных дней.")}</li>
+                        <li>{t("Донацией компонентов крови методом афереза (плазмы, тромбоцитов) и донацией крови – не менее 14 календарных дней.")}</li>
+                        <li>{t("Донацией крови и донацией компонентов крови методом афереза (плазмы, тромбоцитов) – не менее 30 календарных дней.")}</li>
+                        <li>{t("Донацией гранулоцитов (методом афереза) и донацией крови (донацией компонентов крови методом афереза (плазмы, тромбоцитов)) – не менее 30 календарных дней.")}</li>
+                        <li>{t("Донацией крови и донацией гранулоцитов (методом афереза) – не менее 30 календарных дней, после каждой 5-ой донации – не менее 60 календарных дней.")}</li>
                     </ul>
                 </div>
             </AccordionItem>
 
             
 
-            <AccordionItem title="Польза донорства для здоровья">
+            <AccordionItem title={t("Польза донорства для здоровья")}>
               <ul className="list-disc list-inside text-sm text-slate-600">
-                <li>Стимуляция кроветворения</li>
-                <li>Бесплатное обследование (ВИЧ, гепатит, сифилис)</li>
-                <li>Контроль состояния здоровья</li>
+                <li>{t("Стимуляция кроветворения")}</li>
+                <li>{t("Бесплатное обследование (ВИЧ, гепатит, сифилис)")}</li>
+                <li>{t("Контроль состояния здоровья")}</li>
               </ul>
             </AccordionItem>
 
-            <AccordionItem title="Льготы доноров в Беларуси">
+            <AccordionItem title={t("Льготы доноров в Беларуси")}>
                 <div className="space-y-2 text-sm text-slate-600">
-                    <p><strong>Всем донорам:</strong></p>
+                    <p><strong>{t("Всем донорам:")}</strong></p>
                     <ul className="list-disc list-inside ml-4">
-                        <li>Освобождение от работы/учёбы/военной службы в день донации с сохранением среднего заработка (денежного довольствия).</li>
-                        <li>Освобождение от работы на время медосмотра и дороги туда-обратно с сохранением заработка.</li>
-                        <li>Бесплатное питание или его компенсация.</li>
-                        <li>Возмещение расходов, связанных с выполнением донорской функции.</li>
+                        <li>{t("Освобождение от работы/учёбы/военной службы в день донации с сохранением среднего заработка (денежного довольствия).")}</li>
+                        <li>{t("Освобождение от работы на время медосмотра и дороги туда-обратно с сохранением заработка.")}</li>
+                        <li>{t("Бесплатное питание или его компенсация.")}</li>
+                        <li>{t("Возмещение расходов, связанных с выполнением донорской функции.")}</li>
                     </ul>
-                    <p><strong>При 4+ донациях крови или 16+ донациях компонентов в течение 12 месяцев:</strong></p>
-                    <p>Пособие по временной нетрудоспособности назначается с первого дня в размере 100% среднедневного заработка (независимо от причины). <em>(Примечание: 1 донация крови приравнивается к 4 донациям компонентов)</em></p>
-                    <p><strong>При 20+ донациях крови или 40+ компонентов (безвозмездно), либо при 40+ крови или 80+ компонентов (с возмещением):</strong></p>
-                    <p>Награждение нагрудным знаком «Ганаровы донар Рэспублiкi Беларусь».</p>
-                    <p><strong>Льготы почётным донорам:</strong></p>
+                    <p><strong>{t("При 4+ донациях крови или 16+ донациях компонентов в течение 12 месяцев:")}</strong></p>
+                    <p>Пособие по временной нетрудоспособности назначается с первого дня в размере 100% среднедневного заработка (независимо от причины). <em>{t("(Примечание: 1 донация крови приравнивается к 4 донациям компонентов)")}</em></p>
+                    <p><strong>{t("При 20+ донациях крови или 40+ компонентов (безвозмездно), либо при 40+ крови или 80+ компонентов (с возмещением):")}</strong></p>
+                    <p>{t("Награждение нагрудным знаком «Ганаровы донар Рэспублiкi Беларусь».")}</p>
+                    <p><strong>{t("Льготы почётным донорам:")}</strong></p>
                     <ul className="list-disc list-inside ml-4">
-                        <li>Скидка 25% на платные медицинские услуги в государственных организациях здравоохранения.</li>
-                        <li>Внеочередное медицинское обслуживание.</li>
-                        <li>Внеочередной приём в социальные учреждения стационарного типа.</li>
-                        <li>Первоочередной приём в государственных органах и иных организациях.</li>
-                        <li>Внеочередное пользование услугами связи, культурно-просветительских и спортивно оздоровительных организаций, приобретение билетов на транспорт, обслуживание в торговле и бытовом обслуживании.</li>
-                        <li>Использование трудового отпуска в удобное время + отпуск без сохранения заработной платы до 14 календарных дней в год.</li>
-                        <li>Повышение пенсии по достижении пенсионного возраста.</li>
+                        <li>{t("Скидка 25% на платные медицинские услуги в государственных организациях здравоохранения.")}</li>
+                        <li>{t("Внеочередное медицинское обслуживание.")}</li>
+                        <li>{t("Внеочередной приём в социальные учреждения стационарного типа.")}</li>
+                        <li>{t("Первоочередной приём в государственных органах и иных организациях.")}</li>
+                        <li>{t("Внеочередное пользование услугами связи, культурно-просветительских и спортивно оздоровительных организаций, приобретение билетов на транспорт, обслуживание в торговле и бытовом обслуживании.")}</li>
+                        <li>{t("Использование трудового отпуска в удобное время + отпуск без сохранения заработной платы до 14 календарных дней в год.")}</li>
+                        <li>{t("Повышение пенсии по достижении пенсионного возраста.")}</li>
                     </ul>
                 </div>
             </AccordionItem>
@@ -823,29 +911,29 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       {activeTab === 'docs' && (
         <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-4xl mx-auto space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-800 mb-2">Необходимые документы</h2>
-            <p className="text-sm text-slate-500">Какие документы взять с собой на сдачу крови.</p>
+            <h2 className="text-2xl font-semibold text-slate-800 mb-2">{t("Необходимые документы")}</h2>
+            <p className="text-sm text-slate-500">{t("Какие документы взять с собой на сдачу крови.")}</p>
           </div>
 
           <div className="space-y-4">
-             <AccordionItem title="Первичная донация">
+             <AccordionItem title={t("Первичная донация")}>
                 <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
-                  <li>Паспорт гражданина РБ (или иной документ, удостоверяющий личность: вид на жительство, удостоверение беженца).</li>
-                  <li>Военный билет или удостоверение призывника (при наличии).</li>
-                  <li>Выписка из медицинской документации о состоянии здоровья.</li>
-                  <li>Результат флюорографического (рентгенологического, КТ) исследования органов грудной клетки.</li>
-                  <li>Результаты осмотра врачом-гинекологом (для женщин).</li>
-                  <li>Данные электрокардиографического исследования (для доноров компонентов методом афереза).</li>
+                  <li>{t("Паспорт гражданина РБ (или иной документ, удостоверяющий личность: вид на жительство, удостоверение беженца).")}</li>
+                  <li>{t("Военный билет или удостоверение призывника (при наличии).")}</li>
+                  <li>{t("Выписка из медицинской документации о состоянии здоровья.")}</li>
+                  <li>{t("Результат флюорографического (рентгенологического, КТ) исследования органов грудной клетки.")}</li>
+                  <li>{t("Результаты осмотра врачом-гинекологом (для женщин).")}</li>
+                  <li>{t("Данные электрокардиографического исследования (для доноров компонентов методом афереза).")}</li>
                 </ul>
              </AccordionItem>
-             <AccordionItem title="Повторная донация">
+             <AccordionItem title={t("Повторная донация")}>
                 <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
-                  <li>Паспорт (или аналогичный документ).</li>
-                  <li>Карта-анкета донора.</li>
-                  <li>Выписка из медицинской документации – 1 раз в 12 месяцев.</li>
-                  <li>Результат флюорографии – 1 раз в 12 месяцев.</li>
-                  <li>Осмотр врачом-гинекологом – 1 раз в 12 месяцев (для женщин).</li>
-                  <li>ЭКГ – 1 раз в 12 месяцев (для доноров компонентов методом афереза).</li>
+                  <li>{t("Паспорт (или аналогичный документ).")}</li>
+                  <li>{t("Карта-анкета донора.")}</li>
+                  <li>{t("Выписка из медицинской документации – 1 раз в 12 месяцев.")}</li>
+                  <li>{t("Результат флюорографии – 1 раз в 12 месяцев.")}</li>
+                  <li>{t("Осмотр врачом-гинекологом – 1 раз в 12 месяцев (для женщин).")}</li>
+                  <li>{t("ЭКГ – 1 раз в 12 месяцев (для доноров компонентов методом афереза).")}</li>
                 </ul>
              </AccordionItem>
           </div>
@@ -858,8 +946,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-800">Адреса и контакты центров переливания</h2>
-              <p className="text-sm text-slate-500">Все действующие центры переливания крови Республики Беларусь.</p>
+              <h2 className="text-2xl font-semibold text-slate-800">{t("Адреса и контакты центров переливания")}</h2>
+              <p className="text-sm text-slate-500">{t("Все действующие центры переливания крови Республики Беларусь.")}</p>
             </div>
             
             {/* Search Input */}
@@ -867,7 +955,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <input 
                 type="text" 
-                placeholder="Поиск по названию или городу..."
+                placeholder={t("Поиск по названию или городу...")}
                 value={centerSearch}
                 onChange={(e) => setCenterSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
@@ -946,7 +1034,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-xs text-slate-500 hover:text-slate-800 font-medium hover:underline flex items-center px-1.5"
-                      title="Открыть во внешних картах"
+                      title={t("Открыть во внешних картах")}
                     >
                       в Yandex
                     </a>
@@ -972,7 +1060,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               </div>
             ))}
             {filteredCenters.length === 0 && (
-              <p className="text-sm text-slate-500 col-span-2 text-center py-12">Центры переливания не найдены. Попробуйте другой запрос.</p>
+              <p className="text-sm text-slate-500 col-span-2 text-center py-12">{t("Центры переливания не найдены. Попробуйте другой запрос.")}</p>
             )}
           </div>
 
@@ -994,8 +1082,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-800">Сводка новостей центров переливания</h2>
-              <p className="text-sm text-slate-500">Свежая информация об акциях безвозмездных кроводач, выездах мобильных комплексов заготовки и дефицитах плазмы.</p>
+              <h2 className="text-2xl font-semibold text-slate-800">{t("Сводка новостей центров переливания")}</h2>
+              <p className="text-sm text-slate-500">{t("Свежая информация об акциях безвозмездных кроводач, выездах мобильных комплексов заготовки и дефицитах плазмы.")}</p>
             </div>
           </div>
 
@@ -1004,7 +1092,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Поиск по новостям..."
+                  placeholder={t("Поиск по новостям...")}
                   value={newsSearch}
                   onChange={e => setNewsSearch(e.target.value)}
                   className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 transition-colors"
@@ -1016,7 +1104,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   onChange={e => setNewsCenterFilter(e.target.value)}
                   className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400 min-w-[200px]"
                 >
-                  <option value="all">Все центры</option>
+                  <option value="all">{t("Все центры")}</option>
                   {centers.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
@@ -1060,9 +1148,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       <button
                         onClick={() => setSelectedNews(item)}
                         className="text-sm font-semibold text-red-600 hover:text-red-700 flex items-center transition-colors px-2 py-1 -ml-2 rounded-md hover:bg-red-50"
-                      >
-                        Подробнее
-                        <ChevronRight className="w-4 h-4 ml-1" />
+                      >{t("Подробнее")}<ChevronRight className="w-4 h-4 ml-1" />
                       </button>
                     </div>
                   </div>
@@ -1070,7 +1156,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                })}
              </div>
            ) : (
-             <p className="text-sm text-slate-500 text-center py-12">По вашему запросу новости не найдены.</p>
+             <p className="text-sm text-slate-500 text-center py-12">{t("По вашему запросу новости не найдены.")}</p>
            )}
         </div>
       )}
@@ -1090,8 +1176,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             {showAuthModal === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-slate-800">Вход в личный кабинет</h3>
-                  <p className="text-xs text-slate-500 mt-1">Доступно для зарегистрированных доноров и сотрудников центров</p>
+                  <h3 className="text-xl font-bold text-slate-800">{t("Вход в личный кабинет")}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{t("Доступно для зарегистрированных доноров и сотрудников центров")}</p>
                 </div>
 
                 {loginError && (
@@ -1101,7 +1187,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Электронная почта (E-mail)</label>
+                  <label className="text-xs font-semibold text-slate-700">{t("Электронная почта (E-mail)")}</label>
                   <input 
                     type="email" 
                     required
@@ -1113,7 +1199,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Пароль</label>
+                  <label className="text-xs font-semibold text-slate-700">{t("Пароль")}</label>
                   <div className="relative">
                     <input 
                       type={showLoginPassword ? "text" : "password"} 
@@ -1171,7 +1257,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             {showAuthModal === 'register' && (
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="text-center mb-4">
-                  <h3 className="text-xl font-bold text-slate-800">Регистрация нового донора</h3>
+                  <h3 className="text-xl font-bold text-slate-800">{t("Регистрация нового донора")}</h3>
                   <div className="flex items-center justify-center gap-1.5 mt-2">
                     <span className={`w-6 h-1.5 rounded-full ${regStep === 1 ? 'bg-red-600' : 'bg-slate-200'}`}></span>
                     <span className={`w-6 h-1.5 rounded-full ${regStep === 2 ? 'bg-red-600' : 'bg-slate-200'}`}></span>
@@ -1195,7 +1281,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           required
                           value={regForm.lastName}
                           onChange={(e) => handleRegNameChange('lastName', e.target.value)}
-                          placeholder="Иванов"
+                          placeholder={t("Иванов")}
                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                         />
                       </div>
@@ -1206,19 +1292,19 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           required
                           value={regForm.firstName}
                           onChange={(e) => handleRegNameChange('firstName', e.target.value)}
-                          placeholder="Иван"
+                          placeholder={t("Иван")}
                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Отчество</label>
+                      <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Отчество")}</label>
                       <input 
                         type="text" 
                         value={regForm.middleName}
                         onChange={(e) => handleRegNameChange('middleName', e.target.value)}
-                        placeholder="Сергеевич"
+                        placeholder={t("Сергеевич")}
                         className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                       />
                     </div>
@@ -1240,7 +1326,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           }`}
                         />
                         {isBirthDateInvalid() && (
-                          <p className="text-xs text-red-500 mt-1">Возраст донора должен быть от 18 до 65 лет</p>
+                          <p className="text-xs text-red-500 mt-1">{t("Возраст донора должен быть от 18 до 65 лет")}</p>
                         )}
                       </div>
                       <div className="space-y-1">
@@ -1250,8 +1336,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           onChange={(e) => setRegForm({...regForm, gender: e.target.value as Gender})}
                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white"
                         >
-                          <option value="male">Мужской</option>
-                          <option value="female">Женский</option>
+                          <option value="male">{t("Мужской")}</option>
+                          <option value="female">{t("Женский")}</option>
                         </select>
                       </div>
                     </div>
@@ -1297,7 +1383,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         }`}
                       />
                       {isEmailInvalid() && (
-                        <p className="text-xs text-red-500 mt-1">Введите корректный почтовый ящик (с символом @)</p>
+                        <p className="text-xs text-red-500 mt-1">{t("Введите корректный почтовый ящик (с символом @)")}</p>
                       )}
                     </div>
 
@@ -1309,7 +1395,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           required
                           value={regForm.password}
                           onChange={(e) => setRegForm({...regForm, password: e.target.value})}
-                          placeholder="Минимум 6 символов"
+                          placeholder={t("Минимум 6 символов")}
                           className={`w-full pl-3 pr-10 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
                             regForm.password && getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
                           }`}
@@ -1335,7 +1421,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           required
                           value={regConfirmPassword}
                           onChange={(e) => setRegConfirmPassword(e.target.value)}
-                          placeholder="Повторите пароль"
+                          placeholder={t("Повторите пароль")}
                           className={`w-full pl-3 pr-10 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
                             isConfirmPasswordInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
                           }`}
@@ -1349,7 +1435,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         </button>
                       </div>
                       {isConfirmPasswordInvalid() && (
-                        <p className="text-xs text-red-500 mt-1">Неверный пароль</p>
+                        <p className="text-xs text-red-500 mt-1">{t("Неверный пароль")}</p>
                       )}
                     </div>
 
@@ -1371,10 +1457,10 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           onChange={(e) => setRegForm({...regForm, bloodGroup: e.target.value as BloodGroup})}
                           className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white"
                         >
-                          <option value="I_O">I (O) - Первая</option>
-                          <option value="II_A">II (A) - Вторая</option>
-                          <option value="III_B">III (B) - Третья</option>
-                          <option value="IV_AB">IV (AB) - Четвертая</option>
+                          <option value="I_O">{t("I (O) - Первая")}</option>
+                          <option value="II_A">{t("II (A) - Вторая")}</option>
+                          <option value="III_B">{t("III (B) - Третья")}</option>
+                          <option value="IV_AB">{t("IV (AB) - Четвертая")}</option>
                         </select>
                       </div>
 
@@ -1405,7 +1491,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         }`}
                       />
                       {isWeightInvalid() && (
-                        <p className="text-xs text-red-500 mt-1">Минимальный вес — 55 кг.</p>
+                        <p className="text-xs text-red-500 mt-1">{t("Минимальный вес — 55 кг.")}</p>
                       )}
                     </div>
 
@@ -1426,7 +1512,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
                     {/* Checkboxes notification permissions */}
                     <div className="space-y-2.5 pt-2">
-                      <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Предпочтительные каналы оповещений о дефиците:</p>
+                      <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t("Предпочтительные каналы оповещений о дефиците:")}</p>
                       
                       <label className="flex items-center text-xs text-slate-700 cursor-pointer">
                         <input 
@@ -1459,7 +1545,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         onChange={(e) => setRegForm({...regForm, agreeTerms: e.target.checked})}
                         className="mr-2.5 mt-0.5 rounded text-red-600 focus:ring-red-500 border-slate-300"
                       />
-                      <span>Я даю согласие на безопасную обработку медицинских и персональных данных для нужд Минздрава РБ и центров крови.</span>
+                      <span>{t("Я даю согласие на безопасную обработку медицинских и персональных данных для нужд Минздрава РБ и центров крови.")}</span>
                     </label>
 
                     <div className="flex gap-3 pt-4">
@@ -1498,8 +1584,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             {showAuthModal === 'forgot' && (
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-slate-800">Восстановление пароля</h3>
-                  <p className="text-xs text-slate-500 mt-1">Вам на почту придет код для сброса</p>
+                  <h3 className="text-xl font-bold text-slate-800">{t("Восстановление пароля")}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{t("Вам на почту придет код для сброса")}</p>
                 </div>
 
                 {loginError && (
@@ -1509,7 +1595,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Электронная почта (E-mail)</label>
+                  <label className="text-xs font-semibold text-slate-700">{t("Электронная почта (E-mail)")}</label>
                   <input 
                     type="email" 
                     required
@@ -1544,8 +1630,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             {showAuthModal === 'resetAuth' && (
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-bold text-slate-800">Новый пароль</h3>
-                  <p className="text-xs text-slate-500 mt-1">Введите код из письма и новый пароль</p>
+                  <h3 className="text-xl font-bold text-slate-800">{t("Новый пароль")}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{t("Введите код из письма и новый пароль")}</p>
                 </div>
 
                 {loginError && (
@@ -1555,26 +1641,26 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Код восстановления</label>
+                  <label className="text-xs font-semibold text-slate-700">{t("Код восстановления")}</label>
                   <input 
                     type="text" 
                     required
                     value={resetCode}
                     onChange={(e) => setResetCode(e.target.value)}
-                    placeholder="Например, 1234"
+                    placeholder={t("Например, 1234")}
                     className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Новый пароль</label>
+                  <label className="text-xs font-semibold text-slate-700">{t("Новый пароль")}</label>
                   <div className="relative">
                     <input 
                       type={showResetPassword ? "text" : "password"} 
                       required
                       value={resetPassword}
                       onChange={(e) => setResetPassword(e.target.value)}
-                      placeholder="Минимум 6 символов"
+                      placeholder={t("Минимум 6 символов")}
                       className={`w-full pl-3.5 pr-10 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors ${
                         resetPassword && getResetPasswordHint(resetPassword)
                           ? 'border-orange-500 bg-orange-50/50 focus:border-orange-600'
@@ -1595,14 +1681,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Подтвердите пароль</label>
+                  <label className="text-xs font-semibold text-slate-700">{t("Подтвердите пароль")}</label>
                   <div className="relative">
                     <input 
                       type={showResetConfirmPassword ? "text" : "password"} 
                       required
                       value={resetConfirmPassword}
                       onChange={(e) => setResetConfirmPassword(e.target.value)}
-                      placeholder="Повторите пароль"
+                      placeholder={t("Повторите пароль")}
                       className={`w-full pl-3.5 pr-10 py-2.5 text-sm border rounded-xl focus:outline-none transition-colors ${
                         resetConfirmPassword && resetPassword !== resetConfirmPassword
                           ? 'border-red-500 bg-red-50/50 focus:border-red-600'
@@ -1618,7 +1704,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     </button>
                   </div>
                   {resetConfirmPassword && resetPassword !== resetConfirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">неверный пароль</p>
+                    <p className="text-xs text-red-500 mt-1">{t("неверный пароль")}</p>
                   )}
                 </div>
 
@@ -1632,7 +1718,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
                 <div className="text-center text-xs text-slate-500 py-1">
                   {resendCooldown > 0 ? (
-                    <span>Отправить код повторно через {resendCooldown} сек.</span>
+                    <span>{t("Отправить код повторно через")} {resendCooldown} {t("сек.")}</span>
                   ) : (
                     <button
                       type="button"

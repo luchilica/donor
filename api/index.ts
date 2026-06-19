@@ -322,16 +322,71 @@ app.get('/api/download/contraindications', (req, res) => {
     res.json(db.centers);
   });
 
+  // UPDATE CENTER NEEDS
+  app.patch('/api/centers/:id/needs', async (req, res) => {
+    const token = req.headers.authorization;
+    if (!token) return res.status(401).json({ error: 'Требуется авторизация' });
+
+    const userIdStr = token.split('-')[3]; 
+    const userId = parseInt(userIdStr);
+
+    const db = await getDb();
+    const user = db.users.find(u => u.id === userId);
+    const centerId = parseInt(req.params.id);
+
+    if (!user || user.role !== 'center' || user.centerId !== centerId) {
+      return res.status(403).json({ error: 'Нет доступа' });
+    }
+
+    const index = db.centers.findIndex(c => c.id === centerId);
+    if (index === -1) {
+      return res.status(404).json({ error: 'Центр не найден' });
+    }
+
+    const { bloodNeeds } = req.body;
+    db.centers[index].bloodNeeds = { ...db.centers[index].bloodNeeds, ...bloodNeeds };
+    
+    await saveDb(db);
+    res.json(db.centers[index]);
+  });
+
   // GET PUBLIC STATS
   app.get('/api/public-stats', async (req, res) => {
     const db = await getDb();
     const activeDonors = db.donors.filter(d => d.status === 'active').length;
     const centersCount = db.centers.length;
     const sentAlerts = db.notifications.length;
+
+    const needsAggregate: Record<string, { sum: number, count: number }> = {
+      I_pos: { sum: 0, count: 0 }, I_neg: { sum: 0, count: 0 },
+      II_pos: { sum: 0, count: 0 }, II_neg: { sum: 0, count: 0 },
+      III_pos: { sum: 0, count: 0 }, III_neg: { sum: 0, count: 0 },
+      IV_pos: { sum: 0, count: 0 }, IV_neg: { sum: 0, count: 0 }
+    };
+
+    db.centers.forEach((c: any) => {
+      if (c.bloodNeeds) {
+        Object.entries(c.bloodNeeds).forEach(([key, val]) => {
+          if (needsAggregate[key]) {
+            needsAggregate[key].sum += val as number;
+            needsAggregate[key].count += 1;
+          }
+        });
+      }
+    });
+
+    const averageNeeds: Record<string, number> = {};
+    Object.keys(needsAggregate).forEach(key => {
+      averageNeeds[key] = needsAggregate[key].count > 0 
+        ? Math.round(needsAggregate[key].sum / needsAggregate[key].count) 
+        : 100;
+    });
+
     res.json({
       totalDonorsCount: activeDonors,
       centersCount: centersCount,
-      sentAlertsCount: sentAlerts
+      sentAlertsCount: sentAlerts,
+      averageNeeds
     });
   });
 
