@@ -114,6 +114,7 @@ export default function App() {
   const [view, setView] = useState<'home' | 'dashboard'>('home');
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [language, setLanguage] = useState<'RU' | 'BY'>('RU');
+  const [showSwitcher, setShowSwitcher] = useState(false);
 
   const t = (key: string) => {
     if (language === 'RU') return key;
@@ -241,34 +242,44 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50/50 flex flex-col justify-between">
       
-      {/* Dynamic Master Switcher Header Panel for Judges/Evaluators */}
-      <div className="bg-slate-900 text-white border-b border-slate-800 py-2 px-4 flex justify-center items-center text-xs gap-2">
-        <div className="flex flex-wrap justify-center gap-1 select-none">
-          <button 
-            onClick={() => simulateRole('guest')}
-            className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${!session ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
-          >
-            {t("Гость (Публичный сайт)")}
-          </button>
-          <button 
-            onClick={() => simulateRole('donor')}
-            className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'donor' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
-          >
-            {t("Донор: Алексей Павлов")}
-          </button>
-          <button 
-            onClick={() => simulateRole('center')}
-            className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'center' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
-          >
-            {t("Координатор: Минский РНПЦ")}
-          </button>
-          <button 
-            onClick={() => simulateRole('admin')}
-            className={`px-3 py-1 rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'admin' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
-          >
-            {t("Админ: Система")}
-          </button>
-        </div>
+      {/* Dynamic Master Switcher Panel for Judges/Evaluators */}
+      <div className="fixed bottom-4 left-4 z-[9999] flex flex-col items-start gap-2">
+        <button 
+          onClick={() => setShowSwitcher(!showSwitcher)}
+          className="bg-slate-900/90 backdrop-blur-md text-white px-3 py-2 rounded-xl text-xs font-bold shadow-lg border border-slate-700 hover:bg-slate-800 transition"
+        >
+          {showSwitcher ? "Скрыть панель ролей" : "⚙️ Панель ролей"}
+        </button>
+        {showSwitcher && (
+          <div className="bg-slate-900/90 backdrop-blur-md text-white p-3 rounded-xl border border-slate-800 flex flex-col gap-2 text-xs shadow-2xl">
+            <div className="flex flex-col gap-1 select-none">
+              <button 
+                onClick={() => simulateRole('guest')}
+                className={`px-3 py-2 text-left rounded font-bold border transition duration-150 text-[10px] uppercase ${!session ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
+              >
+                {t("Гость (Публичный сайт)")}
+              </button>
+              <button 
+                onClick={() => simulateRole('donor')}
+                className={`px-3 py-2 text-left rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'donor' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
+              >
+                {t("Донор: Алексей Павлов")}
+              </button>
+              <button 
+                onClick={() => simulateRole('center')}
+                className={`px-3 py-2 text-left rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'center' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
+              >
+                {t("Координатор: Минского РНПЦ")}
+              </button>
+              <button 
+                onClick={() => simulateRole('admin')}
+                className={`px-3 py-2 text-left rounded font-bold border transition duration-150 text-[10px] uppercase ${session?.user.role === 'admin' ? 'bg-rose-500 border-rose-500 text-white shadow-sm' : 'bg-transparent border-slate-700 text-slate-300 hover:border-slate-500'}`}
+              >
+                {t("Админ: Система")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Main Core Navigation Header */}

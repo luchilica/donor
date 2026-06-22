@@ -32,7 +32,7 @@ const AccordionItem = ({ title, children }: { title: string; children: React.Rea
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="p-5 bg-white border-t border-red-50 text-sm text-slate-600 leading-relaxed">
+            <div className="p-5 bg-white border-t border-red-50 text-base text-slate-600 leading-relaxed">
               {children}
             </div>
           </motion.div>
@@ -143,7 +143,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
   const isEmailInvalid = () => {
     if (!regForm.email) return false;
-    return !/^.+@.+$/.test(regForm.email);
+    return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regForm.email);
   };
 
   const isConfirmPasswordInvalid = () => {
@@ -155,6 +155,16 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
     if (!regForm.weight) return false;
     const w = parseFloat(regForm.weight);
     return w < 55;
+  };
+
+  const isPhoneInvalid = () => {
+    if (!regForm.phone || regForm.phone === '+375') return false;
+    return regForm.phone.length < 13;
+  };
+
+  const isPasswordShort = () => {
+    if (!regForm.password) return false;
+    return regForm.password.length < 6;
   };
 
   // Registration States
@@ -184,7 +194,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   const handleRegNameChange = (field: 'lastName' | 'firstName' | 'middleName', val: string) => {
-    const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+    const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\s\-]/g, '');
     setRegForm(prev => ({ ...prev, [field]: lettersOnly }));
   };
 
@@ -350,7 +360,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
         setRegError('Пожалуйста, заполните необходимые личные данные');
         return;
       }
-      if (!regForm.email.includes('@')) {
+      if (isEmailInvalid()) {
         setRegError('Введите корректный e-mail');
         return;
       }
@@ -495,7 +505,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                   </button>
                   <button 
                     onClick={() => setShowAuthModal('login')}
-                    className="bg-transparent hover:bg-white/10 text-white border border-white/40 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:border-white/60 hover:shadow-lg flex items-center"
+                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
                   >
                     <User className="w-5 h-5 mr-2" />
                     Личный кабинет
@@ -514,7 +524,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
             <hr className="border-white/20 mb-8" />
 
-            <div className="flex flex-wrap gap-8 md:gap-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div>
                 <motion.span 
                   initial={{ opacity: 0 }} 
@@ -568,8 +578,10 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       )}
 
       {/* Mini Guest Navigation Tabs */}
-      <div className="flex border-b border-slate-200 mb-8 overflow-x-auto whitespace-nowrap gap-1 pb-1">
-        <button 
+      <div className="relative mb-8">
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-10 md:hidden pb-1" />
+        <div className="flex border-b border-slate-200 overflow-x-auto whitespace-nowrap gap-1 pb-1">
+          <button 
           onClick={() => setActiveTab('home')}
           className={`px-5 py-3 font-medium transition-colors border-b-2 text-sm ${activeTab === 'home' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
         >
@@ -599,6 +611,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
         >
           Новости центров ({news.length})
         </button>
+        </div>
       </div>
 
       {/* Tab Context Contents */}
@@ -794,7 +807,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             </AccordionItem>
             
             <AccordionItem title={t("Кто может стать донором")}>
-               <div className="space-y-2 text-sm text-slate-600">
+               <div className="space-y-2 text-base text-slate-600 leading-relaxed">
                   <p><strong>{t("Возраст:")}</strong> от 18 до 65 лет (ст. 26 Закона РБ «О донорстве крови»). В экстренных случаях допуск возможен по решению врачебно-консультационной комиссии.</p>
                   <p><strong>{t("Вес:")}</strong> не менее 55 кг и не более ожирения II степени.</p>
                   <p><strong>{t("Гражданство:")}</strong> граждане РБ, а также иностранные граждане и лица без гражданства, постоянно проживающие в РБ, обладающие полной дееспособностью.</p>
@@ -803,7 +816,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             </AccordionItem>
 
 <AccordionItem title={t("Противопоказания к донорству")}>
-              <div className="space-y-4 text-sm text-slate-600">
+              <div className="space-y-4 text-base text-slate-600 leading-relaxed">
                 <p><strong>{t("Временные противопоказания:")}</strong></p>
                 <ul className="list-disc list-inside space-y-1">
                     <li>{t("Острая респираторная инфекция – через 15 суток после выздоровления.")}</li>
@@ -829,7 +842,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             </AccordionItem>
 
 <AccordionItem title={t("Как подготовиться к сдаче крови")}>
-                <div className="space-y-2 text-sm text-slate-600">
+                <div className="space-y-2 text-base text-slate-600 leading-relaxed">
                     <p><strong>{t("За 10 дней")}</strong> – воздержаться от приёма антибактериальных медицинских препаратов.</p>
                     <p><strong>{t("За 5 дней")}</strong> – от салицилатов и аналгетиков.</p>
                     <p><strong>{t("За 48 часов")}</strong> – от приёма алкогольных (слабоалкогольных) напитков и пива.</p>
@@ -843,7 +856,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             </AccordionItem>
 
             <AccordionItem title={t("Что происходит во время сдачи крови")}>
-              <div className="space-y-2 text-sm text-slate-600">
+              <div className="space-y-2 text-base text-slate-600 leading-relaxed">
                 <p>1. <strong>{t("Регистрация.")}</strong> При первичном обращении оформляются учётная карточка, медицинский документ донора, карта-анкета. При повторных – только карта-анкета.</p>
                 <p>2. <strong>{t("Заполнение карты-анкеты.")}</strong> Донор отвечает на вопросы и подписывает добровольное согласие на забор крови.</p>
                 <p>3. <strong>{t("Клинико-лабораторные исследования.")}</strong></p>
@@ -860,7 +873,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             </AccordionItem>
             
             <AccordionItem title={t("Минимальные интервалы между донациями")}>
-                <div className="space-y-2 text-sm text-slate-600">
+                <div className="space-y-2 text-base text-slate-600 leading-relaxed">
                     <p>{t("Минимальные интервалы между донациями составляют:")}</p>
                     <ul className="list-disc list-inside ml-2 space-y-1">
                         <li>{t("Крови – не менее 60 календарных дней, после каждой 5-ой донации – не менее 90 календарных дней.")}</li>
@@ -876,7 +889,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             
 
             <AccordionItem title={t("Польза донорства для здоровья")}>
-              <ul className="list-disc list-inside text-sm text-slate-600">
+              <ul className="list-disc list-inside text-base text-slate-600 leading-relaxed space-y-2">
                 <li>{t("Стимуляция кроветворения")}</li>
                 <li>{t("Бесплатное обследование (ВИЧ, гепатит, сифилис)")}</li>
                 <li>{t("Контроль состояния здоровья")}</li>
@@ -884,7 +897,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             </AccordionItem>
 
             <AccordionItem title={t("Льготы доноров в Беларуси")}>
-                <div className="space-y-2 text-sm text-slate-600">
+                <div className="space-y-2 text-base text-slate-600 leading-relaxed">
                     <p><strong>{t("Всем донорам:")}</strong></p>
                     <ul className="list-disc list-inside ml-4">
                         <li>{t("Освобождение от работы/учёбы/военной службы в день донации с сохранением среднего заработка (денежного довольствия).")}</li>
@@ -924,7 +937,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
           <div className="space-y-4">
              <AccordionItem title={t("Первичная донация")}>
-                <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
+                <ul className="list-disc list-inside text-base text-slate-600 leading-relaxed space-y-2">
                   <li>{t("Паспорт гражданина РБ (или иной документ, удостоверяющий личность: вид на жительство, удостоверение беженца).")}</li>
                   <li>{t("Военный билет или удостоверение призывника (при наличии).")}</li>
                   <li>{t("Выписка из медицинской документации о состоянии здоровья.")}</li>
@@ -934,7 +947,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 </ul>
              </AccordionItem>
              <AccordionItem title={t("Повторная донация")}>
-                <ul className="list-disc list-inside text-sm text-slate-600 space-y-2">
+                <ul className="list-disc list-inside text-base text-slate-600 leading-relaxed space-y-2">
                   <li>{t("Паспорт (или аналогичный документ).")}</li>
                   <li>{t("Карта-анкета донора.")}</li>
                   <li>{t("Выписка из медицинской документации – 1 раз в 12 месяцев.")}</li>
@@ -1250,7 +1263,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <button 
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loginLoading ? 'Авторизация...' : 'Войти в кабинет'}
                 </button>
@@ -1389,8 +1402,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           setRegForm({...regForm, phone: inputVal.substring(0, 13)});
                         }}
                         placeholder="+375XXXXXXXXX"
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                        className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
+                          isPhoneInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+                        }`}
                       />
+                      {isPhoneInvalid() && (
+                        <p className="text-xs text-red-500 mt-1">{t("Номер телефона должен содержать 12 цифр (включая код +375)")}</p>
+                      )}
                     </div>
 
                     <div className="space-y-1">
@@ -1420,7 +1438,9 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           onChange={(e) => setRegForm({...regForm, password: e.target.value})}
                           placeholder={t("Минимум 6 символов")}
                           className={`w-full pl-3 pr-10 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
-                            regForm.password && getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
+                            isPasswordShort() 
+                              ? 'border-red-500 bg-red-50 focus:border-red-600'
+                              : regForm.password && getPasswordHint(regForm.password) ? 'border-orange-500 bg-orange-50 focus:border-orange-600' : 'border-slate-200 focus:border-red-500'
                           }`}
                         />
                         <button
@@ -1431,9 +1451,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
-                      {regForm.password && getPasswordHint(regForm.password) && (
+                      {isPasswordShort() ? (
+                        <p className="text-xs text-red-500 mt-1 font-medium">{t("Пароль должен содержать не менее 6 символов")}</p>
+                      ) : regForm.password && getPasswordHint(regForm.password) ? (
                         <p className="text-xs text-orange-600 mt-1 font-medium">{getPasswordHint(regForm.password)}</p>
-                      )}
+                      ) : null}
                     </div>
 
                     <div className="space-y-1">
@@ -1458,7 +1480,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         </button>
                       </div>
                       {isConfirmPasswordInvalid() && (
-                        <p className="text-xs text-red-500 mt-1">{t("Неверный пароль")}</p>
+                        <p className="text-xs text-red-500 mt-1">{t("Пароли не совпадают")}</p>
                       )}
                     </div>
 
@@ -1510,11 +1532,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         value={regForm.weight}
                         onChange={(e) => setRegForm({...regForm, weight: e.target.value})}
                         className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
-                          isWeightInvalid() ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+                          isWeightInvalid() || regError.includes('масс') ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
                         }`}
                       />
-                      {isWeightInvalid() && (
-                        <p className="text-xs text-red-500 mt-1">{t("Минимальный вес — 55 кг.")}</p>
+                      {(isWeightInvalid() || regError.includes('масс')) && (
+                        <p className="text-xs text-red-500 mt-1">{regError.includes('масс') ? regError : t("Минимальный вес — 55 кг.")}</p>
                       )}
                     </div>
 
@@ -1582,7 +1604,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       <button 
                         type="submit"
                         disabled={regLoading}
-                        className="w-2/3 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-3 rounded-xl transition duration-150 shadow-sm"
+                        className="w-2/3 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-3 rounded-xl transition duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {regLoading ? 'Отправка...' : 'Отправить анкету'}
                       </button>
@@ -1632,7 +1654,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <button 
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loginLoading ? 'Отправка...' : 'Отправить код'}
                 </button>
@@ -1727,14 +1749,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     </button>
                   </div>
                   {resetConfirmPassword && resetPassword !== resetConfirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">{t("неверный пароль")}</p>
+                    <p className="text-xs text-red-500 mt-1">{t("Пароли не совпадают")}</p>
                   )}
                 </div>
 
                 <button 
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loginLoading ? 'Сохранение...' : 'Сбросить пароль'}
                 </button>
@@ -1747,7 +1769,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       type="button"
                       onClick={handleResendCode}
                       disabled={loginLoading}
-                      className="text-red-600 hover:text-red-700 font-semibold hover:underline"
+                      className="text-red-600 hover:text-red-700 font-semibold hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Отправить код повторно
                     </button>

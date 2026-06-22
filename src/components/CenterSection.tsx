@@ -101,6 +101,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
   // Notifications state list
   const [notifHistory, setNotifHistory] = useState<Notification[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Donors query filters
   const [donorSearch, setDonorSearch] = useState('');
@@ -2176,11 +2177,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       </div>
 
                       <button 
-                        type="submit"
+                        type="submit" disabled={isSaving}
                         className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition duration-150 flex items-center justify-center gap-2.5 shadow-sm text-base"
-                      >
-                        <Send className="w-5.5 h-5.5" /> ОТПРАВИТЬ РАССЫЛКУ
-                      </button>
+                      >{isSaving ? 'Подождите...' : '<Send className="w-5.5 h-5.5" /> ОТПРАВИТЬ РАССЫЛКУ'}</button>
 
                     </form>
                   </div>
@@ -2390,7 +2389,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             <button
               onClick={handleNeedsSubmit}
               disabled={needsSaving}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs flex items-center transition-all shadow-sm"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs flex items-center transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {needsSaving ? 'Сохранение...' : (needsSuccess ? 'Сохранено!' : 'Сохранить изменения')}
             </button>
@@ -2473,11 +2472,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   Отмена
                 </button>
                 <button 
-                  type="submit" 
+                  type="submit" disabled={isSaving} 
                   className="w-2/3 bg-red-650 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl"
-                >
-                  Отклонить заявку
-                </button>
+                >{isSaving ? 'Подождите...' : 'Отклонить заявку'}</button>
               </div>
             </form>
           </div>
@@ -2560,9 +2557,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 />
               </div>
 
-              <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs">
-                Записать в базу и пересчитать сроки
-              </button>
+              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs">{isSaving ? 'Подождите...' : 'Записать в базу и пересчитать сроки'}</button>
             </form>
           </div>
         </div>
@@ -2749,9 +2744,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <button type="button" onClick={() => setShowEditDonorModal(false)} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
                     Отмена
                   </button>
-                  <button type="submit" className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade">
-                    Сохранить изменения
-                  </button>
+                  <button type="submit" disabled={isSaving} className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade">{isSaving ? 'Подождите...' : 'Сохранить изменения'}</button>
                 </div>
               </form>
             </div>
@@ -2830,9 +2823,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </div>
               )}
 
-              <button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">
-                Накладывать медотвод
-              </button>
+              <button type="submit" disabled={isSaving} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">{isSaving ? 'Подождите...' : 'Накладывать медотвод'}</button>
             </form>
           </div>
         </div>
@@ -2888,9 +2879,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 />
               </div>
 
-              <button type="submit" className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2">
-                Сохранить публикацию
-              </button>
+              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2">{isSaving ? 'Подождите...' : 'Сохранить публикацию'}</button>
             </form>
           </div>
         </div>
@@ -3051,9 +3040,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <input type="text" required value={manualForm.password} onChange={(e) => setManualForm({...manualForm, password: e.target.value})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl font-mono focus:border-red-500 focus:outline-none text-red-700 bg-red-50" />
               </div>
 
-              <button type="submit" className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm">
-                Создать профиль донора (Подтвержден на месте)
-              </button>
+              <button type="submit" disabled={isSaving} className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm">{isSaving ? 'Подождите...' : 'Создать профиль донора (Подтвержден на месте)'}</button>
             </form>
           </div>
         </div>

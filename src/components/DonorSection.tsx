@@ -29,6 +29,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
   const [activeMenu, setActiveMenu] = useState<'dashboard' | 'profile' | 'history' | 'links' | 'pause' | 'notifications' | 'account'>('dashboard');
   const [refreshing, setRefreshing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Set local pause states
   const [pauseForm, setPauseForm] = useState({
@@ -281,6 +282,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       variant: 'info',
       confirmText: 'Сохранить',
       onConfirm: async () => {
+        setIsSaving(true);
         try {
           const res = await fetch(`${apiBase}/donor/profile`, {
             method: 'PUT',
@@ -302,8 +304,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           onRefresh();
         } catch (err: any) {
           setEditError(err.message || 'Ошибка обновления профиля');
+        } finally {
+          setIsSaving(false);
+          closeConfirm();
         }
-        closeConfirm();
       }
     });
   };
@@ -324,6 +328,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       variant: 'warning',
       confirmText: 'Сохранить',
       onConfirm: async () => {
+        setIsSaving(true);
         try {
           const res = await fetch(`${apiBase}/donor/pause`, {
             method: 'PUT',
@@ -358,6 +363,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       variant: 'info',
       confirmText: 'Сохранить',
       onConfirm: async () => {
+        setIsSaving(true);
         try {
           const res = await fetch(`${apiBase}/donor/notifications`, {
             method: 'PUT',
@@ -390,6 +396,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       variant: 'info',
       confirmText: 'Отправить',
       onConfirm: async () => {
+        setIsSaving(true);
         try {
           const res = await fetch(`${apiBase}/donor/resubmit/${centerId}`, {
             method: 'POST',
@@ -419,6 +426,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       variant: 'info',
       confirmText: 'Установить',
       onConfirm: async () => {
+        setIsSaving(true);
         try {
           const res = await fetch(`${apiBase}/donor/set-primary-center`, {
             method: 'POST',
@@ -455,6 +463,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       variant: 'info',
       confirmText: 'Отправить',
       onConfirm: async () => {
+        setIsSaving(true);
         try {
           const res = await fetch(`${apiBase}/donor/link-center`, {
             method: 'POST',
@@ -476,8 +485,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           onRefresh();
         } catch (err: any) {
           setLinkError(err.message || 'Ошибка связи');
+        } finally {
+          setIsSaving(false);
+          closeConfirm();
         }
-        closeConfirm();
       }
     });
   };
@@ -839,9 +850,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     </button>
                     <button 
                       type="submit"
-                      className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade"
+                      disabled={isSaving}
+                      className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Сохранить изменения
+                      {isSaving ? 'Сохранение...' : 'Сохранить изменения'}
                     </button>
                   </div>
                 </form>
@@ -1366,12 +1378,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 )}
 
                 <div className="pt-2 border-t border-slate-100">
-                  <button 
+                  <button disabled={isSaving || false} 
                     type="submit"
-                    className="bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition duration-150 shadow-xs"
-                  >
-                    Сохранить
-                  </button>
+                    className="disabled:opacity-50 disabled:cursor-not-allowed bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition duration-150 shadow-xs"
+                  >{isSaving ? '...' : 'Сохранить'}</button>
                 </div>
               </form>
             </div>
@@ -1533,12 +1543,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     })}
                   </select>
                 </div>
-                <button 
+                <button disabled={isSaving || false} 
                   type="submit"
-                  className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs duration-200"
-                >
-                  <Plus className="w-4 h-4" /> Отправить анкету
-                </button>
+                  className="disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs duration-200"
+                >{isSaving ? '...' : '<Plus className="w-4 h-4" /> Отправить анкету'}</button>
               </form>
             </div>
           </motion.div>
@@ -1642,12 +1650,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   ))}
                 </div>
                 <div className="pt-2">
-                  <button 
+                  <button disabled={isSaving || false} 
                     type="submit"
-                    className="w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center"
-                  >
-                    Сохранить изменения
-                  </button>
+                    className="disabled:opacity-50 disabled:cursor-not-allowed w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center"
+                  >{isSaving ? 'Сохранение...' : 'Сохранить изменения'}</button>
                 </div>
               </form>
             </div>
@@ -1773,8 +1779,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   </div>
                 </div>
                 <div className="pt-4 border-t border-slate-50">
-                  <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center">
-                    Обновить пароль
+                  <button type="submit" disabled={isSaving} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                    {isSaving ? 'Обновление...' : 'Обновить пароль'}
                   </button>
                 </div>
               </form>

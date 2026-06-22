@@ -1,3 +1,4 @@
+import 'express-async-errors';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
@@ -467,7 +468,13 @@ app.get('/api/download/contraindications', (req, res) => {
   });
 
   // GET PUBLIC STATS
+  let cachedPublicStats: any = null;
+  let publicStatsCacheTime = 0;
   app.get('/api/public-stats', async (req, res) => {
+    if (cachedPublicStats && Date.now() - publicStatsCacheTime < 5 * 60 * 1000) {
+      return res.json(cachedPublicStats);
+    }
+
     const db = await getDb();
     const activeDonors = db.donors.filter(d => d.status === 'active').length;
     const centersCount = db.centers.length;
@@ -498,12 +505,15 @@ app.get('/api/download/contraindications', (req, res) => {
         : 100;
     });
 
-    res.json({
+    cachedPublicStats = {
       totalDonorsCount: activeDonors,
       centersCount: centersCount,
       sentAlertsCount: sentAlerts,
       averageNeeds
-    });
+    };
+    publicStatsCacheTime = Date.now();
+
+    res.json(cachedPublicStats);
   });
 
   // GET GLOBAL NEWS
@@ -626,9 +636,15 @@ app.get('/api/download/contraindications', (req, res) => {
     if (weight) donor.weight = parseFloat(weight);
 
     const user = db.users.find(u => u.id === donor.userId);
-    if (user && email) {
+    if (user && email && typeof email === 'string') {
       const cleanEmail = email.toLowerCase().trim();
-      user.email = cleanEmail;
+      if (cleanEmail !== user.email) {
+        const existing = db.users.find(u => u.email.toLowerCase() === cleanEmail);
+        if (existing) {
+          return res.status(400).json({ error: 'Пользователь с таким email уже существует' });
+        }
+        user.email = cleanEmail;
+      }
       donor.email = cleanEmail;
     }
 
@@ -1061,6 +1077,14 @@ app.get('/api/download/contraindications', (req, res) => {
     if (!donationDate || !donationType) {
       return res.status(400).json({ error: 'Дата и тип донации обязательны' });
     }
+    
+    let parsedVolume: number | undefined;
+    if (volumeMl !== undefined) {
+      parsedVolume = parseInt(volumeMl);
+      if (isNaN(parsedVolume) || parsedVolume < 0 || parsedVolume > 1000) {
+        return res.status(400).json({ error: 'Недопустимый объем донации' });
+      }
+    }
 
     const db = await getDb();
     const newId = db.donations.length > 0 ? Math.max(...db.donations.map(d => d.id)) + 1 : 1;
@@ -1071,7 +1095,7 @@ app.get('/api/download/contraindications', (req, res) => {
       donationDate,
       donationType,
       isPaid: Boolean(isPaid),
-      volumeMl: volumeMl ? parseInt(volumeMl) : undefined,
+      volumeMl: parsedVolume,
       note,
       addedBy: addedBy ? parseInt(addedBy) : undefined,
       createdAt: new Date().toISOString()
@@ -1432,6 +1456,16 @@ app.get('/api/download/contraindications', (req, res) => {
         res.sendFile(path.join(distPath, 'index.html'));
       });
     }
+
+    // Global Error Handler
+    app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+      console.error('[Error:', req.method, req.originalUrl, ']', err);
+      if (req.originalUrl.startsWith('/api')) {
+        res.status(500).json({ error: 'Внутренняя ошибка сервера. Пожалуйста, проверьте введённые данные.' });
+      } else {
+        next(err);
+      }
+    });
 
     const PORT = 3000;
     app.listen(PORT, '0.0.0.0', () => {

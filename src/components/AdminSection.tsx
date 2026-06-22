@@ -41,6 +41,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Modal controls
   const [editingEntity, setEditingEntity] = useState<{ type: AdminTab; data: any } | null>(null);
@@ -161,10 +162,13 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
       }
     } catch (err: any) {
       alert(err.message || 'Network error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleUpdateEntity = async (entityName: string, entity: any) => {
+    setIsSaving(true);
     try {
       const res = await fetch('/api/admin/update-entity', {
         method: 'POST',
@@ -185,6 +189,8 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
       }
     } catch (err: any) {
       alert(err.message || 'Network error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -763,7 +769,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   <input id="add-user-act" type="checkbox" checked={newUser.isActive} onChange={e => setNewUser({...newUser, isActive: e.target.checked})} className="rounded text-rose-650" />
                   <label htmlFor="add-user-act" className="text-xs font-semibold text-slate-600 dark:text-slate-350">{t('Разрешить вход в личный аккаунт')}</label>
                 </div>
-                <button type="submit" className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{t('Создать аккаунт')}</button>
+                <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{isSaving ? t('Загрузка...') : t('Создать аккаунт')}</button>
               </form>
             )}
 
@@ -790,7 +796,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   <label className="block text-[10px] font-extrabold uppercase tracking-wide text-slate-450 mb-1">{t('Рабочие часы')}</label>
                   <input type="text" value={newCenter.workingHours} onChange={e => setNewCenter({...newCenter, workingHours: e.target.value})} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg" placeholder="Пн-Пт: 08:00 - 15:00" />
                 </div>
-                <button type="submit" className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{t('Зарегистрировать клинику')}</button>
+                <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{isSaving ? t('Загрузка...') : t('Зарегистрировать клинику')}</button>
               </form>
             )}
 
@@ -856,7 +862,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                     }} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-500 font-mono" />
                   </div>
                 </div>
-                <button type="submit" className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{t('Создать карточку донора')}</button>
+                <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{isSaving ? t('Загрузка...') : t('Создать карточку донора')}</button>
               </form>
             )}
 
@@ -916,7 +922,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   <label className="block text-[10px] font-extrabold uppercase tracking-wide text-slate-450 mb-1">{t('Примечание/Комментарий')}</label>
                   <input type="text" value={newDonation.note} onChange={e => setNewDonation({...newDonation, note: e.target.value})} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg" placeholder="Стандартный сеанс" />
                 </div>
-                <button type="submit" className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{t('Зафиксировать донацию')}</button>
+                <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{isSaving ? t('Загрузка...') : t('Зафиксировать донацию')}</button>
               </form>
             )}
 
@@ -942,7 +948,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   <input id="add-news-p" type="checkbox" checked={newNews.isPublished} onChange={e => setNewNews({...newNews, isPublished: e.target.checked})} className="rounded text-rose-650" />
                   <label htmlFor="add-news-p" className="text-xs font-semibold text-slate-600 dark:text-slate-350">{t('Опубликовать немедленно')}</label>
                 </div>
-                <button type="submit" className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{t('Создать публикацию')}</button>
+                <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{isSaving ? t('Загрузка...') : t('Создать публикацию')}</button>
               </form>
             )}
 
@@ -999,7 +1005,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   <input id="add-hold-act" type="checkbox" checked={newHold.isActive} onChange={e => setNewHold({...newHold, isActive: e.target.checked})} className="rounded text-rose-650" />
                   <label htmlFor="add-hold-act" className="text-xs font-semibold text-slate-600 dark:text-slate-350">{t('Зафиксировать в качестве активного')}</label>
                 </div>
-                <button type="submit" className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{t('Наложить медотвод')}</button>
+                <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{isSaving ? t('Загрузка...') : t('Наложить медотвод')}</button>
               </form>
             )}
           </div>
