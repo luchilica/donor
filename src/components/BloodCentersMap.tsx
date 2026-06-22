@@ -83,6 +83,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: number]: L.Marker }>({});
+  const userMarkerRef = useRef<L.Marker | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -232,43 +233,98 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
   }, [selectedCenter]);
 
   const handleZoomIn = () => {
-  const { t } = useLanguage();
-
     if (mapRef.current) {
       mapRef.current.zoomIn();
     }
   };
 
   const handleZoomOut = () => {
-  const { t } = useLanguage();
-
     if (mapRef.current) {
       mapRef.current.zoomOut();
     }
   };
 
   const handleMyLocation = () => {
-  const { t } = useLanguage();
-
     if (!navigator.geolocation) {
-      alert("Геолокация не поддерживается вашим браузером");
+      alert(t("Геолокация не поддерживается вашим браузером"));
       return;
     }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocating(false);
-        const { latitude, longitude } = position.coords;
-        if (mapRef.current) {
-          mapRef.current.setView([latitude, longitude], 13, { animate: true, duration: 1.5 });
-        }
-      },
-      (error) => {
-        setLocating(false);
-        alert("Не удалось определить местоположение. Убедитесь, что геопозиция включена в настройках устройства и предоставлен доступ.");
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+
+    const requestGeo = () => {
+      setLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocating(false);
+          const { latitude, longitude } = position.coords;
+          const map = mapRef.current;
+          if (map) {
+            // Remove geographical boundary restrictions to allow viewing locations outside Belarus
+            map.setMaxBounds(null);
+            map.setView([latitude, longitude], 15, { animate: true, duration: 1.5 });
+
+            // Create custom animated/pulsing marker for user location
+            const UserLocationIcon = L.divIcon({
+              className: 'custom-leaflet-user-marker',
+              html: `
+                <div class="relative flex items-center justify-center">
+                  <span class="absolute inline-flex h-8 w-8 animate-ping rounded-full bg-blue-400 opacity-60"></span>
+                  <div class="relative flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 border-2 border-white shadow-lg">
+                    <div class="h-2 w-2 rounded-full bg-white"></div>
+                  </div>
+                </div>
+              `,
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            });
+
+            // Clean previous user marker if it exists
+            if (userMarkerRef.current) {
+              userMarkerRef.current.remove();
+            }
+
+            // Put a new marker on the map
+            const userMarker = L.marker([latitude, longitude], { icon: UserLocationIcon })
+              .addTo(map)
+              .bindPopup(`
+                <div style="font-family: 'Inter', system-ui, sans-serif; padding: 4px; text-align: center;">
+                  <strong style="color: #1d4ed8; font-size: 13px;">📍 ${t('Вы находитесь здесь')}</strong>
+                  <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b;">${latitude.toFixed(5)}, ${longitude.toFixed(5)}</p>
+                </div>
+              `, { closeButton: false });
+
+            userMarkerRef.current = userMarker;
+            setTimeout(() => {
+              userMarker.openPopup();
+            }, 500);
+          }
+        },
+        (error) => {
+          setLocating(false);
+          console.error("Geolocation error:", error);
+          alert(t("Не удалось определить местоположение. Убедитесь, что геопозиция включена в настройках устройства и предоставлен доступ."));
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    };
+
+    // Query Permission API for clean user consent request
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' as any })
+        .then((result) => {
+          if (result.state === 'prompt') {
+            if (window.confirm(t("Для определения вашего местоположения на карте приложению требуется доступ к геолокации. Разрешить?"))) {
+              requestGeo();
+            }
+          } else {
+            requestGeo();
+          }
+        })
+        .catch(() => {
+          requestGeo();
+        });
+    } else {
+      requestGeo();
+    }
   };
 
   const filteredSearch = searchQuery.trim() === ''

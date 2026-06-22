@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, Users, Bell, FileText, Search, Plus, 
   Trash2, X, Check, Eye, ChevronRight, Send, HelpCircle, ShieldAlert,
-  ArrowUp, ArrowDown, Edit3, Droplets
+  ArrowUp, ArrowDown, Edit3, Droplets, ChevronDown
 } from 'lucide-react';
 import { 
   BloodCenter, Donor, DonorCenter, Donation, MedicalNote, 
@@ -195,6 +195,32 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   });
   const [notifyPreviewCount, setNotifyPreviewCount] = useState<number>(0);
   const [notifySuccessMsg, setNotifySuccessMsg] = useState('');
+
+  const [isQuickAlertOpen, setIsQuickAlertOpen] = useState(false);
+  const [isAlertsHistoryOpen, setIsAlertsHistoryOpen] = useState(false);
+
+  // Alert templates state with local storage support
+  const [templatesList, setTemplatesList] = useState<Array<{ id: string; name: string; text: string; isCustom?: boolean }>>(() => {
+    const base = [
+      { id: 'urgent_color', name: 'Дефицит крови', text: 'Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови II(A) Rh+ и I(O) Rh+. Пожалуйста, зайдите в личный кабинет.' },
+      { id: 'plasma_call', name: 'Аферез плазмы', text: 'Донор-Алерт: Просим доноров плазмы подойти для аппаратного плазмафереза в утренние часы. Контактная регистратура: ' + (center?.phone || '') }
+    ];
+    try {
+      const saved = localStorage.getItem(`donor_alert_templates_${center?.id || 'default'}`);
+      if (saved) {
+        return [...base, ...JSON.parse(saved).map((t: any) => ({ ...t, isCustom: true }))];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return base;
+  });
+
+  const [isTemplatesMenuOpen, setIsTemplatesMenuOpen] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState('');
+  const [newTemplateText, setNewTemplateText] = useState('');
+  const [isAddingTemplate, setIsAddingTemplate] = useState(false);
+  const [templateError, setTemplateError] = useState('');
 
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
@@ -658,17 +684,58 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   };
 
   // Load alert template defaults quick
-  const loadTemplate = (type: string) => {
-    if (type === 'urgent_color') {
-      setNotifyForm({
-        ...notifyForm,
-        messageText: 'Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови II(A) Rh+ и I(O) Rh+. Пожалуйста, зайдите в личный кабинет.'
-      });
-    } else if (type === 'plasma_call') {
-      setNotifyForm({
-        ...notifyForm,
-        messageText: 'Донор-Алерт: Просим доноров плазмы подойти для аппаратного плазмафереза в утренние часы. Контактная регистратура: ' + center.phone
-      });
+  const loadTemplateText = (text: string) => {
+    setNotifyForm({
+      ...notifyForm,
+      messageText: text
+    });
+    setIsTemplatesMenuOpen(false);
+  };
+
+  const handleSaveCustomTemplate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTemplateName.trim()) {
+      setTemplateError(t('Введите название шаблона'));
+      return;
+    }
+    if (!newTemplateText.trim()) {
+      setTemplateError(t('Введите текст шаблона'));
+      return;
+    }
+
+    const newTemplate = {
+      id: `custom_${Date.now()}`,
+      name: newTemplateName.trim(),
+      text: newTemplateText.trim(),
+      isCustom: true
+    };
+
+    const updated = [...templatesList, newTemplate];
+    setTemplatesList(updated);
+
+    // Save customs to local storage
+    try {
+      const customsOnly = updated.filter(temp => temp.isCustom);
+      localStorage.setItem(`donor_alert_templates_${center?.id || 'default'}`, JSON.stringify(customsOnly));
+    } catch (err) {
+      console.error(err);
+    }
+
+    setNewTemplateName('');
+    setNewTemplateText('');
+    setIsAddingTemplate(false);
+    setTemplateError('');
+  };
+
+  const handleDeleteCustomTemplate = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = templatesList.filter(temp => temp.id !== id);
+    setTemplatesList(updated);
+    try {
+      const customsOnly = updated.filter(temp => temp.isCustom);
+      localStorage.setItem(`donor_alert_templates_${center?.id || 'default'}`, JSON.stringify(customsOnly));
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -1566,8 +1633,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         )}
                       </div>
                       <div className="text-xs text-slate-600 space-y-1 font-light">
-                        <p>Медицинские: <strong className="font-semibold text-red-700">{formatBloodGroup(item.donor.bloodGroup)} {formatRhFactor(item.donor.rhFactor)}</strong> (Вес: {item.donor.weight} кг, ДР: {new Date(item.donor.birthDate).toLocaleDateString('ru-RU')})</p>
-                        <p>{t("Связь")}: {t("Телефон")} — {item.donor.phone} | {t("Дата отправки заявки")}: {item.link.resubmittedAt ? new Date(item.link.resubmittedAt).toLocaleDateString('ru-RU') : new Date(item.link.createdAt).toLocaleDateString('ru-RU')}</p>
+                        <p>{t("Дата отправки заявки")}: {item.link.resubmittedAt ? new Date(item.link.resubmittedAt).toLocaleDateString('ru-RU') : new Date(item.link.createdAt).toLocaleDateString('ru-RU')}</p>
                       </div>
                     </div>
 
@@ -1610,189 +1676,346 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          className="flex flex-col gap-8 w-full"
         >
           {/* Form alert settings rules */}
-          <div className="md:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
-            <div>
-              <h3 className="font-bold text-slate-800 text-base">{t("Быстрая рассылка оповещений о дефицитах")}</h3>
-              <p className="text-xs text-slate-500 font-light mt-0.5">{t("Оперативная рассылка для закрытия дефицитов крови.")}</p>
+          <div className={`w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 ${isQuickAlertOpen ? 'space-y-6' : ''}`}>
+            <div 
+              onClick={() => setIsQuickAlertOpen(!isQuickAlertOpen)} 
+              className="flex justify-between items-center cursor-pointer select-none"
+            >
+              <div>
+                <h3 className="font-bold text-slate-800 text-lg">{t("Быстрая рассылка оповещений о дефицитах")}</h3>
+                <p className="text-sm text-slate-500 font-light mt-0.5">{t("Оперативная рассылка для закрытия дефицитов крови.")}</p>
+              </div>
+              <div className={`p-2 rounded-full transition-all duration-300 ${isQuickAlertOpen ? 'bg-red-50 text-red-600 rotate-90' : 'bg-slate-50 text-slate-400'}`}>
+                <ChevronRight className="w-5 h-5" />
+              </div>
             </div>
 
-            {notifySuccessMsg && (
-              <div className="p-4 bg-emerald-50 border border-emerald-250 border-emerald-200 rounded-xl text-xs text-emerald-800 leading-relaxed font-sans whitespace-pre-wrap">
-                {notifySuccessMsg}
-              </div>
-            )}
+            <AnimatePresence initial={false}>
+              {isQuickAlertOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className={isQuickAlertOpen ? "overflow-visible" : "overflow-hidden"}
+                >
+                  <div className="pt-6 border-t border-slate-100/50 space-y-6">
+                    {notifySuccessMsg && (
+                      <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-800 leading-relaxed font-sans whitespace-pre-wrap">
+                        {notifySuccessMsg}
+                      </div>
+                    )}
 
-            <form onSubmit={handleSendBroadcast} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                {/* Target blood selection */}
-                <div className="space-y-1.5 text-xs text-slate-700 font-semibold pb-3 sm:pb-0">
-                  <label>{t("Группа крови:")}</label>
-                  <div className="space-y-1 pt-1 font-medium">
-                    {['I_O', 'II_A', 'III_B', 'IV_AB'].map(bg => (
-                      <label key={bg} className="flex items-center text-xs font-semibold cursor-pointer">
-                        <input 
-                          type="checkbox"
-                          checked={notifyForm.bloodGroups.includes(bg as any)}
-                          onChange={(e) => {
-                            if (e.target.checked) setNotifyForm({ ...notifyForm, bloodGroups: [...notifyForm.bloodGroups, bg as any] });
-                            else setNotifyForm({ ...notifyForm, bloodGroups: notifyForm.bloodGroups.filter(b => b !== bg) });
-                          }}
-                          className="mr-2 rounded text-red-600 focus:ring-red-500 border-slate-300"
+                    <form onSubmit={handleSendBroadcast} className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        
+                        {/* Target blood selection */}
+                        <div className="space-y-1.5 text-sm text-slate-700 font-semibold pb-3 sm:pb-0">
+                          <label>{t("Группа крови:")}</label>
+                          <div className="space-y-1 pt-1 font-medium">
+                            {['I_O', 'II_A', 'III_B', 'IV_AB'].map(bg => (
+                              <label key={bg} className="flex items-center text-sm font-semibold cursor-pointer">
+                                <input 
+                                  type="checkbox"
+                                  checked={notifyForm.bloodGroups.includes(bg as any)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) setNotifyForm({ ...notifyForm, bloodGroups: [...notifyForm.bloodGroups, bg as any] });
+                                    else setNotifyForm({ ...notifyForm, bloodGroups: notifyForm.bloodGroups.filter(b => b !== bg) });
+                                  }}
+                                  className="mr-2 rounded text-red-600 focus:ring-red-500 border-slate-300"
+                                />
+                                {formatBloodGroup(bg as any)}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-3.5 text-sm">
+                          <div className="space-y-1">
+                            <label className="font-semibold text-slate-700">{t("Резус-фактор:")}</label>
+                            <select 
+                              value={notifyForm.rhFactor} 
+                              onChange={(e) => setNotifyForm({...notifyForm, rhFactor: e.target.value})}
+                              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white font-medium"
+                            >
+                              <option value="both">{t("Любой резус-фактор (+/-)")}</option>
+                              <option value="positive">{t("Только положительный (Rh+)")}</option>
+                              <option value="negative">{t("Только отрицательный (Rh-)")}</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="font-semibold text-slate-700">{t("Минимальный срок с последней сдачи (дней):")}</label>
+                            <input 
+                              type="number" 
+                              value={notifyForm.minDaysSinceDonation}
+                              onChange={(e) => setNotifyForm({...notifyForm, minDaysSinceDonation: e.target.value})}
+                              className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white font-medium"
+                            />
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                        <label className="flex items-start text-sm text-slate-700 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={notifyForm.excludeMedical}
+                            onChange={(e) => setNotifyForm({...notifyForm, excludeMedical: e.target.checked})}
+                            className="mt-0.5 mr-2 rounded text-red-600 focus:ring-red-500 border-slate-300"
+                          />
+                          <div>
+                            <span className="font-semibold text-slate-800 text-sm block">{t("Исключить активные медотводы")}</span>
+                            <span className="text-xs text-slate-400 block">{t("Система не побеспокоит доноров под запретом врача")}</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-start text-sm text-slate-700 cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            checked={notifyForm.excludePause}
+                            onChange={(e) => setNotifyForm({...notifyForm, excludePause: e.target.checked})}
+                            className="mt-0.5 mr-2 rounded text-red-600 focus:ring-red-500 border-slate-300"
+                          />
+                          <div>
+                            <span className="font-semibold text-slate-800 text-sm block">{t("Учитывать личные паузы доноров")}</span>
+                            <span className="text-xs text-slate-400 block">{t("Не отправлять тем, кто взял временную паузу")}</span>
+                          </div>
+                        </label>
+                      </div>
+
+                      <div className="space-y-1.5 pt-4 text-sm font-semibold">
+                        <label>{t("Предпочтительный канал доставки рассылки:")}</label>
+                        <div className="flex flex-wrap gap-4 pt-1 font-medium">
+                          {[
+                            { id: 'all', label: 'Оба канала (Push + Email)' },
+                            { id: 'push', label: 'Только Push-уведомления' },
+                            { id: 'email', label: 'Только письма на E-mail' }
+                          ].map(chan => (
+                            <label key={chan.id} className="flex items-center text-sm cursor-pointer font-semibold text-slate-700">
+                              <input 
+                                type="radio" 
+                                name="chanRadios" 
+                                checked={notifyForm.channel === chan.id}
+                                onChange={() => setNotifyForm({...notifyForm, channel: chan.id})}
+                                className="mr-1.5 text-red-600 focus:ring-red-500"
+                              />
+                              {chan.label}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 pt-4">
+                        <div className="flex justify-between items-center text-sm relative">
+                          <label className="font-semibold text-slate-700">{t("Текст извещения донорам (до 160 символов):")}</label>
+                          
+                          {/* Dynamic Templates Menu Dropdown */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsTemplatesMenuOpen(!isTemplatesMenuOpen);
+                                setIsAddingTemplate(false);
+                                setTemplateError('');
+                              }}
+                              className="bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+                            >
+                              {t("Шаблоны")} <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isTemplatesMenuOpen ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                              {isTemplatesMenuOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: 5, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 5, scale: 0.95 }}
+                                  className="absolute right-0 mt-2 w-64 bg-white border border-slate-150 rounded-2xl shadow-xl z-50 p-2.5 space-y-2"
+                                >
+                                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1.5 pt-1">
+                                    {t("Доступные шаблоны")}
+                                  </div>
+                                  
+                                  <div className={`${isAddingTemplate ? 'max-h-[96px]' : 'max-h-56'} overflow-y-auto custom-scrollbar space-y-0.5 pr-1 transition-all duration-200`}>
+                                    {templatesList.map((temp) => (
+                                      <div 
+                                        key={temp.id}
+                                        onClick={() => loadTemplateText(temp.text)}
+                                        className="flex justify-between items-center w-full h-8 text-left px-2 text-xs font-semibold rounded-xl hover:bg-red-50 hover:text-red-700 text-slate-700 cursor-pointer transition-colors group shrink-0"
+                                      >
+                                        <span className="truncate pr-2 font-bold text-slate-800 group-hover:text-red-700">{temp.name}</span>
+                                        <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                                          {temp.isCustom && (
+                                            <button
+                                              type="button"
+                                              onClick={(e) => handleDeleteCustomTemplate(temp.id, e)}
+                                              className="p-1 rounded-md text-slate-400 hover:text-red-650 hover:bg-red-50 transition-colors"
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  <div className="border-t border-slate-100 pt-2">
+                                    {!isAddingTemplate ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setIsAddingTemplate(true);
+                                          setTemplateError('');
+                                        }}
+                                        className="w-full flex items-center justify-start gap-2 px-2 py-1.5 text-xs text-red-650 font-bold hover:bg-slate-50 rounded-xl transition-colors cursor-pointer"
+                                      >
+                                        <Plus className="w-4 h-4 text-red-600" /> {t("Добавить")}
+                                      </button>
+                                    ) : (
+                                      <div className="space-y-2 px-1 pb-1">
+                                        <input
+                                          type="text"
+                                          placeholder={t("Название нового шаблона")}
+                                          value={newTemplateName}
+                                          onChange={(e) => {
+                                            setNewTemplateName(e.target.value);
+                                            setTemplateError('');
+                                          }}
+                                          className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:border-red-500 focus:outline-none"
+                                        />
+                                        <textarea
+                                          placeholder={t("Текст нового шаблона")}
+                                          value={newTemplateText}
+                                          onChange={(e) => {
+                                            setNewTemplateText(e.target.value);
+                                            setTemplateError('');
+                                          }}
+                                          rows={3}
+                                          className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg focus:border-red-500 focus:outline-none"
+                                        />
+                                        {templateError && (
+                                          <p className="text-[10px] text-red-600 font-medium leading-tight">{templateError}</p>
+                                        )}
+                                        <div className="flex gap-1.5">
+                                          <button
+                                            type="button"
+                                            onClick={handleSaveCustomTemplate}
+                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-lg text-[10px] transition-colors cursor-pointer"
+                                          >
+                                            {t("Сохранить")}
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setIsAddingTemplate(false);
+                                              setNewTemplateName('');
+                                              setNewTemplateText('');
+                                              setTemplateError('');
+                                            }}
+                                            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-1 px-2 rounded-lg text-[10px] transition-colors cursor-pointer"
+                                          >
+                                            {t("Отмена")}
+                                          </button>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+                        <textarea 
+                          required
+                          value={notifyForm.messageText}
+                          onChange={(e) => setNotifyForm({...notifyForm, messageText: e.target.value.substring(0, 500)})}
+                          placeholder={t("Донор-Алерт: Требуется срочное пополнение первой отрицательной...")}
+                          rows={4}
+                          className="w-full px-4 py-3 text-base border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                         />
-                        {formatBloodGroup(bg as any)}
-                      </label>
-                    ))}
+                      </div>
+
+                      {/* LIVE RECIPIENT COUNT INDICATOR */}
+                      <div className="p-4 bg-red-50/40 rounded-xl border border-red-100 flex justify-between items-center text-sm">
+                        <span className="font-semibold text-red-850 text-red-800">
+                          Рассылка будет отправлена строго:
+                        </span>
+                        <span className="bg-red-600 text-white font-mono font-bold text-sm px-4 py-1.5 rounded-full">
+                          {notifyPreviewCount} подходящим донорам РНПЦ
+                        </span>
+                      </div>
+
+                      <button 
+                        type="submit"
+                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition duration-150 flex items-center justify-center gap-2.5 shadow-sm text-base"
+                      >
+                        <Send className="w-5.5 h-5.5" /> ОТПРАВИТЬ СИГНАЛ БЕДСТВИЯ
+                      </button>
+
+                    </form>
                   </div>
-                </div>
-
-                <div className="space-y-3.5 text-xs">
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">{t("Резус-фактор:")}</label>
-                    <select 
-                      value={notifyForm.rhFactor} 
-                      onChange={(e) => setNotifyForm({...notifyForm, rhFactor: e.target.value})}
-                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white font-medium"
-                    >
-                      <option value="both">{t("Любой резус-фактор (+/-)")}</option>
-                      <option value="positive">{t("Только положительный (Rh+)")}</option>
-                      <option value="negative">{t("Только отрицательный (Rh-)")}</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">{t("Минимальный срок с последней сдачи (дней):")}</label>
-                    <input 
-                      type="number" 
-                      value={notifyForm.minDaysSinceDonation}
-                      onChange={(e) => setNotifyForm({...notifyForm, minDaysSinceDonation: e.target.value})}
-                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white font-medium"
-                    />
-                  </div>
-                </div>
-
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                <label className="flex items-start text-xs text-slate-700 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={notifyForm.excludeMedical}
-                    onChange={(e) => setNotifyForm({...notifyForm, excludeMedical: e.target.checked})}
-                    className="mr-2 rounded text-red-605 text-red-600 focus:ring-red-500 border-slate-300"
-                  />
-                  <div>
-                    <span className="font-semibold text-slate-800 text-xs block">{t("Исключить активные медотводы")}</span>
-                    <span className="text-[10px] text-slate-450 block text-slate-400">{t("Система не побеспокоит доноров под запретом врача")}</span>
-                  </div>
-                </label>
-
-                <label className="flex items-start text-xs text-slate-700 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={notifyForm.excludePause}
-                    onChange={(e) => setNotifyForm({...notifyForm, excludePause: e.target.checked})}
-                    className="mr-2 rounded text-red-605 text-red-600 focus:ring-red-500 border-slate-300"
-                  />
-                  <div>
-                    <span className="font-semibold text-slate-800 text-xs block">{t("Учитывать личные паузы доноров")}</span>
-                    <span className="text-[10px] text-slate-450 block text-slate-400">{t("Не отправлять тем, кто взял каникулы по учебе/отпуску")}</span>
-                  </div>
-                </label>
-              </div>
-
-              <div className="space-y-1.5 pt-4 text-xs font-semibold">
-                <label>{t("Предпочтительный канал доставки рассылки:")}</label>
-                <div className="flex flex-wrap gap-4 pt-1 font-medium">
-                  {[
-                    { id: 'all', label: 'Оба канала (Push + Email)' },
-                    { id: 'push', label: 'Только Push-уведомления' },
-                    { id: 'email', label: 'Только письма на E-mail' }
-                  ].map(chan => (
-                    <label key={chan.id} className="flex items-center text-xs cursor-pointer font-semibold text-slate-700">
-                      <input 
-                        type="radio" 
-                        name="chanRadios" 
-                        checked={notifyForm.channel === chan.id}
-                        onChange={() => setNotifyForm({...notifyForm, channel: chan.id})}
-                        className="mr-1.5 text-red-600 focus:ring-red-500"
-                      />
-                      {chan.label}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-4">
-                <div className="flex justify-between items-center text-xs">
-                  <label className="font-semibold text-slate-700">{t("Текст извещения донорам (до 160 символов):")}</label>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => loadTemplate('urgent_color')} className="text-red-700 hover:underline font-semibold text-[10px]">Шаблон: Дефицит крови</button>
-                    <button type="button" onClick={() => loadTemplate('plasma_call')} className="text-[10px] text-slate-500 hover:underline">Шаблон: Аферез плазмы</button>
-                  </div>
-                </div>
-                <textarea 
-                  required
-                  value={notifyForm.messageText}
-                  onChange={(e) => setNotifyForm({...notifyForm, messageText: e.target.value.substring(0, 500)})}
-                  placeholder={t("Донор-Алерт: Требуется срочное пополнение первой отрицательной...")}
-                  rows={4}
-                  className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                />
-              </div>
-
-              {/* LIVE RECIPIENT COUNT INDICATOR */}
-              <div className="p-4 bg-red-50/40 rounded-xl border border-red-100 flex justify-between items-center">
-                <span className="text-xs font-semibold text-red-850 text-red-800">
-                  Рассылка будет отправлена строго:
-                </span>
-                <span className="bg-red-600 text-white font-mono font-bold text-xs px-3 py-1 rounded-full">
-                  {notifyPreviewCount} подходящим донорам РНПЦ
-                </span>
-              </div>
-
-              <button 
-                type="submit"
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition duration-150 flex items-center justify-center gap-2 shadow-sm text-sm"
-              >
-                <Send className="w-5 h-5" /> ОТПРАВИТЬ СИГНАЛ БЕДСТВИЯ
-              </button>
-
-            </form>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Right sidebar: Alerts logs history */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm">{t("Журнал отправленных алертов")}</h3>
-            <p className="text-xs text-slate-500">{t("История рассылок координатора с показателями доставленных уведомлений донорам:")}</p>
-
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-              {notifHistory.map(item => (
-                <div key={item.id} className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-2.5 text-xs text-slate-600">
-                  <div className="flex justify-between items-center text-[10px] uppercase font-semibold text-slate-400">
-                    <span>{t("Телеметрия")} #{item.id}</span>
-                    <span>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</span>
-                  </div>
-                  <p className="font-semibold text-slate-850 text-slate-800 italic leading-snug">« {item.messageText} »</p>
-                  <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 text-center text-[10px] gap-1 font-semibold text-slate-500">
-                    <div>
-                      <span className="block text-red-700 font-bold">{item.pushSent} / {item.recipientsCount}</span>
-                      <span>Push</span>
-                    </div>
-                    <div>
-                      <span className="block text-red-700 font-bold">{item.emailSent} / {item.recipientsCount}</span>
-                      <span>Email</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {notifHistory.length === 0 && (
-                <p className="text-xs text-slate-450 py-12 text-center text-slate-400">{t("В этом месяце рассылок дефицита не проводилось.")}</p>
-              )}
+          <div className={`w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 ${isAlertsHistoryOpen ? 'space-y-4' : ''}`}>
+            <div 
+              onClick={() => setIsAlertsHistoryOpen(!isAlertsHistoryOpen)} 
+              className="flex justify-between items-center cursor-pointer select-none"
+            >
+              <div>
+                <h3 className="font-bold text-slate-800 text-sm">{t("Журнал отправленных алертов")}</h3>
+                <p className="text-xs text-slate-500 mt-0.5">{t("История рассылок координатора с показателями доставленных уведомлений донорам:")}</p>
+              </div>
+              <div className={`p-2 rounded-full transition-all duration-300 ${isAlertsHistoryOpen ? 'bg-red-50 text-red-600 rotate-90' : 'bg-slate-50 text-slate-400'}`}>
+                <ChevronRight className="w-5 h-5" />
+              </div>
             </div>
+
+            <AnimatePresence initial={false}>
+              {isAlertsHistoryOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-4 border-t border-slate-100 space-y-4">
+                    <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+                      {notifHistory.map(item => (
+                        <div key={item.id} className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-2.5 text-xs text-slate-600">
+                          <div className="flex justify-between items-center text-[10px] uppercase font-semibold text-slate-400">
+                            <span>{t("Телеметрия")} #{item.id}</span>
+                            <span>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</span>
+                          </div>
+                          <p className="font-semibold text-slate-850 text-slate-800 italic leading-snug">« {item.messageText} »</p>
+                          <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 text-center text-[10px] gap-1 font-semibold text-slate-500">
+                            <div>
+                              <span className="block text-red-700 font-bold">{item.pushSent} / {item.recipientsCount}</span>
+                              <span>Push</span>
+                            </div>
+                            <div>
+                              <span className="block text-red-700 font-bold">{item.emailSent} / {item.recipientsCount}</span>
+                              <span>Email</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {notifHistory.length === 0 && (
+                        <p className="text-xs text-slate-450 py-12 text-center text-slate-400">{t("В этом месяце рассылок дефицита не проводилось.")}</p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       )}
