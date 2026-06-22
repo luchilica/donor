@@ -575,10 +575,10 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                             {donor ? `${donor.lastName} ${donor.firstName[0]}.` : `Donor #${donation.donorId}`}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-slate-500 truncate max-w-[150px]">
+                        <td className="px-4 py-3 font-mono text-slate-500 truncate max-w-[150px]">
                           {center ? center.name : `Center #${donation.centerId}`}
                         </td>
-                        <td className="px-4 py-3 font-mono text-[11px]">{donation.donationDate}</td>
+                        <td className="px-4 py-3 font-mono text-[11px]">{donation.donationDate ? new Date(donation.donationDate).toLocaleDateString('ru-RU') : ''}</td>
                         <td className="px-4 py-3">
                           <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                             {donation.donationType.toUpperCase()}
@@ -641,7 +641,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                           {post.isPublished ? t('Опубл') : t('Черновик')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-mono text-[10px] text-slate-400">{post.createdAt ? new Date(post.createdAt).toLocaleDateString() : '-'}</td>
+                      <td className="px-4 py-3 font-mono text-[10px] text-slate-400">{post.createdAt ? new Date(post.createdAt).toLocaleDateString('ru-RU') : '-'}</td>
                       <td className="px-4 py-3 text-right space-x-1">
                         <button 
                           onClick={() => setEditingEntity({ type: 'news', data: post })}
@@ -689,8 +689,8 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                         {donor ? `${donor.lastName} ${donor.firstName}` : `Donor #${note.donorId}`}
                       </td>
                       <td className="px-4 py-3 text-slate-600 truncate max-w-sm">{note.reason}</td>
-                      <td className="px-4 py-3 font-mono text-slate-505 text-[11px]">{note.startDate}</td>
-                      <td className="px-4 py-3 font-mono text-slate-505 text-[11px]">{note.endDate || t('Бессрочно')}</td>
+                      <td className="px-4 py-3 font-mono text-slate-505 text-[11px]">{note.startDate ? new Date(note.startDate).toLocaleDateString('ru-RU') : ''}</td>
+                      <td className="px-4 py-3 font-mono text-slate-505 text-[11px]">{note.endDate ? new Date(note.endDate).toLocaleDateString('ru-RU') : t('Бессрочно')}</td>
                       <td className="px-4 py-3">
                         <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${note.isActive ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20' : 'bg-slate-100 text-slate-500'}`}>
                           {note.isActive ? t('Активен') : t('Снят')}

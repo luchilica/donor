@@ -12,6 +12,19 @@ import {
 } from '../types';
 import { ConfirmationModal } from './ConfirmationModal';
 
+const formatDateHuman = (dateInput: any): string => {
+  if (!dateInput) return '';
+  if (typeof dateInput === 'string' && /^\d{2}\.\d{2}\.\d{4}$/.test(dateInput)) {
+    return dateInput;
+  }
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return String(dateInput);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
 const CenterAccordionItem = ({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
@@ -72,7 +85,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const [newsList, setNewsList] = useState<News[]>([]);
   const [showNewsModal, setShowNewsModal] = useState<boolean>(false);
   const [editingNews, setEditingNews] = useState<News | null>(null);
-  const [newsForm, setNewsForm] = useState({ title: '', content: '', isPublished: true });
+  const [newsForm, setNewsForm] = useState({ title: '', content: '', isPublished: true, publishedAt: new Date().toISOString().split('T')[0] });
+  const [newsStatusFilter, setNewsStatusFilter] = useState<'all' | 'published' | 'unpublished'>('all');
+  const [newsDateFilter, setNewsDateFilter] = useState<string>('');
 
   // Needs state
   const [needsForm, setNeedsForm] = useState(
@@ -1117,7 +1132,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
                       <span className="font-bold text-slate-800 text-right">
-                        {new Date(donorCard.donor.birthDate).toLocaleDateString('ru-RU')} ({
+                        {formatDateHuman(donorCard.donor.birthDate)} ({
                           (() => {
                             const birthDate = new Date(donorCard.donor.birthDate);
                             const today = new Date();
@@ -1186,7 +1201,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           
                           return (
                             <tr key={don.id}>
-                              <td className="p-3 font-bold text-slate-800">{new Date(don.donationDate || don.date!).toLocaleDateString('ru-RU')}</td>
+                              <td className="p-3 font-bold text-slate-800">{formatDateHuman(don.donationDate || don.date!)}</td>
                               <td className="p-3">
                                 <span className="bg-red-50 text-red-600 px-2 py-1 rounded font-bold border border-red-100 uppercase text-[10px] tracking-wide inline-block">
                                   {typeLabel} <span className="opacity-70 lowercase">({paidLabel})</span>
@@ -1237,19 +1252,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <div className="space-y-2.5">
                     {donorCard.medicalNotes.map(note => (
                       <div key={note.id} className={`p-4 rounded-xl border flex justify-between items-start gap-4 ${note.isActive ? 'bg-red-50/55 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
-                        <div>
-                          <p className="text-xs font-semibold text-slate-800">{t("Причина")}: {note.reason}</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{t("Период")}: {note.startDate} — {note.endDate ? note.endDate : t('Постоянный отвод')}</p>
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-slate-800">{t("Причина")}: {note.reason}</p>
+                          <p className="text-xs text-slate-500">{t("Период")}: {note.startDate ? formatDateHuman(note.startDate) : ''} – {note.endDate ? formatDateHuman(note.endDate) : t('Постоянный отвод')}</p>
                           {note.isActive ? (
-                            <span className="text-[9px] bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded-full mt-2 inline-block">{t("Активен")}</span>
+                            <span className="text-[10px] bg-red-100 text-red-800 font-bold px-2.5 py-1 rounded-full mt-2 inline-block shadow-sm">{t("Активен")}</span>
                           ) : (
-                            <span className="text-[9px] bg-slate-200 text-slate-600 font-bold px-2 py-0.5 rounded-full mt-2 inline-block">{t("Архивный (Снят)")}</span>
+                            <span className="text-[10px] bg-slate-200 text-slate-600 font-bold px-2.5 py-1 rounded-full mt-2 inline-block">{t("Архивный (Снят)")}</span>
                           )}
                         </div>
                         {note.isActive && (
                           <button 
                             onClick={() => handleLiftMedical(note.id)}
-                            className="bg-white hover:bg-slate-100 text-slate-800 border text-[10px] font-bold px-2.5 py-1 rounded-lg"
+                            className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 cursor-pointer"
                           >
                             Снять медотвод
                           </button>
@@ -1257,7 +1272,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       </div>
                     ))}
                     {donorCard.medicalNotes.length === 0 && (
-                      <p className="text-xs text-slate-400 py-6 text-center">{t("У донора отсутствуют медотводы в истории.")}</p>
+                      <p className="text-sm text-slate-400 py-6 text-center">{t("У донора отсутствуют медотводы в истории.")}</p>
                     )}
                   </div>
                 </CenterAccordionItem>
@@ -1433,7 +1448,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                             </span>
                           )}
                         </td>
-                        <td className="p-3 font-mono">{item.lastDonationDate || 'Ни разу'}</td>
+                        <td className="p-3 font-mono">{item.lastDonationDate ? formatDateHuman(item.lastDonationDate) : 'Ни разу'}</td>
                         <td className="p-3 font-semibold text-slate-800">{item.donationsCount}</td>
                         <td className="p-3">
                           <button 
@@ -1480,7 +1495,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pt-4 border-b pb-4 border-slate-100">
                 <div>
                   <h3 className="text-lg font-bold text-slate-800">{t("Анкета кандидата на подтверждение")}: {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName}</h3>
-                  <p className="text-xs text-slate-500 mt-1">{t("Отправлено")}: {pendingDonorProfile.card.link.resubmittedAt ? new Date(pendingDonorProfile.card.link.resubmittedAt).toLocaleDateString('ru-RU') : new Date(pendingDonorProfile.card.link.createdAt).toLocaleDateString('ru-RU')}</p>
+                  <p className="text-xs text-slate-500 mt-1">{t("Отправлено")}: {pendingDonorProfile.card.link.resubmittedAt ? formatDateHuman(pendingDonorProfile.card.link.resubmittedAt) : formatDateHuman(pendingDonorProfile.card.link.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`inline-block px-3.5 py-1.5 rounded-full text-xs font-bold ${
@@ -1511,7 +1526,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
                       <span className="font-bold text-slate-800 text-right">
-                        {new Date(pendingDonorProfile.card.donor.birthDate).toLocaleDateString('ru-RU')} ({
+                        {formatDateHuman(pendingDonorProfile.card.donor.birthDate)} ({
                           (() => {
                             const birthDate = new Date(pendingDonorProfile.card.donor.birthDate);
                             const today = new Date();
@@ -1563,7 +1578,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("В системе с")}</span>
-                      <span className="font-bold text-slate-800 text-right font-mono">{new Date(pendingDonorProfile.card.donor.createdAt).toLocaleDateString('ru-RU')}</span>
+                      <span className="font-bold text-slate-800 text-right font-mono">{formatDateHuman(pendingDonorProfile.card.donor.createdAt)}</span>
                     </div>
                   </div>
                 </div>
@@ -1579,7 +1594,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <div key={note.id} className="p-3.5 rounded-xl border border-red-150 bg-red-50/30 text-xs text-slate-700">
                             <p className="font-semibold text-red-800">{t("Причина")}: {note.reason}</p>
                             <p className="text-[11px] text-slate-500 mt-1">
-                              Срок проведения отвода: с {new Date(note.startDate).toLocaleDateString('ru-RU')} по {note.endDate ? new Date(note.endDate).toLocaleDateString('ru-RU') : 'бессрочно'}
+                              Срок проведения отвода: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : 'бессрочно'}
                             </p>
                           </div>
                         ))}
@@ -1608,7 +1623,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                             {pendingDonorProfile.card.donations.map((don: any) => (
                               <tr key={don.id}>
                                 <td className="p-3 border-r border-slate-100 font-bold text-slate-800">
-                                  {new Date(don.donationDate || don.date).toLocaleDateString('ru-RU')}
+                                  {formatDateHuman(don.donationDate || don.date)}
                                 </td>
                                 <td className="p-3 border-r border-slate-100 capitalize">
                                   {don.donationType === 'blood' ? 'кровь' : don.donationType === 'plasma' ? 'плазма' : 'тромбоциты'}
@@ -1679,7 +1694,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         )}
                       </div>
                       <div className="text-xs text-slate-600 space-y-1 font-light">
-                        <p>{t("Дата отправки заявки")}: {item.link.resubmittedAt ? new Date(item.link.resubmittedAt).toLocaleDateString('ru-RU') : new Date(item.link.createdAt).toLocaleDateString('ru-RU')}</p>
+                        <p>{t("Дата отправки заявки")}: {item.link.resubmittedAt ? formatDateHuman(item.link.resubmittedAt) : formatDateHuman(item.link.createdAt)}</p>
                       </div>
                     </div>
 
@@ -2204,7 +2219,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         <div key={item.id} className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-600 flex flex-col md:flex-row md:items-center justify-between gap-4">
                           <div className="space-y-1 flex-1">
                             <div className="text-[10px] uppercase font-semibold text-slate-400">
-                              <span>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</span>
+                              <span>{formatDateHuman(item.createdAt)}</span>
                             </div>
                             <p className="font-semibold text-slate-850 text-slate-800 italic leading-snug">« {item.messageText} »</p>
                           </div>
@@ -2237,60 +2252,123 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="space-y-6"
         >
-          <div className="flex justify-between items-center">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pl-2">
+            <div className="flex-1 pr-4">
               <h3 className="font-bold text-slate-800 text-base">{t("Доска объявлений и новостей филиала")}</h3>
-              <p className="text-xs text-slate-500">{t("Эти публикации видны всем гостям и донорам на общей публичной странице проекта.")}</p>
+              <p className="text-xs text-slate-500 max-w-2xl">{t("Эти публикации видны всем гостям и донорам на общей публичной странице проекта.")}</p>
             </div>
             <button 
               onClick={() => {
                 setEditingNews(null);
-                setNewsForm({ title: '', content: '', isPublished: true });
+                setNewsForm({ title: '', content: '', isPublished: true, publishedAt: new Date().toISOString().split('T')[0] });
                 setShowNewsModal(true);
               }}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center shrink-0 w-max"
             >
               <Plus className="w-4 h-4 mr-1" /> Опубликовать новость
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {newsList.map(item => (
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-slate-500 mb-1 pl-1">{t("По статусу")}</label>
+              <select
+                value={newsStatusFilter}
+                onChange={(e) => setNewsStatusFilter(e.target.value as any)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
+              >
+                <option value="all">{t("Все")}</option>
+                <option value="published">{t("Опубликовано")}</option>
+                <option value="unpublished">{t("Ещё не опубликована")}</option>
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-semibold text-slate-500 mb-1 pl-1">{t("По дате")}</label>
+              <input
+                type="date"
+                min="2000-01-01"
+                max="9999-12-31"
+                value={newsDateFilter}
+                onChange={(e) => {
+                  let val = e.target.value;
+                  const parts = val.split('-');
+                  if (parts[0] && parts[0].length > 4) {
+                    parts[0] = parts[0].slice(0, 4);
+                    val = parts.join('-');
+                  }
+                  setNewsDateFilter(val);
+                }}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400"
+              />
+            </div>
+            {newsDateFilter && (
+              <div className="flex items-end pb-1 lg:flex-none">
+                <button 
+                  onClick={() => setNewsDateFilter('')}
+                  className="px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-xl w-full sm:w-auto mt-2 sm:mt-0 lg:h-9"
+                >
+                  Сбросить дату
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {newsList.filter(item => {
+              const nowIso = new Date().toISOString().split('T')[0];
+              const itemDateIso = item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : '';
+              const isActuallyPublished = itemDateIso && (itemDateIso <= nowIso);
+
+              if (newsStatusFilter === 'published' && !isActuallyPublished) return false;
+              if (newsStatusFilter === 'unpublished' && isActuallyPublished) return false;
+
+              if (newsDateFilter && itemDateIso !== newsDateFilter) return false;
+
+              return true;
+            }).map(item => {
+              const nowIso = new Date().toISOString().split('T')[0];
+              const itemDateIso = item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : '';
+              const isActuallyPublished = itemDateIso && itemDateIso <= nowIso;
+
+              return (
               <div key={item.id} className="bg-white p-5 rounded-2xl border border-slate-250 border-slate-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <div className="flex justify-between text-xs text-slate-400 font-semibold mb-2">
-                    <span>{t("Новость")} #{item.id}</span>
-                    <span>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Проект'}</span>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-semibold text-slate-500">{item.publishedAt ? formatDateHuman(item.publishedAt) : 'Проект'}</span>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${isActuallyPublished ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-600 border border-amber-200'}`}>
+                      {isActuallyPublished ? 'Опубликовано' : 'Ещё не опубликована'}
+                    </span>
                   </div>
                   <h4 className="font-bold text-slate-800 text-base mb-2">{item.title}</h4>
                   <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap mb-6 truncate max-h-24">{item.content}</p>
                 </div>
 
-                <div className="flex justify-between items-center pt-3 border-t">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.isPublished ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-650'}`}>
-                    {item.isPublished ? 'Опубликовано' : 'Черновик'}
-                  </span>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => {
-                        setEditingNews(item);
-                        setNewsForm({ title: item.title, content: item.content, isPublished: item.isPublished });
-                        setShowNewsModal(true);
-                      }}
-                      className="text-xs font-semibold text-slate-700 hover:underline"
-                    >
-                      Редактировать
-                    </button>
-                    <button 
-                      onClick={() => handleNewsDelete(item.id)}
-                      className="text-xs font-semibold text-red-600 hover:underline"
-                    >
-                      Удалить
-                    </button>
-                  </div>
+                <div className="flex justify-end gap-3">
+                  <button 
+                    onClick={() => {
+                      setEditingNews(item);
+                      setNewsForm({ 
+                        title: item.title, 
+                        content: item.content, 
+                        isPublished: true,
+                        publishedAt: item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+                      });
+                      setShowNewsModal(true);
+                    }}
+                    className="text-[13px] font-semibold text-slate-700 hover:underline"
+                  >
+                    Редактировать
+                  </button>
+                  <button 
+                    onClick={() => handleNewsDelete(item.id)}
+                    className="text-[13px] font-semibold text-red-600 hover:underline"
+                  >
+                    Удалить
+                  </button>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </motion.div>
       )}
@@ -2762,44 +2840,55 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
       {/* SHADCN-LIKE USER INPUT NEWS ADD DIALOG */}
       {showNewsModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
-            <button onClick={() => setShowNewsModal(false)} className="absolute right-4 top-4 p-1.5 text-slate-400">✕</button>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative border-0">
+            <button onClick={() => setShowNewsModal(false)} className="absolute right-4 top-4 p-1.5 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">✕</button>
             <h4 className="font-bold text-slate-800 text-base mb-4">{t("Публикация новости на главную")}</h4>
             <form onSubmit={handleNewsSubmit} className="space-y-3.5">
               <div className="space-y-1 text-xs">
-                <label className="font-semibold block">{t("Заголовок новости:")}</label>
+                <label className="font-semibold block text-slate-700">{t("Заголовок новости:")}</label>
                 <input 
                   type="text"
                   required
                   value={newsForm.title}
                   onChange={(e) => setNewsForm({ ...newsForm, title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-all bg-slate-50 focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1 text-xs">
-                <label className="font-semibold block">{t("Текст новости:")}</label>
+                <label className="font-semibold block text-slate-700">{t("Текст новости:")}</label>
                 <textarea 
                   required
                   value={newsForm.content}
                   onChange={(e) => setNewsForm({ ...newsForm, content: e.target.value })}
                   rows={4}
-                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-all bg-slate-50 focus:bg-white"
                 />
               </div>
 
-              <label className="flex items-center text-xs font-semibold cursor-pointer">
+              <div className="space-y-1 text-xs">
+                <label className="font-semibold block text-slate-700">{t("Дата публикации:")}</label>
                 <input 
-                  type="checkbox"
-                  checked={newsForm.isPublished}
-                  onChange={(e) => setNewsForm({ ...newsForm, isPublished: e.target.checked })}
-                  className="mr-2"
+                  type="date"
+                  required
+                  min="2000-01-01"
+                  max="9999-12-31"
+                  value={newsForm.publishedAt}
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    const parts = val.split('-');
+                    if (parts[0] && parts[0].length > 4) {
+                      parts[0] = parts[0].slice(0, 4);
+                      val = parts.join('-');
+                    }
+                    setNewsForm({ ...newsForm, publishedAt: val });
+                  }}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-red-400 focus:ring-1 focus:ring-red-400 transition-all bg-slate-50 focus:bg-white"
                 />
-                Опубликовать сразу
-              </label>
+              </div>
 
-              <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs">
+              <button type="submit" className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2">
                 Сохранить публикацию
               </button>
             </form>
@@ -2989,7 +3078,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
               </h3>
               <p className="text-xs text-slate-500 font-light mt-1">
-                Дата регистрации: {new Date(pendingDonorProfile.card.donor.createdAt).toLocaleDateString('ru-RU')}
+                Дата регистрации: {formatDateHuman(pendingDonorProfile.card.donor.createdAt)}
               </p>
             </div>
 
@@ -3005,7 +3094,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
                   <span className="font-bold text-slate-800 text-right">
-                    {new Date(pendingDonorProfile.card.donor.birthDate).toLocaleDateString('ru-RU')} ({
+                    {formatDateHuman(pendingDonorProfile.card.donor.birthDate)} ({
                       (() => {
                         const birthDate = new Date(pendingDonorProfile.card.donor.birthDate);
                         const today = new Date();
@@ -3062,7 +3151,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <div key={note.id} className="p-3.5 rounded-xl border border-red-150 bg-red-50/30 text-xs text-slate-700">
                       <p className="font-semibold text-red-800">{t("Причина")}: {note.reason}</p>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        Период: с {new Date(note.startDate).toLocaleDateString('ru-RU')} по {note.endDate ? new Date(note.endDate).toLocaleDateString('ru-RU') : 'бессрочно'}
+                        Период: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : 'бессрочно'}
                       </p>
                       {note.isActive && (
                         <span className="inline-block mt-1 bg-red-150 text-red-900 border border-red-200 text-[9px] font-bold px-2 py-0.5 rounded-full">

@@ -429,6 +429,13 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   });
 
   const filteredNews = news.filter(item => {
+    // Only show published news (where publishedAt is <= today)
+    const nowIso = new Date().toISOString().split('T')[0];
+    const itemDateIso = item.publishedAt ? new Date(item.publishedAt).toISOString().split('T')[0] : '';
+    if (!itemDateIso || itemDateIso > nowIso) {
+        return false;
+    }
+
     const center = centers.find(c => c.id === item.centerId);
     const centerName = center?.name || 'Центр переливания крови';
     

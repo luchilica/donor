@@ -509,13 +509,12 @@ app.get('/api/download/contraindications', (req, res) => {
   // GET GLOBAL NEWS
   app.get('/api/news', async (req, res) => {
     const db = await getDb();
-    const published = db.news.filter(n => n.isPublished);
-    res.json(published);
+    res.json(db.news); // Front-end will filter for guests
   });
 
   // CREATE NEWS (CENTER)
   app.post('/api/news', async (req, res) => {
-    const { title, content, isPublished, centerId, sentBy } = req.body;
+    const { title, content, isPublished, publishedAt, centerId, sentBy } = req.body;
     if (!title || !content || !centerId) {
       return res.status(400).json({ error: 'Заголовок и текст обязательны' });
     }
@@ -527,8 +526,8 @@ app.get('/api/download/contraindications', (req, res) => {
       centerId: parseInt(centerId),
       title,
       content,
-      isPublished: !!isPublished,
-      publishedAt: isPublished ? new Date().toISOString() : undefined,
+      isPublished: true, // We always treat as true and check date for status in UI
+      publishedAt: publishedAt ? new Date(publishedAt).toISOString() : new Date().toISOString(),
       createdAt: new Date().toISOString(),
       createdBy: parseInt(sentBy) || 1
     });
@@ -539,7 +538,7 @@ app.get('/api/download/contraindications', (req, res) => {
   // UPDATE NEWS (CENTER)
   app.put('/api/news/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const { title, content, isPublished } = req.body;
+    const { title, content, isPublished, publishedAt } = req.body;
 
     const db = await getDb();
     const newsIdx = db.news.findIndex(n => n.id === id);
@@ -547,10 +546,9 @@ app.get('/api/download/contraindications', (req, res) => {
 
     db.news[newsIdx].title = title || db.news[newsIdx].title;
     db.news[newsIdx].content = content || db.news[newsIdx].content;
-    const wasPublished = db.news[newsIdx].isPublished;
-    db.news[newsIdx].isPublished = isPublished !== undefined ? !!isPublished : db.news[newsIdx].isPublished;
-    if (db.news[newsIdx].isPublished && !wasPublished) {
-      db.news[newsIdx].publishedAt = new Date().toISOString();
+    
+    if (publishedAt) {
+      db.news[newsIdx].publishedAt = new Date(publishedAt).toISOString();
     }
 
     await saveDb(db);
