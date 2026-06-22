@@ -845,7 +845,15 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   </div>
                   <div>
                     <label className="block text-[10px] font-extrabold uppercase tracking-wide text-slate-450 mb-1">{t('Дата рождения')}</label>
-                    <input required type="date" value={newDonor.birthDate} onChange={e => setNewDonor({...newDonor, birthDate: e.target.value})} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-500 font-mono" />
+                    <input required type="date" value={newDonor.birthDate} onChange={e => {
+                      let val = e.target.value;
+                      const parts = val.split('-');
+                      if (parts[0] && parts[0].length > 4) {
+                        parts[0] = parts[0].slice(0, 4);
+                        val = parts.join('-');
+                      }
+                      setNewDonor({...newDonor, birthDate: val});
+                    }} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-500 font-mono" />
                   </div>
                 </div>
                 <button type="submit" className="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition duration-150 mt-3">{t('Создать карточку донора')}</button>
@@ -874,7 +882,15 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-[10px] font-extrabold uppercase tracking-wide text-slate-450 mb-1">{t('Дата забора')}</label>
-                    <input required type="date" value={newDonation.donationDate} onChange={e => setNewDonation({...newDonation, donationDate: e.target.value})} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg font-mono text-slate-550" />
+                    <input required type="date" value={newDonation.donationDate} onChange={e => {
+                      let val = e.target.value;
+                      const parts = val.split('-');
+                      if (parts[0] && parts[0].length > 4) {
+                        parts[0] = parts[0].slice(0, 4);
+                        val = parts.join('-');
+                      }
+                      setNewDonation({...newDonation, donationDate: val});
+                    }} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg font-mono text-slate-550" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-extrabold uppercase tracking-wide text-slate-450 mb-1">{t('Объем (мл)')}</label>
@@ -956,11 +972,27 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="block text-[10px] font-extrabold uppercase tracking-wide text-slate-450 mb-1">{t('Дата начала')}</label>
-                    <input required type="date" value={newHold.startDate} onChange={e => setNewHold({...newHold, startDate: e.target.value})} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-550 font-mono" />
+                    <input required type="date" value={newHold.startDate} onChange={e => {
+                      let val = e.target.value;
+                      const parts = val.split('-');
+                      if (parts[0] && parts[0].length > 4) {
+                        parts[0] = parts[0].slice(0, 4);
+                        val = parts.join('-');
+                      }
+                      setNewHold({...newHold, startDate: val});
+                    }} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-550 font-mono" />
                   </div>
                   <div>
                     <label className="block text-[10px] font-extrabold uppercase tracking-wide text-slate-450 mb-1">{t('Окончание отвода')}</label>
-                    <input type="date" value={newHold.endDate} onChange={e => setNewHold({...newHold, endDate: e.target.value})} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-rose-550 font-mono" />
+                    <input type="date" value={newHold.endDate} onChange={e => {
+                      let val = e.target.value;
+                      const parts = val.split('-');
+                      if (parts[0] && parts[0].length > 4) {
+                        parts[0] = parts[0].slice(0, 4);
+                        val = parts.join('-');
+                      }
+                      setNewHold({...newHold, endDate: val});
+                    }} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-rose-550 font-mono" />
                   </div>
                 </div>
                 <div className="flex items-center gap-2 pt-1">

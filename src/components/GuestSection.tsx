@@ -1112,7 +1112,15 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <input
                   type="date"
                   value={newsDateFilter}
-                  onChange={e => setNewsDateFilter(e.target.value)}
+                  onChange={e => {
+                    let val = e.target.value;
+                    const parts = val.split('-');
+                    if (parts[0] && parts[0].length > 4) {
+                      parts[0] = parts[0].slice(0, 4);
+                      val = parts.join('-');
+                    }
+                    setNewsDateFilter(val);
+                  }}
                   className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-400"
                 />
               </div>
@@ -1318,7 +1326,15 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           min={new Date(new Date().setFullYear(new Date().getFullYear() - 65)).toISOString().split('T')[0]}
                           max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                           value={regForm.birthDate}
-                          onChange={(e) => setRegForm({...regForm, birthDate: e.target.value})}
+                          onChange={(e) => {
+                            let val = e.target.value;
+                            const parts = val.split('-');
+                            if (parts[0] && parts[0].length > 4) {
+                              parts[0] = parts[0].slice(0, 4);
+                              val = parts.join('-');
+                            }
+                            setRegForm({...regForm, birthDate: val});
+                          }}
                           className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
                             isBirthDateInvalid() 
                               ? 'border-red-500 bg-red-50 focus:border-red-600' 

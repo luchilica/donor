@@ -1338,7 +1338,15 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       <input 
                         type="date"
                         value={pauseForm.personalPauseUntil}
-                        onChange={(e) => setPauseForm({ ...pauseForm, personalPauseUntil: e.target.value })}
+                        onChange={(e) => {
+                          let val = e.target.value;
+                          const parts = val.split('-');
+                          if (parts[0] && parts[0].length > 4) {
+                            parts[0] = parts[0].slice(0, 4);
+                            val = parts.join('-');
+                          }
+                          setPauseForm({ ...pauseForm, personalPauseUntil: val });
+                        }}
                         className="w-full px-4 py-3 text-sm md:text-base border border-slate-200 rounded-lg focus:border-red-600 focus:outline-none"
                       />
                       <span className="text-[11px] text-slate-400 block font-medium">{t("*Если оставить пустым, пауза будет считаться бессрочной")}</span>

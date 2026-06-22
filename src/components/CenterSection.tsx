@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Activity, Users, Bell, FileText, Search, Plus, 
   Trash2, X, Check, Eye, ChevronRight, Send, HelpCircle, ShieldAlert,
-  ArrowUp, ArrowDown, Edit3, Droplets, ChevronDown
+  ArrowUp, ArrowDown, Edit3, Droplets, ChevronDown, Folder, FolderOpen
 } from 'lucide-react';
 import { 
   BloodCenter, Donor, DonorCenter, Donation, MedicalNote, 
@@ -202,8 +202,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   // Alert templates state with local storage support
   const [templatesList, setTemplatesList] = useState<Array<{ id: string; name: string; text: string; isCustom?: boolean }>>(() => {
     const base = [
-      { id: 'urgent_color', name: 'Дефицит крови', text: 'Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови II(A) Rh+ и I(O) Rh+. Пожалуйста, зайдите в личный кабинет.' },
-      { id: 'plasma_call', name: 'Аферез плазмы', text: 'Донор-Алерт: Просим доноров плазмы подойти для аппаратного плазмафереза в утренние часы. Контактная регистратура: ' + (center?.phone || '') }
+      { id: 'urgent_color', name: 'Дефицит крови', text: 'Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови. Пожалуйста, придите на донацию в ближайшее время.' },
+      { id: 'plasma_call', name: 'Аферез плазмы', text: 'Донор-Алерт: Просим доноров плазмы подойти для аппаратного плазмафереза в ближайшее время.' },
+      { id: 'platelet_call', name: 'Аферез тромбоцитов', text: 'Донор-Алерт: Требуются доноры тромбоцитов. Просим вас подойти в центр крови в ближайшее время.' },
+      { id: 'granulocyte_call', name: 'Дефицит гранулоцитов', text: 'Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов! Сдача клеток крови требуется в ближайшие время. ' }
     ];
     try {
       const saved = localStorage.getItem(`donor_alert_templates_${center?.id || 'default'}`);
@@ -221,6 +223,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const [newTemplateText, setNewTemplateText] = useState('');
   const [isAddingTemplate, setIsAddingTemplate] = useState(false);
   const [templateError, setTemplateError] = useState('');
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+  const [selectedTemplateGroups, setSelectedTemplateGroups] = useState<string[]>([]);
+  const [isBaseTemplatesFolderOpen, setIsBaseTemplatesFolderOpen] = useState(false);
 
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
@@ -683,8 +688,49 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     });
   };
 
+  const getUrgentColorText = (groups: string[]) => {
+    const groupsText = groups.length > 0 
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      : '';
+    const bloodSpace = groupsText ? ' ' + groupsText : '';
+    return `Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови${bloodSpace}. Пожалуйста, придите на донацию в ближайшее время.`;
+  };
+
+  const getPlasmaCallText = (groups: string[]) => {
+    const groupsText = groups.length > 0 
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      : '';
+    const bloodSpace = groupsText ? ' ' + groupsText : '';
+    return `Донор-Алерт: Просим доноров плазмы${bloodSpace} подойти для аппаратного плазмафереза в ближайшее время.`;
+  };
+
+  const getPlateletCallText = (groups: string[]) => {
+    const groupsText = groups.length > 0 
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      : '';
+    const bloodSpace = groupsText ? ' ' + groupsText : '';
+    return `Донор-Алерт: Требуются доноры тромбоцитов${bloodSpace}. Просим вас подойти в центр крови в ближайшее время.`;
+  };
+
+  const getGranulocyteCallText = (groups: string[]) => {
+    const groupsText = groups.length > 0 
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      : '';
+    const bloodSpace = groupsText ? ' ' + groupsText : '';
+    return `Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов${bloodSpace}! Сдача клеток крови требуется в ближайшие время. `;
+  };
+
+  const getUpdatedTemplateText = (id: string, groups: string[]) => {
+    if (id === 'urgent_color') return getUrgentColorText(groups);
+    if (id === 'plasma_call') return getPlasmaCallText(groups);
+    if (id === 'platelet_call') return getPlateletCallText(groups);
+    if (id === 'granulocyte_call') return getGranulocyteCallText(groups);
+    return '';
+  };
+
   // Load alert template defaults quick
   const loadTemplateText = (text: string) => {
+    setActiveTemplateId(null);
     setNotifyForm({
       ...notifyForm,
       messageText: text
@@ -1676,7 +1722,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3, ease: 'easeOut' }}
-          className="flex flex-col gap-8 w-full"
+          className="flex flex-col gap-6 w-full"
         >
           {/* Form alert settings rules */}
           <div className={`w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 ${isQuickAlertOpen ? 'space-y-6' : ''}`}>
@@ -1812,10 +1858,23 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
                       <div className="space-y-2 pt-4">
                         <div className="flex justify-between items-center text-sm relative">
-                          <label className="font-semibold text-slate-700">{t("Текст извещения донорам (до 160 символов):")}</label>
+                          <label className="font-semibold text-slate-700">{t("Текст извещения донорам:")}</label>
                           
                           {/* Dynamic Templates Menu Dropdown */}
-                          <div className="relative">
+                          <div className="relative flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNotifyForm({ ...notifyForm, messageText: '' });
+                                setActiveTemplateId(null);
+                                setSelectedTemplateGroups([]);
+                              }}
+                              className="bg-slate-50 hover:bg-red-50 text-slate-500 hover:text-red-700 border border-slate-200 hover:border-red-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                              {t("Очистить")}
+                            </button>
+
                             <button
                               type="button"
                               onClick={() => {
@@ -1836,28 +1895,92 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                   exit={{ opacity: 0, y: 5, scale: 0.95 }}
                                   className="absolute right-0 mt-2 w-64 bg-white border border-slate-150 rounded-2xl shadow-xl z-50 p-2.5 space-y-2"
                                 >
-                                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1.5 pt-1">
-                                    {t("Доступные шаблоны")}
+                                  <div className="flex justify-between items-center px-1.5 pt-1">
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                      {t("Доступные шаблоны")}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setIsTemplatesMenuOpen(false)}
+                                      className="p-1 rounded-lg text-slate-400 hover:text-red-650 hover:bg-slate-50 transition-colors cursor-pointer"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
                                   </div>
                                   
-                                  <div className={`${isAddingTemplate ? 'max-h-[96px]' : 'max-h-56'} overflow-y-auto custom-scrollbar space-y-0.5 pr-1 transition-all duration-200`}>
-                                    {templatesList.map((temp) => (
+                                  <div className={`${isAddingTemplate ? 'max-h-[140px]' : 'max-h-72'} overflow-y-auto custom-scrollbar space-y-0.5 pr-1 transition-all duration-200`}>
+                                    {/* "Базовые шаблоны" folder item */}
+                                    <div 
+                                      onClick={() => setIsBaseTemplatesFolderOpen(!isBaseTemplatesFolderOpen)}
+                                      className="flex justify-between items-center w-full h-8 text-left px-2 text-xs font-semibold rounded-xl hover:bg-red-50 hover:text-red-700 text-slate-700 cursor-pointer transition-colors group shrink-0"
+                                    >
+                                      <div className="flex items-center gap-2 truncate">
+                                        {isBaseTemplatesFolderOpen ? (
+                                          <FolderOpen className="w-4 h-4 text-red-650 shrink-0" />
+                                        ) : (
+                                          <Folder className="w-4 h-4 text-slate-400 group-hover:text-red-650 shrink-0" />
+                                        )}
+                                        <span className="truncate font-bold text-slate-800 group-hover:text-red-700">{t("Базовые шаблоны")}</span>
+                                      </div>
+                                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 shrink-0 text-slate-400 group-hover:text-red-700 ${isBaseTemplatesFolderOpen ? 'rotate-180' : ''}`} />
+                                    </div>
+
+                                    {/* Collapsible list of basic templates with identical spacing and heights */}
+                                    {isBaseTemplatesFolderOpen && (
+                                      <div className="pl-3 border-l border-slate-100 ml-3.5 space-y-0.5 transition-all">
+                                        {templatesList.filter((t) => !t.isCustom).map((temp) => (
+                                          <div 
+                                            key={temp.id}
+                                            onClick={() => {
+                                              setActiveTemplateId(temp.id);
+                                              const defaultGroups: string[] = [];
+                                              setSelectedTemplateGroups(defaultGroups);
+                                              
+                                              let valText = '';
+                                              if (temp.id === 'urgent_color') {
+                                                valText = getUrgentColorText(defaultGroups);
+                                              } else if (temp.id === 'plasma_call') {
+                                                valText = getPlasmaCallText(defaultGroups);
+                                              } else if (temp.id === 'platelet_call') {
+                                                valText = getPlateletCallText(defaultGroups);
+                                              } else if (temp.id === 'granulocyte_call') {
+                                                valText = getGranulocyteCallText(defaultGroups);
+                                              }
+
+                                              setNotifyForm({
+                                                ...notifyForm,
+                                                messageText: valText
+                                              });
+                                              setIsTemplatesMenuOpen(false);
+                                            }}
+                                            className="flex justify-between items-center w-full h-8 text-left px-2 text-xs font-semibold rounded-xl hover:bg-red-50 hover:text-red-700 text-slate-700 cursor-pointer transition-colors group shrink-0"
+                                          >
+                                            <span className="truncate pr-2 font-bold text-slate-850 text-slate-800 group-hover:text-red-700">{temp.name}</span>
+                                            <div className="w-6 h-6 flex items-center justify-center shrink-0"></div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    {/* Render custom templates */}
+                                    {templatesList.filter((t) => t.isCustom).map((temp) => (
                                       <div 
                                         key={temp.id}
-                                        onClick={() => loadTemplateText(temp.text)}
+                                        onClick={() => {
+                                          setActiveTemplateId(null);
+                                          loadTemplateText(temp.text);
+                                        }}
                                         className="flex justify-between items-center w-full h-8 text-left px-2 text-xs font-semibold rounded-xl hover:bg-red-50 hover:text-red-700 text-slate-700 cursor-pointer transition-colors group shrink-0"
                                       >
-                                        <span className="truncate pr-2 font-bold text-slate-800 group-hover:text-red-700">{temp.name}</span>
+                                        <span className="truncate pr-2 font-bold text-slate-850 text-slate-800 group-hover:text-red-700">{temp.name}</span>
                                         <div className="w-6 h-6 flex items-center justify-center shrink-0">
-                                          {temp.isCustom && (
-                                            <button
-                                              type="button"
-                                              onClick={(e) => handleDeleteCustomTemplate(temp.id, e)}
-                                              className="p-1 rounded-md text-slate-400 hover:text-red-650 hover:bg-red-50 transition-colors"
-                                            >
-                                              <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
-                                          )}
+                                          <button
+                                            type="button"
+                                            onClick={(e) => handleDeleteCustomTemplate(temp.id, e)}
+                                            className="p-1 rounded-md text-slate-400 hover:text-red-650 hover:bg-red-50 transition-colors"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
                                         </div>
                                       </div>
                                     ))}
@@ -1937,6 +2060,94 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           rows={4}
                           className="w-full px-4 py-3 text-base border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                         />
+
+                         {/* Interactive Blood Group Builder for Basic Templates */}
+                        {activeTemplateId && ['urgent_color', 'plasma_call', 'platelet_call', 'granulocyte_call'].includes(activeTemplateId) && (
+                          <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3.5 space-y-3 mt-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-slate-700 block">
+                                {activeTemplateId === 'urgent_color' && t("Выбрать группы крови относящиеся к дефициту:")}
+                                {activeTemplateId === 'plasma_call' && t("Выбрать группы крови для срочного афереза плазмы:")}
+                                {activeTemplateId === 'platelet_call' && t("Выбрать группы крови для срочного афереза тромбоцитов:")}
+                                {activeTemplateId === 'granulocyte_call' && t("Выбрать группы крови относящиеся к дефициту гранулоцитов:")}
+                              </span>
+                              
+                              <div className="relative group">
+                                <select
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val) {
+                                      let newGroups;
+                                      if (selectedTemplateGroups.includes(val)) {
+                                        newGroups = selectedTemplateGroups.filter(g => g !== val);
+                                      } else {
+                                        newGroups = [...selectedTemplateGroups, val];
+                                      }
+                                      setSelectedTemplateGroups(newGroups);
+                                      
+                                      const newText = getUpdatedTemplateText(activeTemplateId, newGroups);
+                                      setNotifyForm(prev => ({ ...prev, messageText: newText }));
+                                      e.target.value = ""; // Reset dropdown selection
+                                    }
+                                  }}
+                                  className="appearance-none bg-white border border-slate-200 text-slate-800 text-xs rounded-xl pl-3 pr-8 py-1.5 font-bold outline-none focus:border-red-500 hover:border-slate-350 cursor-pointer shadow-xs transition-all"
+                                  defaultValue=""
+                                >
+                                  <option value="" disabled>{t("Выбрать группу...")}</option>
+                                  {['I(O) Rh+', 'I(O) Rh-', 'II(A) Rh+', 'II(A) Rh-', 'III(B) Rh+', 'III(B) Rh-', 'IV(AB) Rh+', 'IV(AB) Rh-'].map(g => (
+                                    <option key={g} value={g}>
+                                      {g} {selectedTemplateGroups.includes(g) ? "✓" : ""}
+                                    </option>
+                                  ))}
+                                </select>
+                                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                                  <ChevronDown className="w-3.5 h-3.5" />
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {selectedTemplateGroups.length > 0 ? (
+                              <div className="flex flex-wrap gap-1.5 items-center">
+                                {selectedTemplateGroups.map((g) => (
+                                  <span 
+                                    key={g} 
+                                    className="inline-flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-100 px-2.5 py-1 rounded-xl text-xs font-bold transition-all"
+                                  >
+                                    {g}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const newGroups = selectedTemplateGroups.filter(x => x !== g);
+                                        setSelectedTemplateGroups(newGroups);
+                                        const newText = getUpdatedTemplateText(activeTemplateId, newGroups);
+                                        setNotifyForm(prev => ({ ...prev, messageText: newText }));
+                                      }}
+                                      className="text-red-400 hover:text-red-700 transition-colors cursor-pointer text-sm font-bold"
+                                    >
+                                      &times;
+                                    </button>
+                                  </span>
+                                ))}
+                                
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedTemplateGroups([]);
+                                    const newText = getUpdatedTemplateText(activeTemplateId, []);
+                                    setNotifyForm(prev => ({ ...prev, messageText: newText }));
+                                  }}
+                                  className="text-[10px] text-slate-400 hover:text-red-600 font-bold underline ml-1.5 cursor-pointer"
+                                >
+                                  {t("Очистить все")}
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="text-xs text-slate-400 italic">
+                                {t("Группы не выбраны. Выберите одну или несколько групп из выпадающего списка, чтобы они автоматически появились в тексте шаблона.")}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* LIVE RECIPIENT COUNT INDICATOR */}
@@ -1945,7 +2156,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           Рассылка будет отправлена строго:
                         </span>
                         <span className="bg-red-600 text-white font-mono font-bold text-sm px-4 py-1.5 rounded-full">
-                          {notifyPreviewCount} подходящим донорам РНПЦ
+                          {notifyPreviewCount} подходящим донорам центра
                         </span>
                       </div>
 
@@ -1953,7 +2164,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         type="submit"
                         className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition duration-150 flex items-center justify-center gap-2.5 shadow-sm text-base"
                       >
-                        <Send className="w-5.5 h-5.5" /> ОТПРАВИТЬ СИГНАЛ БЕДСТВИЯ
+                        <Send className="w-5.5 h-5.5" /> ОТПРАВИТЬ РАССЫЛКУ
                       </button>
 
                     </form>
@@ -1970,7 +2181,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               className="flex justify-between items-center cursor-pointer select-none"
             >
               <div>
-                <h3 className="font-bold text-slate-800 text-sm">{t("Журнал отправленных алертов")}</h3>
+                <h3 className="font-bold text-slate-800 text-base">{t("Журнал отправленных алертов")}</h3>
                 <p className="text-xs text-slate-500 mt-0.5">{t("История рассылок координатора с показателями доставленных уведомлений донорам:")}</p>
               </div>
               <div className={`p-2 rounded-full transition-all duration-300 ${isAlertsHistoryOpen ? 'bg-red-50 text-red-600 rotate-90' : 'bg-slate-50 text-slate-400'}`}>
@@ -1990,21 +2201,17 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <div className="pt-4 border-t border-slate-100 space-y-4">
                     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
                       {notifHistory.map(item => (
-                        <div key={item.id} className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-2.5 text-xs text-slate-600">
-                          <div className="flex justify-between items-center text-[10px] uppercase font-semibold text-slate-400">
-                            <span>{t("Телеметрия")} #{item.id}</span>
-                            <span>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</span>
+                        <div key={item.id} className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs text-slate-600 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="space-y-1 flex-1">
+                            <div className="text-[10px] uppercase font-semibold text-slate-400">
+                              <span>{new Date(item.createdAt).toLocaleDateString('ru-RU')}</span>
+                            </div>
+                            <p className="font-semibold text-slate-850 text-slate-800 italic leading-snug">« {item.messageText} »</p>
                           </div>
-                          <p className="font-semibold text-slate-850 text-slate-800 italic leading-snug">« {item.messageText} »</p>
-                          <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 text-center text-[10px] gap-1 font-semibold text-slate-500">
-                            <div>
-                              <span className="block text-red-700 font-bold">{item.pushSent} / {item.recipientsCount}</span>
-                              <span>Push</span>
-                            </div>
-                            <div>
-                              <span className="block text-red-700 font-bold">{item.emailSent} / {item.recipientsCount}</span>
-                              <span>Email</span>
-                            </div>
+                          <div className="flex items-center justify-center border-t md:border-t-0 md:border-l border-slate-200/60 pt-2.5 md:pt-0 md:pl-4 shrink-0 text-center">
+                            <span className="px-3 py-1 bg-red-50 text-red-650 rounded-lg font-bold text-xs uppercase tracking-wide">
+                              {item.channel === 'all' ? 'Push+E-mail' : (item.channel === 'push' ? 'Push' : 'E-mail')}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -2213,7 +2420,15 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   required
                   max={new Date().toISOString().split('T')[0]}
                   value={donationForm.donationDate}
-                  onChange={(e) => setDonationForm({ ...donationForm, donationDate: e.target.value })}
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    const parts = val.split('-');
+                    if (parts[0] && parts[0].length > 4) {
+                      parts[0] = parts[0].slice(0, 4);
+                      val = parts.join('-');
+                    }
+                    setDonationForm({ ...donationForm, donationDate: val });
+                  }}
                   className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
               </div>
@@ -2350,7 +2565,15 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       min={new Date(new Date().setFullYear(new Date().getFullYear() - 65)).toISOString().split('T')[0]}
                       max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                       value={editDonorForm.birthDate} 
-                      onChange={e => setEditDonorForm({...editDonorForm, birthDate: e.target.value})} 
+                      onChange={e => {
+                        let val = e.target.value;
+                        const parts = val.split('-');
+                        if (parts[0] && parts[0].length > 4) {
+                          parts[0] = parts[0].slice(0, 4);
+                          val = parts.join('-');
+                        }
+                        setEditDonorForm({...editDonorForm, birthDate: val});
+                      }} 
                       className={`w-full text-sm font-bold rounded-xl px-4 py-2.5 focus:outline-none transition-colors ${
                         editDonorAgeError 
                           ? 'border-red-500 bg-red-50 focus:border-red-600 text-slate-800' 
@@ -2483,7 +2706,15 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   type="date"
                   required
                   value={medicalForm.startDate}
-                  onChange={(e) => setMedicalForm({ ...medicalForm, startDate: e.target.value })}
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    const parts = val.split('-');
+                    if (parts[0] && parts[0].length > 4) {
+                      parts[0] = parts[0].slice(0, 4);
+                      val = parts.join('-');
+                    }
+                    setMedicalForm({ ...medicalForm, startDate: val });
+                  }}
                   className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
               </div>
@@ -2507,7 +2738,15 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     type="date"
                     required
                     value={medicalForm.endDate}
-                    onChange={(e) => setMedicalForm({ ...medicalForm, endDate: e.target.value })}
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      const parts = val.split('-');
+                      if (parts[0] && parts[0].length > 4) {
+                        parts[0] = parts[0].slice(0, 4);
+                        val = parts.join('-');
+                      }
+                      setMedicalForm({ ...medicalForm, endDate: val });
+                    }}
                     className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                   />
                 </div>
@@ -2604,7 +2843,15 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     min={new Date(new Date().setFullYear(new Date().getFullYear() - 65)).toISOString().split('T')[0]}
                     max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
                     value={manualForm.birthDate} 
-                    onChange={(e) => setManualForm({...manualForm, birthDate: e.target.value})} 
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      const parts = val.split('-');
+                      if (parts[0] && parts[0].length > 4) {
+                        parts[0] = parts[0].slice(0, 4);
+                        val = parts.join('-');
+                      }
+                      setManualForm({...manualForm, birthDate: val});
+                    }} 
                     className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
                       isBirthDateInvalid() 
                         ? 'border-red-500 bg-red-50 focus:border-red-600' 
