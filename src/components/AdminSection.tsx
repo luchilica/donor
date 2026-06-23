@@ -392,34 +392,36 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                     const center = centers.find(c => c.id === user.centerId);
                     return (
                       <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-4 py-4 text-slate-400">#{user.id}</td>
-                        <td className="px-4 py-4 font-medium text-slate-900">{user.email}</td>
-                        <td className="px-4 py-4">
+                        <td className="px-4 py-4 text-slate-400 align-middle">#{user.id}</td>
+                        <td className="px-4 py-4 font-medium text-slate-900 align-middle">{user.email}</td>
+                        <td className="px-4 py-4 align-middle">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide border ${user.role === "admin" ? "bg-amber-50 text-amber-700 border-amber-200" : user.role === "center" ? "bg-indigo-50 text-indigo-700 border-indigo-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
                             {user.role.toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-4 py-4 align-middle">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide border ${user.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200"}`}>
                             {user.isActive ? t('Активен') : t('Лок')}
                           </span>
                         </td>
-                        <td className="px-4 py-4 text-slate-500 max-w-xs truncate">
+                        <td className="px-4 py-4 text-slate-500 max-w-xs truncate align-middle">
                           {user.role === 'center' ? (center ? center.name : `Center #${user.centerId}`) : '-'}
                         </td>
-                        <td className="px-4 py-4 text-right space-x-2">
-                          <button 
-                            onClick={() => setEditingEntity({ type: 'users', data: user })}
-                            className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteEntity('users', user.id)}
-                            className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                        <td className="px-4 py-4 align-middle">
+                          <div className="flex justify-end items-center gap-2">
+                            <button 
+                              onClick={() => setEditingEntity({ type: 'users', data: user })}
+                              className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteEntity('users', user.id)}
+                              className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -427,7 +429,260 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
               </tbody>
             </table>
           </div>
-        )}</motion.div>
+        )}
+
+        {/* --- CENTERS TAB --- */}
+        {activeTab === 'centers' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100/60 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 font-mono">ID</th>
+                  <th className="px-4 py-3">{t('Название')}</th>
+                  <th className="px-4 py-3">{t('E-mail')}</th>
+                  <th className="px-4 py-3">{t('Телефон')}</th>
+                  <th className="px-4 py-3 text-right">{t('Правка')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/60 text-sm">
+                {centers
+                  .filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(center => (
+                    <tr key={center.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-4 text-slate-400 align-middle">#{center.id}</td>
+                      <td className="px-4 py-4 font-medium text-slate-900 align-middle">{center.name}</td>
+                      <td className="px-4 py-4 text-slate-600 align-middle">{center.email || '-'}</td>
+                      <td className="px-4 py-4 text-slate-600 align-middle">{center.phone}</td>
+                      <td className="px-4 py-4 align-middle">
+                        <div className="flex justify-end items-center gap-2">
+                          <button 
+                            onClick={() => setEditingEntity({ type: 'centers', data: center })}
+                            className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteEntity('centers', center.id)}
+                            className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* --- DONORS TAB --- */}
+        {activeTab === 'donors' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100/60 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 font-mono">ID</th>
+                  <th className="px-4 py-3">{t('ФИО')}</th>
+                  <th className="px-4 py-3">{t('Группа Крови')}</th>
+                  <th className="px-4 py-3">{t('Телефон')}</th>
+                  <th className="px-4 py-3 text-right">{t('Правка')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/60 text-sm">
+                {donors
+                  .filter(d => `${d.lastName} ${d.firstName}`.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(donor => (
+                    <tr key={donor.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-4 text-slate-400 align-middle">#{donor.id}</td>
+                      <td className="px-4 py-4 font-medium text-slate-900 align-middle">{donor.lastName} {donor.firstName}</td>
+                      <td className="px-4 py-4 align-middle">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
+                          {donor.bloodGroup.replace('I_O', 'O(I)').replace('II_A', 'A(II)').replace('III_B', 'B(III)').replace('IV_AB', 'AB(IV)')} {donor.rhFactor === 'positive' ? 'Rh+' : 'Rh-'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-slate-600 align-middle">{donor.phone}</td>
+                      <td className="px-4 py-4 align-middle">
+                        <div className="flex justify-end items-center gap-2">
+                          <button 
+                            onClick={() => setEditingEntity({ type: 'donors', data: donor })}
+                            className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteEntity('donors', donor.id)}
+                            className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* --- DONATIONS TAB --- */}
+        {activeTab === 'donations' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100/60 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 font-mono">ID</th>
+                  <th className="px-4 py-3">{t('Донор')}</th>
+                  <th className="px-4 py-3">{t('Центр')}</th>
+                  <th className="px-4 py-3">{t('Тип')}</th>
+                  <th className="px-4 py-3">{t('Дата')}</th>
+                  <th className="px-4 py-3 text-right">{t('Правка')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/60 text-sm">
+                {donations
+                  .map(donation => {
+                    const donor = donors.find(d => d.id === donation.donorId);
+                    const center = centers.find(c => c.id === donation.centerId);
+                    return (
+                      <tr key={donation.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-4 text-slate-400 align-middle">#{donation.id}</td>
+                        <td className="px-4 py-4 font-medium text-slate-900 align-middle">{donor ? `${donor.lastName} ${donor.firstName}` : `ID: ${donation.donorId}`}</td>
+                        <td className="px-4 py-4 text-slate-600 align-middle max-w-[150px] truncate">{center ? center.name : `ID: ${donation.centerId}`}</td>
+                        <td className="px-4 py-4 align-middle">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {donation.donationType}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-slate-600 align-middle font-mono text-xs">{new Date(donation.donationDate).toLocaleDateString()}</td>
+                        <td className="px-4 py-4 align-middle">
+                          <div className="flex justify-end items-center gap-2">
+                            <button 
+                              onClick={() => setEditingEntity({ type: 'donations', data: donation })}
+                              className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteEntity('donations', donation.id)}
+                              className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* --- NEWS TAB --- */}
+        {activeTab === 'news' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100/60 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 font-mono">ID</th>
+                  <th className="px-4 py-3">{t('Заголовок')}</th>
+                  <th className="px-4 py-3">{t('Статус')}</th>
+                  <th className="px-4 py-3">{t('Дата публикации')}</th>
+                  <th className="px-4 py-3 text-right">{t('Правка')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/60 text-sm">
+                {news
+                  .filter(n => n.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                  .map(item => (
+                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-4 py-4 text-slate-400 align-middle">#{item.id}</td>
+                      <td className="px-4 py-4 font-medium text-slate-900 align-middle max-w-sm truncate">{item.title}</td>
+                      <td className="px-4 py-4 align-middle">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${item.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                          {item.isPublished ? t('Опубликовано') : t('Черновик')}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-slate-600 align-middle font-mono text-xs">{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString() : '-'}</td>
+                      <td className="px-4 py-4 align-middle">
+                        <div className="flex justify-end items-center gap-2">
+                          <button 
+                            onClick={() => setEditingEntity({ type: 'news', data: item })}
+                            className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteEntity('news', item.id)}
+                            className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* --- HOLDS TAB --- */}
+        {activeTab === 'holds' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100/60 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 font-mono">ID</th>
+                  <th className="px-4 py-3">{t('Донор')}</th>
+                  <th className="px-4 py-3">{t('Причина')}</th>
+                  <th className="px-4 py-3">{t('Сроки')}</th>
+                  <th className="px-4 py-3">{t('Статус')}</th>
+                  <th className="px-4 py-3 text-right">{t('Правка')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/60 text-sm">
+                {medicalNotes
+                  .map(note => {
+                    const donor = donors.find(d => d.id === note.donorId);
+                    return (
+                      <tr key={note.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-4 text-slate-400 align-middle">#{note.id}</td>
+                        <td className="px-4 py-4 font-medium text-slate-900 align-middle">{donor ? `${donor.lastName} ${donor.firstName}` : `ID: ${note.donorId}`}</td>
+                        <td className="px-4 py-4 text-slate-600 align-middle max-w-[200px] truncate">{note.reason}</td>
+                        <td className="px-4 py-4 text-slate-600 align-middle font-mono text-xs">
+                          {new Date(note.startDate).toLocaleDateString()} - {note.endDate ? new Date(note.endDate).toLocaleDateString() : '∞'}
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${note.isActive ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                            {note.isActive ? t('Активен') : t('Снят')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <div className="flex justify-end items-center gap-2">
+                            <button 
+                              onClick={() => setEditingEntity({ type: 'medicalNotes', data: note })}
+                              className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteEntity('medicalNotes', note.id)}
+                              className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </motion.div>
 
       {/* --- ADD SLIDE-OVER/MODAL FORMS (COMPACT, LIGHTWEIGHT) --- */}
       

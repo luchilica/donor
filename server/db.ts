@@ -1100,15 +1100,15 @@ export async function getDb(): Promise<DatabaseState> {
         dbNotifications,
         dbNotificationRecipients
       ] = await Promise.all([
-        prisma.bloodCenter.findMany(),
-        prisma.user.findMany(),
-        prisma.donor.findMany(),
-        prisma.donorCenter.findMany(),
-        prisma.donation.findMany(),
-        prisma.medicalNote.findMany(),
-        prisma.news.findMany(),
-        prisma.notification.findMany(),
-        prisma.notificationRecipient.findMany()
+        prisma.bloodCenter.findMany({ orderBy: { id: 'asc' } }),
+        prisma.user.findMany({ orderBy: { id: 'asc' } }),
+        prisma.donor.findMany({ orderBy: { id: 'asc' } }),
+        prisma.donorCenter.findMany({ orderBy: { id: 'asc' } }),
+        prisma.donation.findMany({ orderBy: { id: 'asc' } }),
+        prisma.medicalNote.findMany({ orderBy: { id: 'asc' } }),
+        prisma.news.findMany({ orderBy: { id: 'asc' } }),
+        prisma.notification.findMany({ orderBy: { id: 'asc' } }),
+        prisma.notificationRecipient.findMany({ orderBy: { id: 'asc' } })
       ]);
 
       cachedDb = {
