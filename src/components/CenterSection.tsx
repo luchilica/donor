@@ -11,6 +11,7 @@ import {
   Notification, News, BloodGroup, RhFactor, DonationType, DonorStatus, formatBloodGroup, formatRhFactor 
 } from '../types';
 import { ConfirmationModal } from './ConfirmationModal';
+import { CenterStatsDashboard } from './CenterStatsDashboard';
 
 const formatDateHuman = (dateInput: any): string => {
   if (!dateInput) return '';
@@ -936,7 +937,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           className="space-y-6"
         >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-red-50 border border-red-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-red-100/30 transition-all">
+            <div className="bg-white border border-red-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest mb-1">{t("всего доноров (активных)")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-red-600 leading-none tracking-tight">{stats.totalDonors}</span>
               
@@ -947,7 +948,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </div>
 
-            <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-emerald-100/30 transition-all">
+            <div className="bg-white border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest mb-1">{t("готовы сдать сейчас")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-emerald-600 leading-none tracking-tight">{stats.readyCount}</span>
 
@@ -957,7 +958,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </div>
 
-            <div className="bg-amber-50 border border-amber-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-amber-100/30 transition-all">
+            <div className="bg-white border border-amber-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest mb-1">{t("ожидают подтверждения")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-amber-500 leading-none tracking-tight">{stats.pendingCount}</span>
 
@@ -967,7 +968,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-blue-100/30 transition-all">
+            <div className="bg-white border border-blue-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest mb-1">{t("рассылок в этом месяце")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-blue-500 leading-none tracking-tight">{stats.notificationsThisMonth}</span>
 
@@ -1067,6 +1068,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </div>
           </div>
+          <CenterStatsDashboard center={center} stats={stats} isLoading={false} />
         </motion.div>
       )}
 
@@ -2409,12 +2411,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               const val = needsForm[bg.id as keyof typeof needsForm] as number;
               let color = 'bg-emerald-500';
               let text = 'text-emerald-700';
-              let bgC = 'bg-emerald-50/50';
-              if (val < 30) { color = 'bg-red-600'; text = 'text-red-700'; bgC = 'bg-red-50'; }
-              else if (val < 60) { color = 'bg-amber-400'; text = 'text-amber-700'; bgC = 'bg-amber-50'; }
+              let borderColor = 'border-emerald-100';
+              if (val < 30) { color = 'bg-red-600'; text = 'text-red-700'; borderColor = 'border-red-100'; }
+              else if (val < 60) { color = 'bg-amber-400'; text = 'text-amber-700'; borderColor = 'border-amber-100'; }
               
               return (
-                <div key={bg.id} className={`p-4 rounded-xl border border-slate-100 ${bgC} transition-colors`}>
+                <div key={bg.id} className={`p-4 rounded-xl border ${borderColor} bg-white shadow-sm transition-colors`}>
                   <div className="flex justify-between items-center mb-4">
                     <span className="font-bold text-slate-800 text-base">{bg.label}</span>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${text} bg-white border border-slate-100 shadow-sm`}>{bg.rh}</span>

@@ -592,6 +592,30 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     }
   }
 
+  let recoveryProgress = 100;
+  let recoveryDaysPassed = 0;
+  let recoveryDaysTotal = 0;
+  let recoveryDaysLeft = 0;
+
+  if (!readiness.ready) {
+    if (donor.lastDonationDate && donor.nextAvailableDate) {
+      const lastDate = new Date(donor.lastDonationDate).getTime();
+      const nextDate = new Date(donor.nextAvailableDate).getTime();
+      const today = new Date().getTime();
+
+      if (nextDate > lastDate) {
+        recoveryDaysTotal = Math.ceil((nextDate - lastDate) / (1000 * 60 * 60 * 24));
+        recoveryDaysPassed = Math.max(0, Math.ceil((today - lastDate) / (1000 * 60 * 60 * 24)));
+        recoveryDaysLeft = Math.max(0, Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24)));
+        recoveryProgress = Math.min(100, Math.max(0, (recoveryDaysPassed / recoveryDaysTotal) * 100));
+      } else {
+        recoveryProgress = 0;
+      }
+    } else {
+      recoveryProgress = 0;
+    }
+  }
+
   return (
     <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
       {/* Side Profile Card & Inner Panel Menu */}
@@ -976,6 +1000,66 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   {readiness.ready ? '—' : (donor.nextAvailableDate ? new Date(donor.nextAvailableDate).toLocaleDateString('ru-RU') : '—')}
                 </span>
                 <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest">{t("следующая дата")}</span>
+              </div>
+            </div>
+
+            {/* Preparation and Recovery Progress */}
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100/60 mb-6">
+                <div>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">{t("Статус восстановления")}</h3>
+                  <p className="text-xs md:text-sm text-slate-500 mt-0.5">{t("Процесс подготовки организма к следующей донации")}</p>
+                </div>
+                <div>
+                  <span className={`inline-flex items-center px-4 py-1.5 rounded-full border text-xs sm:text-sm font-semibold tracking-wide shadow-xs ${readiness.ready ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'}`}>
+                    {readiness.ready ? 'Организм готов' : 'Идет восстановление'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-4 font-sans">
+                <div className="flex justify-between items-end">
+                   <div className="flex flex-col">
+                     <span className="text-[13px] font-bold text-slate-800">{t("Уровень восстановления крови и железа")}</span>
+                     {!readiness.ready && recoveryDaysLeft > 0 && (
+                        <span className="text-xs text-slate-500 mt-1.5 font-medium bg-slate-50 px-2.5 py-1 rounded-md self-start border border-slate-200/60 leading-none">До допуска: <strong className="text-slate-700">{recoveryDaysLeft} дней</strong></span>
+                     )}
+                   </div>
+                   <div className="text-right">
+                     <span className={`text-2xl sm:text-3xl font-bold tracking-tight leading-none ${readiness.ready ? 'text-emerald-600' : 'text-amber-500'}`}>
+                       <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>{Math.round(recoveryProgress)}</motion.span>%
+                     </span>
+                   </div>
+                </div>
+                
+                <div className="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden relative shadow-inner">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${recoveryProgress}%` }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className={`h-full rounded-full ${readiness.ready ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-400 to-amber-500 relative overflow-hidden'}`}
+                  >
+                     {!readiness.ready && recoveryProgress < 100 && (
+                       <motion.div
+                         animate={{ 
+                           x: ["-100%", "200%"],
+                         }}
+                         transition={{
+                           repeat: Infinity,
+                           duration: 2.5,
+                           ease: "linear"
+                         }}
+                         className="absolute top-0 bottom-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                       />
+                     )}
+                  </motion.div>
+                </div>
+                {readiness.reason && !readiness.ready && (
+                  <div className="flex items-start gap-2.5 mt-4 p-3.5 bg-red-50 border border-red-100 rounded-xl text-xs font-semibold text-red-700 leading-relaxed shadow-sm">
+                    <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{readiness.reason}</span>
+                  </div>
+                )}
               </div>
             </div>
 
