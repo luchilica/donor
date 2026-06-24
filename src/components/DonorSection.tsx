@@ -1259,7 +1259,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               </div>
               
               <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                   <AreaChart
                     data={last12MonthsData}
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
