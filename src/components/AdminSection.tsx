@@ -19,6 +19,7 @@ import {
   PlusCircle
 } from 'lucide-react';
 import { User, BloodCenter, Donor, Donation, MedicalNote, DonorCenter } from '../types';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface AdminSectionProps {
   token: string;
@@ -121,6 +122,28 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
     status: 'pending' as any
   });
 
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    onConfirm: () => void;
+    variant?: 'danger' | 'success' | 'warning' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const requestConfirm = (options: Omit<typeof confirmConfig, 'isOpen'>) => {
+    setConfirmConfig({
+      ...options,
+      isOpen: true
+    });
+  };
+
   const loadAllData = async () => {
     setLoading(true);
     setError(null);
@@ -156,29 +179,38 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
     setTimeout(() => setSuccessMessage(null), 3500);
   };
 
-  const handleDeleteEntity = async (entityName: string, id: number) => {
-    if (!window.confirm(t('Вы уверены, что хотите удалить эту запись?'))) return;
-    try {
-      const res = await fetch('/api/admin/delete-entity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token
-        },
-        body: JSON.stringify({ entityName, id })
-      });
-      if (res.ok) {
-        showSuccess(t('Запись удалена'));
-        loadAllData();
-      } else {
-        const data = await res.json();
-        alert(data.error || 'Deletion failed');
+  const handleDeleteEntity = (entityName: string, id: number) => {
+    requestConfirm({
+      title: t('Подтверждение удаления'),
+      message: t('Вы уверены, что хотите удалить эту запись?'),
+      variant: 'danger',
+      confirmText: t('Удалить'),
+      cancelText: t('Отмена'),
+      onConfirm: async () => {
+        setIsSaving(true);
+        try {
+          const res = await fetch('/api/admin/delete-entity', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({ entityName, id })
+          });
+          if (res.ok) {
+            showSuccess(t('Запись удалена'));
+            loadAllData();
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Deletion failed');
+          }
+        } catch (err: any) {
+          alert(err.message || 'Network error');
+        } finally {
+          setIsSaving(false);
+        }
       }
-    } catch (err: any) {
-      alert(err.message || 'Network error');
-    } finally {
-      setIsSaving(false);
-    }
+    });
   };
 
   const handleUpdateEntity = async (entityName: string, entity: any) => {
@@ -1522,6 +1554,20 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
           </motion.div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        variant={confirmConfig.variant}
+        confirmText={confirmConfig.confirmText}
+        cancelText={confirmConfig.cancelText}
+        onConfirm={() => {
+          confirmConfig.onConfirm();
+          setConfirmConfig(p => ({ ...p, isOpen: false }));
+        }}
+        onCancel={() => setConfirmConfig(p => ({ ...p, isOpen: false }))}
+      />
     </div>
   );
 }

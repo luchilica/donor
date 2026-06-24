@@ -1813,18 +1813,40 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           </button>
                         )}
                         {(a.status === 'pending' || a.status === 'confirmed') && (
-                          <button 
-                            onClick={async () => {
-                                await fetch(`${apiBase}/appointments/${a.id}`, {
-                                    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
-                                });
-                                loadAppointments();
-                                refreshDashboard();
-                            }}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
-                          >
-                            <Check className="w-4 h-4 mr-1" /> Завершена
-                          </button>
+                          <>
+                            <button 
+                              onClick={async () => {
+                                  await fetch(`${apiBase}/appointments/${a.id}`, {
+                                      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
+                                  });
+                                  loadAppointments();
+                                  refreshDashboard();
+                              }}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
+                            >
+                              <Check className="w-4 h-4 mr-1" /> Завершена
+                            </button>
+                            <button 
+                              onClick={() => {
+                                  requestConfirm({
+                                      title: 'Отклонить запись?',
+                                      message: `Вы уверены, что хотите отклонить запись донора ${a.donorName} на донацию?`,
+                                      variant: 'danger',
+                                      confirmText: 'Отклонить',
+                                      cancelText: 'Отмена',
+                                      onConfirm: async () => {
+                                          await fetch(`${apiBase}/appointments/${a.id}`, {
+                                              method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'cancelled'})
+                                          });
+                                          loadAppointments();
+                                      }
+                                  });
+                              }}
+                              className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
+                            >
+                              Отклонить
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>

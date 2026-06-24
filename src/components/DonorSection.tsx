@@ -430,9 +430,20 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
         return;
     }
 
+    if (!readiness.ready) {
+        alert(readiness.reason || t('Запись недоступна из-за действующего отвода или периода восстановления'));
+        return;
+    }
+
     const link = links.find(l => l.centerId === appointmentForm.centerId);
     if (!link || link.status !== 'confirmed') {
         alert(t('Вы должны быть прикреплены к выбранному центру крови'));
+        return;
+    }
+
+    const apptTime = appointmentForm.appointmentTime || '10:00';
+    if (apptTime < '09:00' || apptTime > '17:00') {
+        alert(t('Запись возможна только в рабочее время с 09:00 до 17:00'));
         return;
     }
 
@@ -1091,9 +1102,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="flex justify-between items-end">
                    <div className="flex flex-col">
                      <span className="text-[13px] font-bold text-slate-800">{t("Уровень восстановления крови и железа")}</span>
-                     {!readiness.ready && recoveryDaysLeft > 0 && (
-                        <span className="text-xs text-slate-500 mt-1.5 font-medium bg-slate-50 px-2.5 py-1 rounded-md self-start border border-slate-200/60 leading-none">До допуска: <strong className="text-slate-700">{recoveryDaysLeft} дней</strong></span>
-                     )}
+                     {/* {!readiness.ready && recoveryDaysLeft > 0 && (
+                         <span className="text-xs text-slate-500 mt-1.5 font-medium bg-slate-50 px-2.5 py-1 rounded-md self-start border border-slate-200/60 leading-none">До допуска: <strong className="text-slate-700">{recoveryDaysLeft} дней</strong></span>
+                      )} */}
                    </div>
                    <div className="text-right">
                      <span className={`text-2xl sm:text-3xl font-bold tracking-tight leading-none ${readiness.ready ? 'text-emerald-600' : 'text-amber-500'}`}>
@@ -1601,16 +1612,28 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                           </div>
                           
                           {isConfirmed && (
-                            <div className="mt-2">
+                            <div className="mt-2 relative inline-block group">
                               <button
+                                disabled={!readiness.ready}
                                 onClick={() => {
+                                  if (!readiness.ready) return;
                                   setAppointmentForm({ ...appointmentForm, centerId: link.centerId });
                                   setShowAppointmentModal(true);
                                 }}
-                                className="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                                  readiness.ready 
+                                    ? 'bg-red-100 hover:bg-red-200 text-red-700 cursor-pointer' 
+                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-75'
+                                }`}
                               >
                                 Записаться на донацию
                               </button>
+                              {!readiness.ready && (
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 text-white text-[11px] leading-normal p-2.5 rounded-lg shadow-xl z-50 text-center font-normal">
+                                  <span>Запись недоступна: {readiness.reason || 'действует медотвод или период восстановления'}</span>
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
@@ -1714,7 +1737,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <button disabled={isSaving || false} 
                   type="submit"
                   className="disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs duration-200"
-                >{isSaving ? '...' : '<Plus className="w-4 h-4" /> Отправить анкету'}</button>
+                >{isSaving ? '...' : <><Plus className="w-4 h-4" /> {t("Отправить анкету")}</>}</button>
               </form>
             </div>
           </motion.div>
@@ -2032,10 +2055,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       <label className="block text-sm font-bold text-slate-700 mb-1">Время</label>
                       <input 
                         type="time"
+                        min="09:00"
+                        max="17:00"
                         value={appointmentForm.appointmentTime}
                         onChange={e => setAppointmentForm({ ...appointmentForm, appointmentTime: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                       />
+                      <p className="text-[10px] text-slate-500 mt-1">Доступное время для записи: с 09:00 до 17:00</p>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Тип донации</label>

@@ -394,6 +394,30 @@ app.get('/api/download/contraindications', (req, res) => {
       if (donorId) {
         setTimeout(() => recalculateDonorStats(donorId).catch(console.error), 200);
       }
+    } else if (entityName === 'donationAppointments' && entity.status === 'completed') {
+      const appt = collection.find((item: any) => item.id === id);
+      if (appt) {
+        // Check if a donation already exists for this appointment
+        const donationExists = db.donations.find(d => d.donorId === appt.donorId && d.donationDate === appt.appointmentDate && d.centerId === appt.centerId);
+        
+        if (!donationExists) {
+          const nextDonationId = db.donations.length > 0 ? Math.max(...db.donations.map(d => d.id)) + 1 : 1;
+          db.donations.push({
+            id: nextDonationId,
+            donorId: appt.donorId,
+            centerId: appt.centerId,
+            donationDate: appt.appointmentDate,
+            donationType: appt.donationType,
+            isPaid: false, // Default
+            volumeMl: 450, // Default
+            createdAt: new Date().toISOString()
+          });
+          const donorId = parseInt(appt.donorId);
+          if (donorId) {
+            setTimeout(() => recalculateDonorStats(donorId).catch(console.error), 200);
+          }
+        }
+      }
     }
 
     await saveDb(db);
@@ -1541,6 +1565,23 @@ app.get('/api/download/contraindications', (req, res) => {
     const db = await getDb();
     const { donorId, centerId, appointmentDate, appointmentTime, donationType } = req.body;
     
+    const donor = db.donors.find(d => d.id === parseInt(donorId));
+    if (!donor) return res.status(404).json({ error: 'Донор не найден' });
+
+    const medicalNotes = db.medicalNotes.filter(m => m.donorId === donor.id);
+    const link = db.donorCenters.find(lc => lc.donorId === donor.id && lc.centerId === parseInt(centerId));
+    const todayStr = new Date().toISOString().split('T')[0];
+    const readiness = isDonorReady(donor, todayStr, medicalNotes, link?.status === 'confirmed');
+
+    if (!readiness.ready) {
+      return res.status(400).json({ error: readiness.reason || 'Запись на донацию невозможна из-за действующего отвода или периода восстановления' });
+    }
+
+    const apptTime = appointmentTime || '10:00';
+    if (apptTime < '09:00' || apptTime > '17:00') {
+      return res.status(400).json({ error: 'Запись возможна только в рабочее время с 09:00 до 17:00' });
+    }
+
     if (!db.donationAppointments) db.donationAppointments = [];
     const newId = db.donationAppointments.length > 0 ? Math.max(...db.donationAppointments.map(a => a.id)) + 1 : 1;
     
