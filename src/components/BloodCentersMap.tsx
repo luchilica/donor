@@ -267,9 +267,9 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
               className: 'custom-leaflet-user-marker',
               html: `
                 <div class="relative flex items-center justify-center">
-                  <span class="absolute inline-flex h-8 w-8 animate-ping rounded-full bg-blue-400 opacity-60"></span>
-                  <div class="relative flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 border-2 border-white shadow-lg">
-                    <div class="h-2 w-2 rounded-full bg-white"></div>
+                  <span class="absolute inline-flex h-10 w-10 animate-ping rounded-full bg-blue-400 opacity-60"></span>
+                  <div class="relative flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 border-2 border-white shadow-lg text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   </div>
                 </div>
               `,
@@ -315,6 +315,8 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
             if (window.confirm(t("Для определения вашего местоположения на карте приложению требуется доступ к геолокации. Разрешить?"))) {
               requestGeo();
             }
+          } else if (result.state === 'denied') {
+            alert(t("Доступ к геолокации запрещен в настройках браузера. Пожалуйста, разрешите доступ для этого сайта."));
           } else {
             requestGeo();
           }

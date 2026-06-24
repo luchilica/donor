@@ -53,7 +53,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
       {/* 1. Inventory Status */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm flex flex-col">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 hover:border-red-200 transition-all cursor-default">
         <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-4 h-4 text-red-500" />
             <h3 className="text-base font-bold text-slate-800 tracking-tight">{t("Запасы крови")}</h3>
@@ -81,7 +81,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       </motion.div>
 
       {/* 2. Conversion/Alerts */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }} className="bg-white p-6 rounded-2xl border border-indigo-100 shadow-sm flex flex-col">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }} className="bg-white p-6 rounded-2xl border border-indigo-100 shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 hover:border-indigo-200 transition-all cursor-default">
         <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4 text-indigo-500" />
             <h3 className="text-base font-bold text-slate-800 tracking-tight">{t("Эффективность оповещений")}</h3>
@@ -99,7 +99,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       </motion.div>
       
       {/* 3. Suspensions */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 hover:border-slate-300 transition-all cursor-default">
         <div className="flex items-center gap-2 mb-4">
             <PieChart className="w-4 h-4 text-slate-500" />
             <h3 className="text-base font-bold text-slate-800 tracking-tight">{t("Медотводы")}</h3>
@@ -120,7 +120,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       </motion.div>
 
       {/* 4. Planner */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col hover:shadow-md hover:-translate-y-1 hover:border-slate-300 transition-all cursor-default">
         <h3 className="text-base font-bold text-slate-800 tracking-tight mb-4">{t("Планер загрузки")}</h3>
         <div className="grid grid-cols-7 gap-1 mb-3">
           {(stats?.weeklyLoad || []).map((day, i) => (
