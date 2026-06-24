@@ -109,7 +109,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
         <div className="text-xs space-y-1 mt-auto">
           {(stats?.suspensionBreakdown || []).map((item, i) => (
              <div key={i} className="flex justify-between items-center text-slate-600">
-               <span className='flex items-center gap-1.5'><div className={`w-1.5 h-1.5 rounded-full ${item.color}`}></div>{item.label}</span>
+               <span className='flex items-center gap-1.5'><div className={`w-1.5 h-1.5 rounded-full ${item.color}`}></div>{t(item.label)}</span>
                <span className="font-bold text-slate-900">{item.value}%</span>
              </div>
           ))}

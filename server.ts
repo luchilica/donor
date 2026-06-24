@@ -924,37 +924,35 @@ app.get('/api/download/contraindications', (req, res) => {
     // Suspension breakdown
     const todayForMedical = new Date();
     todayForMedical.setHours(0,0,0,0);
-    const activeNotes = db.medicalNotes.filter(m => {
-       if (!m.isActive) return false;
-       if (!confirmedDonors.some(d => d.id === m.donorId)) return false;
-       const start = new Date(m.startDate);
-       start.setHours(0,0,0,0);
-       if (start > todayForMedical) return false;
-       if (m.endDate) {
-           const end = new Date(m.endDate);
-           end.setHours(23,59,59,999);
-           if (end < todayForMedical) return false;
-       }
-       return true;
-    });
-    const reasonCounts: Record<string, number> = {};
-    activeNotes.forEach(m => {
-       const shortReason = m.reason.length > 20 ? m.reason.substring(0, 20) + '...' : m.reason;
-       reasonCounts[shortReason] = (reasonCounts[shortReason] || 0) + 1;
-    });
-    
-    const colors = ['bg-rose-500', 'bg-slate-400', 'bg-indigo-400', 'bg-amber-400', 'bg-emerald-500'];
-    let cIdx = 0;
-    const suspensionBreakdown = Object.keys(reasonCounts).map(r => {
-        const val = Math.round((reasonCounts[r] / activeNotes.length) * 100);
-        const col = colors[cIdx % colors.length];
-        cIdx++;
-        return { label: r, value: val, color: col };
-    }).sort((a,b) => b.value - a.value).slice(0, 4);
 
-    if (suspensionBreakdown.length === 0) {
-        suspensionBreakdown.push({ label: 'Нет медотводов', value: 100, color: 'bg-emerald-400' });
+    const donorsWithSuspensionsCount = confirmedDonors.filter(d => {
+       const donorNotes = db.medicalNotes.filter(m => m.donorId === d.id && m.isActive);
+       return donorNotes.some(m => {
+          const start = new Date(m.startDate);
+          start.setHours(0,0,0,0);
+          if (start > todayForMedical) return false;
+          if (m.endDate) {
+              const end = new Date(m.endDate);
+              end.setHours(23,59,59,999);
+              if (end < todayForMedical) return false;
+          }
+          return true;
+       });
+    }).length;
+
+    const totalDonorsCount = confirmedDonors.length;
+    let hasSuspensionPercent = 0;
+    let noSuspensionPercent = 100;
+
+    if (totalDonorsCount > 0) {
+       hasSuspensionPercent = Math.round((donorsWithSuspensionsCount / totalDonorsCount) * 100);
+       noSuspensionPercent = 100 - hasSuspensionPercent;
     }
+
+    const suspensionBreakdown = [
+       { label: 'Есть медотводы', value: hasSuspensionPercent, color: 'bg-rose-500' },
+       { label: 'Нет медотводов', value: noSuspensionPercent, color: 'bg-emerald-500' }
+    ];
 
     // Weekly load (based on actual appointments for the next 7 days)
     const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
