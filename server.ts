@@ -925,9 +925,13 @@ app.get('/api/download/contraindications', (req, res) => {
     const todayForMedical = new Date();
     todayForMedical.setHours(0,0,0,0);
 
-    const donorsWithSuspensionsCount = confirmedDonors.filter(d => {
+    let permanentCount = 0;
+    let temporaryCount = 0;
+    let noSuspensionCount = 0;
+
+    confirmedDonors.forEach(d => {
        const donorNotes = db.medicalNotes.filter(m => m.donorId === d.id && m.isActive);
-       return donorNotes.some(m => {
+       const activeNotes = donorNotes.filter(m => {
           const start = new Date(m.startDate);
           start.setHours(0,0,0,0);
           if (start > todayForMedical) return false;
@@ -938,20 +942,34 @@ app.get('/api/download/contraindications', (req, res) => {
           }
           return true;
        });
-    }).length;
+
+       if (activeNotes.length === 0) {
+          noSuspensionCount++;
+       } else if (activeNotes.some(m => !m.endDate)) {
+          permanentCount++;
+       } else {
+          temporaryCount++;
+       }
+    });
 
     const totalDonorsCount = confirmedDonors.length;
-    let hasSuspensionPercent = 0;
-    let noSuspensionPercent = 100;
+    let permPercent = 0;
+    let tempPercent = 0;
+    let nonePercent = 100;
 
     if (totalDonorsCount > 0) {
-       hasSuspensionPercent = Math.round((donorsWithSuspensionsCount / totalDonorsCount) * 100);
-       noSuspensionPercent = 100 - hasSuspensionPercent;
+       permPercent = Math.round((permanentCount / totalDonorsCount) * 100);
+       tempPercent = Math.round((temporaryCount / totalDonorsCount) * 100);
+       nonePercent = 100 - (permPercent + tempPercent);
+       if (nonePercent < 0) {
+          nonePercent = 0;
+       }
     }
 
     const suspensionBreakdown = [
-       { label: 'Есть медотводы', value: hasSuspensionPercent, color: 'bg-rose-500' },
-       { label: 'Нет медотводов', value: noSuspensionPercent, color: 'bg-emerald-500' }
+       { label: 'Постоянный медотвод', value: permPercent, color: 'bg-red-500' },
+       { label: 'Временный медотвод', value: tempPercent, color: 'bg-amber-500' },
+       { label: 'Нет медотводов', value: nonePercent, color: 'bg-emerald-500' }
     ];
 
     // Weekly load (based on actual appointments for the next 7 days)

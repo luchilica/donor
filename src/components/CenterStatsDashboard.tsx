@@ -97,20 +97,42 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       </motion.div>
       
       {/* 3. Suspensions */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4 flex flex-col">
-        <div className="flex items-center gap-2 mb-4">
-            <h3 className="font-bold text-slate-800 text-lg">{t("Медотводы")}</h3>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+              <h3 className="font-bold text-slate-800 text-lg">{t("Медотводы")}</h3>
+          </div>
+          
+          {/* Detailed multi-segment colored progress bar */}
+          <div className="w-full bg-slate-100 h-3 rounded-full flex overflow-hidden mb-6 shadow-inner border border-slate-200/50">
+            {(stats?.suspensionBreakdown || []).map((item, i) => (
+              <motion.div 
+                key={i} 
+                className={`${item.color} h-full cursor-pointer hover:brightness-105 transition-all relative group`} 
+                initial={{ width: 0 }}
+                animate={{ width: `${item.value}%` }}
+                transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                style={{ width: `${item.value}%` }}
+              >
+                {/* Tooltip on hover */}
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-10 font-medium">
+                  {t(item.label)}: {item.value}%
+                </span>
+              </motion.div>
+            ))}
+          </div>
         </div>
-        <div className="w-full bg-slate-100 h-2 rounded-full flex overflow-hidden mb-4">
+
+        <div className="text-xs space-y-2 mt-auto pt-4 border-t border-slate-50">
           {(stats?.suspensionBreakdown || []).map((item, i) => (
-            <div key={i} className={`${item.color} h-full`} style={{ width: `${item.value}%` }}></div>
-          ))}
-        </div>
-        <div className="text-xs space-y-1 mt-auto">
-          {(stats?.suspensionBreakdown || []).map((item, i) => (
-             <div key={i} className="flex justify-between items-center text-slate-600">
-               <span className='flex items-center gap-1.5'><div className={`w-1.5 h-1.5 rounded-full ${item.color}`}></div>{t(item.label)}</span>
-               <span className="font-bold text-slate-900">{item.value}%</span>
+             <div key={i} className="flex justify-between items-center text-slate-600 hover:bg-slate-50/50 p-1 rounded-lg transition-colors">
+               <span className='flex items-center gap-2 font-medium'>
+                 <div className={`w-2.5 h-2.5 rounded-full ${item.color} shadow-sm`} />
+                 {t(item.label)}
+               </span>
+               <span className="font-bold text-slate-900 bg-slate-100/80 px-2 py-0.5 rounded-md min-w-[36px] text-center">
+                 {item.value}%
+               </span>
              </div>
           ))}
         </div>
