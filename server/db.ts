@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
 import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, BloodGroup, RhFactor, DonationType, DonationAppointment } from '../src/types';
+import { isDonorReady } from '../src/utils/intervals.js';
 
 let dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
@@ -1270,6 +1271,12 @@ export async function getDb(): Promise<DatabaseState> {
         }
       });
 
+      // Ensure any non-ready donor has an active medical note added
+      const ensuredNotes = ensureMedicalNotesForNotReadyDonors(cachedDb);
+      if (ensuredNotes) {
+        notesChanged = true;
+      }
+
       // Seed valid initial appointments if empty (as requested)
       if (cachedDb.donationAppointments.length === 0 && cachedDb.donors.length > 0 && cachedDb.centers.length > 0) {
         // Try to find a donor that has a confirmed link to a center
@@ -1396,6 +1403,13 @@ export async function getDb(): Promise<DatabaseState> {
           notesChanged = true;
         }
       });
+
+      // Ensure any non-ready donor has an active medical note added
+      const ensuredNotes = ensureMedicalNotesForNotReadyDonors(cachedDb);
+      if (ensuredNotes) {
+        notesChanged = true;
+      }
+
       if (notesChanged) {
         saveDb(JSON.parse(JSON.stringify(cachedDb))).catch(console.error);
       }
@@ -1789,3 +1803,92 @@ export async function saveDb(state: DatabaseState): Promise<void> {
   // Always write locally as secondary fallback / dual sync
   saveState(state);
 }
+
+export function ensureMedicalNotesForNotReadyDonors(state: DatabaseState): boolean {
+  if (!state.donors) return false;
+  if (!state.medicalNotes) state.medicalNotes = [];
+  if (!state.donorCenters) state.donorCenters = [];
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const today = new Date(todayStr);
+  let changed = false;
+
+  state.donors.forEach(donor => {
+    // Only process active donors
+    if (donor.status !== 'active') return;
+
+    // Get all medical notes for this donor
+    const notes = state.medicalNotes.filter(m => m.donorId === donor.id);
+    
+    // Check if there is an active medical note already
+    const hasActiveMedical = notes.some(note => {
+      if (!note.isActive) return false;
+      const start = new Date(note.startDate);
+      if (start > today) return false;
+      if (!note.endDate) return true; // Permanent
+      const end = new Date(note.endDate);
+      return end >= today;
+    });
+
+    if (hasActiveMedical) {
+      // Already has an active medical note
+      return;
+    }
+
+    // Call isDonorReady with confirmed ties = true so we only check medical criteria
+    const readiness = isDonorReady(donor, todayStr, notes, true);
+    
+    if (!readiness.ready) {
+      // Determine the reason and duration
+      let reason = readiness.reason || 'Временный медотвод';
+      let startDate = todayStr;
+      let endDate: string | null = null;
+
+      if (donor.weight < 55) {
+        reason = 'Временный медотвод: Вес меньше 55 кг';
+        const end = new Date(today.getTime());
+        end.setDate(end.getDate() + 180);
+        endDate = end.toISOString().split('T')[0];
+      } else if (readiness.reason && readiness.reason.includes('Возраст')) {
+        reason = 'Постоянный медотвод: Возрастные ограничения (18-65 лет)';
+        endDate = null;
+      } else if (donor.personalPause) {
+        reason = `Временный медотвод: Личная пауза донора (${donor.personalPauseNote || 'Временно не могу сдавать'})`;
+        endDate = donor.personalPauseUntil || null;
+      } else if (donor.nextAvailableDate) {
+        reason = 'Временный медотвод: Период восстановления после донации';
+        startDate = donor.lastDonationDate || todayStr;
+        endDate = donor.nextAvailableDate;
+      }
+
+      // Find center to associate with
+      const donorTies = state.donorCenters.filter(dc => dc.donorId === donor.id && dc.status === 'confirmed');
+      const centerId = donorTies.length > 0 ? donorTies[0].centerId : (state.centers && state.centers.length > 0 ? state.centers[0].id : 1);
+
+      // Generate a new ID
+      const nextId = state.medicalNotes.length > 0 ? Math.max(...state.medicalNotes.map(m => m.id)) + 1 : 1;
+
+      const newNote: MedicalNote = {
+        id: nextId,
+        donorId: donor.id,
+        centerId: centerId,
+        createdBy: 1, // System
+        reason: reason,
+        startDate: startDate,
+        endDate: endDate,
+        isActive: true,
+        liftedAt: null,
+        liftedBy: null,
+        liftNote: null,
+        createdAt: new Date().toISOString()
+      };
+
+      state.medicalNotes.push(newNote);
+      changed = true;
+      console.log(`Auto-created medical note for donor ${donor.lastName} ${donor.firstName} (ID: ${donor.id}): ${reason}`);
+    }
+  });
+
+  return changed;
+}
+
