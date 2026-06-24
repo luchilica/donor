@@ -741,7 +741,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-col gap-1">
+        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-row md:flex-col overflow-x-auto gap-2 md:gap-1 scrollbar-hide">
           {[
             { id: 'dashboard', label: 'Рабочий стол', icon: Home },
             { id: 'profile', label: 'Профиль', icon: User },
@@ -757,12 +757,12 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <button
                 key={it.id}
                 onClick={() => { setActiveMenu(it.id as any); }}
-                className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition duration-150 relative ${isActive ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-500 font-bold hover:bg-slate-50'}`}
+                className={`w-auto min-w-max md:w-full flex items-center px-4 py-3 rounded-xl text-left transition duration-150 relative min-h-[48px] md:min-h-0 ${isActive ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-500 font-bold hover:bg-slate-50'}`}
               >
-                <Icon className={`w-4 h-4 mr-3 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+                <Icon className={`w-4 h-4 mr-3 md:mr-3 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
                 <span className="text-sm leading-none">{it.label}</span>
                 {it.id === 'notifications' && unreadCount > 0 && (
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full border-2 border-white shadow-sm" />
+                  <span className="absolute right-4 md:right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full border-2 border-white shadow-sm" />
                 )}
               </button>
             );
@@ -788,7 +788,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 {!isEditingProfile && (
                   <button 
                     onClick={handleStartEdit}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors min-h-[44px] md:min-h-0"
                   >
                     <User className="w-4 h-4" />
                     Редактировать
@@ -875,7 +875,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         required
                         value={profileForm.phone} 
                         onChange={handlePhoneChange}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-base md:text-sm min-h-[44px] md:min-h-0 font-bold text-slate-800 focus:outline-none focus:border-red-500"
                       />
                     </div>
                     <div>
@@ -949,14 +949,14 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     <button 
                       type="button"
                       onClick={handleCancelEdit}
-                      className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors"
+                      className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors min-h-[44px] md:min-h-0"
                     >
                       Отмена
                     </button>
                     <button 
                       type="submit"
                       disabled={isSaving}
-                      className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                     >
                       {isSaving ? 'Сохранение...' : 'Сохранить изменения'}
                     </button>
@@ -1545,7 +1545,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="pt-2 border-t border-slate-100">
                   <button disabled={isSaving || false} 
                     type="submit"
-                    className="disabled:opacity-50 disabled:cursor-not-allowed bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition duration-150 shadow-xs"
+                    className="disabled:opacity-50 disabled:cursor-not-allowed bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition duration-150 shadow-xs min-h-[44px] md:min-h-0"
                   >{isSaving ? '...' : 'Сохранить'}</button>
                 </div>
               </form>
@@ -1736,7 +1736,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
                 <button disabled={isSaving || false} 
                   type="submit"
-                  className="disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs duration-200"
+                  className="disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm px-5 py-2.5 rounded-xl transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 shadow-xs duration-200 min-h-[44px] md:min-h-0"
                 >{isSaving ? '...' : <><Plus className="w-4 h-4" /> {t("Отправить анкету")}</>}</button>
               </form>
             </div>
@@ -1850,7 +1850,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="pt-2">
                   <button disabled={isSaving || false} 
                     type="submit"
-                    className="disabled:opacity-50 disabled:cursor-not-allowed w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center"
+                    className="disabled:opacity-50 disabled:cursor-not-allowed w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center min-h-[44px] md:min-h-0"
                   >{isSaving ? 'Сохранение...' : 'Сохранить изменения'}</button>
                 </div>
               </form>
@@ -1977,7 +1977,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   </div>
                 </div>
                 <div className="pt-4 border-t border-slate-50">
-                  <button type="submit" disabled={isSaving} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                  <button type="submit" disabled={isSaving} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0">
                     {isSaving ? 'Обновление...' : 'Обновить пароль'}
                   </button>
                 </div>
@@ -2076,7 +2076,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       </select>
                     </div>
                     <div className="pt-4 flex justify-end">
-                      <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-sm transition-colors">
+                      <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-sm transition-colors min-h-[44px] md:min-h-0">
                         Записаться
                       </button>
                     </div>

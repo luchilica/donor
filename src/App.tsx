@@ -283,7 +283,7 @@ export default function App() {
       </div>
 
       {/* Main Core Navigation Header */}
-      <header className="bg-white border-b border-slate-100 py-4 px-6 shadow-xs sticky top-0 z-40">
+      <header className="bg-white border-b border-slate-100 pt-4 pb-4 md:pt-4 md:pb-4 safe-header px-6 shadow-xs sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2 select-none cursor-pointer" onClick={() => setView('home')}>
             <Heart className="w-6.5 h-6.5 text-red-650 text-red-600 fill-red-600" />
@@ -297,13 +297,13 @@ export default function App() {
             <div className="flex items-center bg-slate-100 p-1 rounded-xl shadow-xs dark:bg-slate-800">
               <button
                 onClick={() => setLanguage('RU')}
-                className={`px-2 py-1 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'RU' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                className={`px-3 py-3 md:px-2 md:py-1 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'RU' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
               >
                 RU
               </button>
               <button
                 onClick={() => setLanguage('BY')}
-                className={`px-2 py-1 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'BY' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                className={`px-3 py-3 md:px-2 md:py-1 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'BY' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
               >
                 BY
               </button>
@@ -313,7 +313,7 @@ export default function App() {
             <button
               onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
               id="theme-toggle-btn"
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition duration-150 flex items-center justify-center shadow-xs cursor-pointer dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              className="p-3 md:p-2 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition duration-150 flex items-center justify-center shadow-xs cursor-pointer dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               title={theme === 'light' ? t("Включить ночной режим") : t("Включить дневной режим")}
             >
               {theme === 'light' ? (
@@ -327,7 +327,7 @@ export default function App() {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => setView('dashboard')}
-                  className="w-9 h-9 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors cursor-pointer border border-red-200"
+                  className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors cursor-pointer border border-red-200"
                   title={t("Личный кабинет")}
                 >
                   <User className="w-5 h-5" />
@@ -337,7 +337,7 @@ export default function App() {
                 </div>
                 <button 
                   onClick={handleLogout}
-                  className="bg-slate-100 hover:bg-slate-200 hover:text-red-700 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl transition duration-150 flex items-center shadow-xs"
+                  className="bg-slate-100 hover:bg-slate-200 hover:text-red-700 text-slate-700 font-bold text-xs px-4 py-3 md:py-2 rounded-xl transition duration-150 flex items-center shadow-xs min-h-[44px] md:min-h-0"
                 >
                   <LogOut className="w-4 h-4 mr-1.5" />
                   {t("Выйти")}
@@ -346,10 +346,10 @@ export default function App() {
             ) : (
               <button 
                 onClick={() => window.dispatchEvent(new Event('openAuth'))}
-                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200"
+                className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200"
                 title={t("Войти в кабинет")}
               >
-                <User className="w-5 h-5" />
+                <User className="w-5 h-5 md:w-5 md:h-5" />
               </button>
             )}
           </div>
@@ -409,7 +409,7 @@ export default function App() {
 
       {/* Aesthetic multi-column footer layout (matching screenshot & responsive) */}
       {(view === 'home' || !session) && (
-        <footer className="bg-white border-t border-slate-100 py-12 px-6 text-sm text-slate-500 select-none">
+        <footer className="bg-white border-t border-slate-100 pt-12 pb-12 md:pb-12 safe-footer px-6 text-sm text-slate-500 select-none">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 pb-8 border-b border-slate-100">
               {/* Column 1: Brand, Доноры, Двухканальная система */}

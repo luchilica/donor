@@ -484,7 +484,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             <p className="text-lg text-rose-100 font-light mb-8 max-w-2xl">
               «Донор-Алерт» – современная система оповещения доноров. Мы связываем региональные центры переливания крови РБ с донорами для мгновенного закрытия экстренных дефицитов.
             </p>
-            <div className="flex flex-wrap gap-4 mb-8">
+            <div className="flex flex-col md:flex-row gap-4 mb-8">
               {!session ? (
                 <>
                   <button 
@@ -498,14 +498,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       setRegConfirmPassword('');
                       setShowAuthModal('register');
                     }}
-                    className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
+                    className="w-full md:w-auto justify-center bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
                   >
                     <Heart className="w-5 h-5 mr-2" />
                     Стать донором
                   </button>
                   <button 
                     onClick={() => setShowAuthModal('login')}
-                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
+                    className="w-full md:w-auto justify-center bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
                   >
                     <User className="w-5 h-5 mr-2" />
                     Личный кабинет
@@ -514,7 +514,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               ) : (
                 <button 
                   onClick={() => window.dispatchEvent(new Event('goToDashboard'))}
-                  className="bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center"
+                  className="w-full md:w-auto justify-center bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
                 >
                   <User className="w-5 h-5 mr-2" />
                   Перейти в личный кабинет
@@ -583,31 +583,31 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
         <div className="flex border-b border-slate-200 overflow-x-auto whitespace-nowrap gap-1 pb-1">
           <button 
           onClick={() => setActiveTab('home')}
-          className={`px-5 py-3 font-medium transition-colors border-b-2 text-sm ${activeTab === 'home' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+          className={`px-5 py-4 md:py-3 min-h-[48px] md:min-h-0 font-medium transition-colors border-b-2 text-base md:text-sm ${activeTab === 'home' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
         >
           Главная
         </button>
         <button 
           onClick={() => setActiveTab('info')}
-          className={`px-5 py-3 font-medium transition-colors border-b-2 text-sm ${activeTab === 'info' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+          className={`px-5 py-4 md:py-3 min-h-[48px] md:min-h-0 font-medium transition-colors border-b-2 text-base md:text-sm ${activeTab === 'info' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
         >
           Памятка донору
         </button>
         <button 
           onClick={() => setActiveTab('docs')}
-          className={`px-5 py-3 font-medium transition-colors border-b-2 text-sm ${activeTab === 'docs' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+          className={`px-5 py-4 md:py-3 min-h-[48px] md:min-h-0 font-medium transition-colors border-b-2 text-base md:text-sm ${activeTab === 'docs' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
         >
           Необходимые документы
         </button>
         <button 
           onClick={() => setActiveTab('centers')}
-          className={`px-5 py-3 font-medium transition-colors border-b-2 text-sm ${activeTab === 'centers' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+          className={`px-5 py-4 md:py-3 min-h-[48px] md:min-h-0 font-medium transition-colors border-b-2 text-base md:text-sm ${activeTab === 'centers' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
         >
           Центры крови РБ ({centers.length})
         </button>
         <button 
           onClick={() => setActiveTab('news')}
-          className={`px-5 py-3 font-medium transition-colors border-b-2 text-sm ${activeTab === 'news' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
+          className={`px-5 py-4 md:py-3 min-h-[48px] md:min-h-0 font-medium transition-colors border-b-2 text-base md:text-sm ${activeTab === 'news' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}
         >
           Новости центров ({news.length})
         </button>
@@ -1307,7 +1307,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <button 
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                 >
                   {loginLoading ? 'Авторизация...' : 'Войти в кабинет'}
                 </button>
@@ -1530,7 +1530,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
                     <button 
                       type="submit"
-                      className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm"
+                      className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm min-h-[44px] md:min-h-0"
                     >
                       Далее к мед. параметрам
                     </button>
@@ -1648,7 +1648,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       <button 
                         type="submit"
                         disabled={regLoading}
-                        className="w-2/3 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-3 rounded-xl transition duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-2/3 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-3 rounded-xl transition duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                       >
                         {regLoading ? 'Отправка...' : 'Отправить анкету'}
                       </button>
@@ -1698,7 +1698,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <button 
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                 >
                   {loginLoading ? 'Отправка...' : 'Отправить код'}
                 </button>
@@ -1800,7 +1800,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 <button 
                   type="submit"
                   disabled={loginLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 flex items-center justify-center text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                 >
                   {loginLoading ? 'Сохранение...' : 'Сбросить пароль'}
                 </button>
@@ -1813,7 +1813,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       type="button"
                       onClick={handleResendCode}
                       disabled={loginLoading}
-                      className="text-red-600 hover:text-red-700 font-semibold hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="text-red-600 hover:text-red-700 font-semibold hover:underline disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                     >
                       Отправить код повторно
                     </button>

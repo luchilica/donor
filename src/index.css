@@ -229,3 +229,25 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #64748b; /* slate-500 */
 }
+
+/* Safe area inset utilities for mobile */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .pt-safe {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .pl-safe {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+  .pr-safe {
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  .safe-header {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+  .safe-footer {
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  }
+}

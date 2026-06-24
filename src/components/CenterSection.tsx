@@ -921,7 +921,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           <p className="text-xs text-slate-500 mt-0.5">{t("Тел")}: {center.phone}</p>
         </div>
 
-        <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1 flex-wrap">
+        <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1 overflow-x-auto max-w-full scrollbar-hide flex-nowrap md:flex-wrap">
           {[
             { id: 'stats', label: 'Показатели', icon: Activity },
             { id: 'donors', label: 'Доноры', icon: Users },
@@ -936,7 +936,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <button
                 key={menu.id}
                 onClick={() => { setActiveMenu(menu.id as any); setSelectedDonorId(null); setDonorCard(null); }}
-                className={`flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold transition ${activeMenu === menu.id ? 'bg-red-600 text-white shadow-sm' : 'text-slate-650 hover:bg-slate-50 text-slate-600'}`}
+                className={`flex-shrink-0 flex items-center px-3.5 py-2 rounded-lg text-xs font-semibold transition ${activeMenu === menu.id ? 'bg-red-600 text-white shadow-sm' : 'text-slate-650 hover:bg-slate-50 text-slate-600'}`}
               >
                 <Icon className="w-3.5 h-3.5 mr-1.5" />
                 {menu.label}
@@ -1126,7 +1126,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <div className="flex flex-wrap gap-2.5">
                 <button 
                   onClick={handleOpenEditDonor}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs px-4 py-2 rounded-xl flex items-center"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs px-4 py-2 rounded-xl flex items-center min-h-[44px] md:min-h-0"
                 >
                   <Edit3 className="w-4 h-4 mr-1" /> Редактировать данные донора
                 </button>
@@ -2192,7 +2192,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                           <button
                                             type="button"
                                             onClick={handleSaveCustomTemplate}
-                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-lg text-[10px] transition-colors cursor-pointer"
+                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-2 rounded-lg text-[10px] transition-colors cursor-pointer min-h-[44px] md:min-h-0"
                                           >
                                             {t("Сохранить")}
                                           </button>
@@ -2327,7 +2327,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
                       <button 
                         type="submit" disabled={isSaving}
-                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition duration-150 flex items-center justify-center gap-2.5 shadow-sm text-base"
+                        className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition duration-150 flex items-center justify-center gap-2.5 shadow-sm text-base min-h-[44px] md:min-h-0"
                       >{isSaving ? 'Подождите...' : '<Send className="w-5.5 h-5.5" /> ОТПРАВИТЬ РАССЫЛКУ'}</button>
 
                     </form>
@@ -2538,7 +2538,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             <button
               onClick={handleNeedsSubmit}
               disabled={needsSaving}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs flex items-center transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs flex items-center transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
             >
               {needsSaving ? 'Сохранение...' : (needsSuccess ? 'Сохранено!' : 'Сохранить изменения')}
             </button>
@@ -2622,7 +2622,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </button>
                 <button 
                   type="submit" disabled={isSaving} 
-                  className="w-2/3 bg-red-650 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl"
+                  className="w-2/3 bg-red-650 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl min-h-[44px] md:min-h-0"
                 >{isSaving ? 'Подождите...' : 'Отклонить заявку'}</button>
               </div>
             </form>
@@ -2706,7 +2706,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 />
               </div>
 
-              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs">{isSaving ? 'Подождите...' : 'Записать в базу и пересчитать сроки'}</button>
+              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Записать в базу и пересчитать сроки'}</button>
             </form>
           </div>
         </div>
@@ -2818,7 +2818,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                   <div>
                     <label className="block text-xs font-bold text-slate-500 mb-1">Телефон <span className="text-red-500">*</span></label>
-                    <input required type="tel" value={editDonorForm.phone} onChange={handleEditDonorPhoneChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500" />
+                    <input required type="tel" value={editDonorForm.phone} onChange={handleEditDonorPhoneChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-base md:text-sm min-h-[44px] md:min-h-0 font-bold text-slate-800 focus:outline-none focus:border-red-500" />
                   </div>
                   <div className="relative group/field">
                     <label className="block text-xs font-bold text-slate-500 mb-1 flex items-center justify-between">
@@ -2893,7 +2893,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <button type="button" onClick={() => setShowEditDonorModal(false)} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
                     Отмена
                   </button>
-                  <button type="submit" disabled={isSaving} className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade">{isSaving ? 'Подождите...' : 'Сохранить изменения'}</button>
+                  <button type="submit" disabled={isSaving} className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Сохранить изменения'}</button>
                 </div>
               </form>
             </div>
@@ -2972,7 +2972,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </div>
               )}
 
-              <button type="submit" disabled={isSaving} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">{isSaving ? 'Подождите...' : 'Накладывать медотвод'}</button>
+              <button type="submit" disabled={isSaving} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Накладывать медотвод'}</button>
             </form>
           </div>
         </div>
@@ -3028,7 +3028,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 />
               </div>
 
-              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2">{isSaving ? 'Подождите...' : 'Сохранить публикацию'}</button>
+              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2 min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Сохранить публикацию'}</button>
             </form>
           </div>
         </div>
@@ -3189,7 +3189,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <input type="text" required value={manualForm.password} onChange={(e) => setManualForm({...manualForm, password: e.target.value})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl font-mono focus:border-red-500 focus:outline-none text-red-700 bg-red-50" />
               </div>
 
-              <button type="submit" disabled={isSaving} className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm">{isSaving ? 'Подождите...' : 'Создать профиль донора (Подтвержден на месте)'}</button>
+              <button type="submit" disabled={isSaving} className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Создать профиль донора (Подтвержден на месте)'}</button>
             </form>
           </div>
         </div>

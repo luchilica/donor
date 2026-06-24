@@ -440,7 +440,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
         <button
           onClick={handleZoomIn}
           type="button"
-          className="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-200/80 rounded-xl shadow-md transition-all cursor-pointer font-bold text-lg focus:outline-none"
+          className="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-200/80 rounded-xl shadow-md transition-all cursor-pointer font-bold text-lg focus:outline-none min-h-[44px] md:min-h-0"
           title="Приблизить"
         >
           <Plus size={18} className="stroke-[2.5]" />
@@ -448,7 +448,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
         <button
           onClick={handleZoomOut}
           type="button"
-          className="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-200/80 rounded-xl shadow-md transition-all cursor-pointer font-bold text-lg focus:outline-none"
+          className="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-200/80 rounded-xl shadow-md transition-all cursor-pointer font-bold text-lg focus:outline-none min-h-[44px] md:min-h-0"
           title="Отдалить"
         >
           <Minus size={18} className="stroke-[2.5]" />

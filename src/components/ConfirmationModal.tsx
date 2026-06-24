@@ -48,7 +48,7 @@ export function ConfirmationModal({
         <div className="flex gap-3">
           <button 
             onClick={onCancel}
-            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl transition duration-150 text-sm"
+            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-3 rounded-xl transition duration-150 text-sm min-h-[44px] md:min-h-0"
           >
             {cancelText}
           </button>
