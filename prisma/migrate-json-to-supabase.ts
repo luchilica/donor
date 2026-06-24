@@ -18,6 +18,7 @@ async function main() {
 
   // Clear existing tables in reverse dependency order to avoid foreign key violations
   console.log('Cleaning existing database tables...');
+  await prisma.donationAppointment.deleteMany({});
   await prisma.notificationRecipient.deleteMany({});
   await prisma.notification.deleteMany({});
   await prisma.medicalNote.deleteMany({});
@@ -231,6 +232,25 @@ async function main() {
     }
   }
 
+  // 10. Donation Appointments
+  if (data.donationAppointments && data.donationAppointments.length > 0) {
+    console.log(`Migrating ${data.donationAppointments.length} donation appointments...`);
+    for (const item of data.donationAppointments) {
+      await prisma.donationAppointment.create({
+        data: {
+          id: item.id,
+          donorId: item.donorId,
+          centerId: item.centerId,
+          appointmentDate: new Date(item.appointmentDate),
+          appointmentTime: item.appointmentTime,
+          donationType: item.donationType,
+          status: item.status,
+          createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+        }
+      });
+    }
+  }
+
   // No SMS Templates to migrate
 
   // Reset the PostgreSQL sequences for auto-increment fields to prevent future registration key collisions
@@ -244,7 +264,8 @@ async function main() {
     { name: 'medical_notes', seq: 'medical_notes' },
     { name: 'news', seq: 'news' },
     { name: 'notifications', seq: 'notifications' },
-    { name: 'notification_recipients', seq: 'notification_recipients' }
+    { name: 'notification_recipients', seq: 'notification_recipients' },
+    { name: 'donation_appointments', seq: 'donation_appointments' }
   ];
 
   for (const table of tables) {

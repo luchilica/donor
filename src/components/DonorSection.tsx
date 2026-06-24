@@ -49,6 +49,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   // Received notifications list states
   const [notificationsHistory, setNotificationsHistory] = useState<any[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
+  const unreadCount = notificationsHistory.filter(n => !n.isRead).length;
 
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
@@ -85,11 +86,33 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     }
   };
 
+  const markAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    try {
+      await fetch(`${apiBase}/donor/notifications/read-all`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ donorId: donor.id })
+      });
+      // Update local state
+      setNotificationsHistory(prev => prev.map(n => ({ ...n, isRead: true })));
+    } catch (e) {
+      console.error('Error marking as read', e);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchNotificationsHistory();
+  }, [donor.id]);
+
   React.useEffect(() => {
     if (activeMenu === 'notifications') {
-      fetchNotificationsHistory();
+      markAllAsRead();
     }
-  }, [activeMenu, donor.id]);
+  }, [activeMenu]);
 
   // Additional link center state
   const [selectedCenterId, setSelectedCenterId] = useState('');
@@ -247,6 +270,15 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const [editSuccess, setEditSuccess] = useState('');
   const [editError, setEditError] = useState('');
 
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+  const [appointmentForm, setAppointmentForm] = useState({
+      centerId: 0,
+      appointmentDate: '',
+      appointmentTime: '10:00',
+      donationType: 'blood'
+  });
+  const [appointmentSuccess, setAppointmentSuccess] = useState('');
+
   React.useEffect(() => {
     setProfileForm({
       lastName: donor.lastName,
@@ -389,6 +421,41 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   };
 
   // Resubmit a rejected center application
+  const handleAppointmentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!appointmentForm.centerId || !appointmentForm.appointmentDate) return;
+
+    if (donor.status !== 'active') {
+        alert(t('Вы должны быть подтвержденным донором для записи'));
+        return;
+    }
+
+    const link = links.find(l => l.centerId === appointmentForm.centerId);
+    if (!link || link.status !== 'confirmed') {
+        alert(t('Вы должны быть прикреплены к выбранному центру крови'));
+        return;
+    }
+
+    try {
+        const res = await fetch(`${apiBase}/appointments`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                donorId: donor.id,
+                centerId: appointmentForm.centerId,
+                appointmentDate: appointmentForm.appointmentDate,
+                appointmentTime: appointmentForm.appointmentTime,
+                donationType: appointmentForm.donationType
+            })
+        });
+        if (res.ok) {
+            setShowAppointmentModal(false);
+            setAppointmentSuccess('Вы успешно записаны на донацию. Ждем вас!');
+            setTimeout(() => setAppointmentSuccess(''), 5000);
+        }
+    } catch {}
+  };
+
   const handleResubmit = (centerId: number) => {
     requestConfirm({
       title: 'Переподать заявку?',
@@ -679,10 +746,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <button
                 key={it.id}
                 onClick={() => { setActiveMenu(it.id as any); }}
-                className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition duration-150 ${isActive ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-500 font-bold hover:bg-slate-50'}`}
+                className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition duration-150 relative ${isActive ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-500 font-bold hover:bg-slate-50'}`}
               >
                 <Icon className={`w-4 h-4 mr-3 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
                 <span className="text-sm leading-none">{it.label}</span>
+                {it.id === 'notifications' && unreadCount > 0 && (
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full border-2 border-white shadow-sm" />
+                )}
               </button>
             );
           })}
@@ -1529,6 +1599,20 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                                 : `Подан: ${statusDate}`}
                             </span>
                           </div>
+                          
+                          {isConfirmed && (
+                            <div className="mt-2">
+                              <button
+                                onClick={() => {
+                                  setAppointmentForm({ ...appointmentForm, centerId: link.centerId });
+                                  setShowAppointmentModal(true);
+                                }}
+                                className="bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+                              >
+                                Записаться на донацию
+                              </button>
+                            </div>
+                          )}
                         </div>
 
                         <div className="shrink-0 flex items-center justify-center">
@@ -1671,8 +1755,15 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   {notificationsHistory.map((notif: any) => (
                     <div 
                       key={notif.id} 
-                      className="p-3 rounded-xl border border-slate-100 bg-slate-50/40 hover:bg-slate-50/85 transition-all space-y-1.5 shadow-sm"
+                      className={`p-3 rounded-xl border transition-all space-y-1.5 shadow-sm relative ${
+                        !notif.isRead 
+                          ? 'border-red-100 bg-red-50/20 hover:bg-red-50/40' 
+                          : 'border-slate-100 bg-slate-50/40 hover:bg-slate-50/85'
+                      }`}
                     >
+                      {!notif.isRead && (
+                        <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full shadow-sm" />
+                      )}
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-0.5">
                           <span className="inline-block px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-extrabold bg-rose-50 text-rose-600 border border-rose-100">
@@ -1896,6 +1987,79 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
         )}
       </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {showAppointmentModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.95 }}
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden relative border border-slate-100"
+              >
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-slate-800">Запись на донацию</h3>
+                    <button onClick={() => setShowAppointmentModal(false)} className="text-slate-400 hover:text-slate-600">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                  
+                  {appointmentSuccess && (
+                      <div className="mb-4 p-3 bg-emerald-50 text-emerald-700 text-sm font-semibold rounded-xl">
+                          {appointmentSuccess}
+                      </div>
+                  )}
+
+                  <form onSubmit={handleAppointmentSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Дата *</label>
+                      <input 
+                        type="date"
+                        required
+                        min={new Date().toISOString().split('T')[0]}
+                        value={appointmentForm.appointmentDate}
+                        onChange={e => setAppointmentForm({ ...appointmentForm, appointmentDate: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Время</label>
+                      <input 
+                        type="time"
+                        value={appointmentForm.appointmentTime}
+                        onChange={e => setAppointmentForm({ ...appointmentForm, appointmentTime: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Тип донации</label>
+                      <select 
+                        value={appointmentForm.donationType}
+                        onChange={e => setAppointmentForm({ ...appointmentForm, donationType: e.target.value as any })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+                      >
+                        <option value="blood">Цельная кровь</option>
+                        <option value="plasma">Плазма</option>
+                        <option value="platelets">Тромбоциты</option>
+                      </select>
+                    </div>
+                    <div className="pt-4 flex justify-end">
+                      <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-sm transition-colors">
+                        Записаться
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
+            </motion.div>
+        )}
+      </AnimatePresence>
 
       <ConfirmationModal 
         isOpen={confirmConfig.isOpen}

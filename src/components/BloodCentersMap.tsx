@@ -250,6 +250,10 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
       return;
     }
 
+    if (!window.confirm("Разрешить доступ к вашей геопозиции, чтобы показать вас на карте?")) {
+      return;
+    }
+
     const requestGeo = () => {
       setLocating(true);
       navigator.geolocation.getCurrentPosition(

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../LanguageContext.tsx';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Heart, Activity, Users, Bell, FileText, Search, Plus, 
+  Heart, Activity, Users, Bell, FileText, Search, Plus, Calendar,
   Trash2, X, Check, Eye, ChevronRight, Send, HelpCircle, ShieldAlert,
   ArrowUp, ArrowDown, Edit3, Droplets, ChevronDown, Folder, FolderOpen
 } from 'lucide-react';
@@ -70,9 +70,10 @@ interface CenterSectionProps {
 export default function CenterSection({ center, onRefresh, apiBase, token }: CenterSectionProps) {
   const { t } = useLanguage();
 
-  const [activeMenu, setActiveMenu] = useState<'stats' | 'donors' | 'pending' | 'notify' | 'news' | 'needs'>('stats');
+  const [activeMenu, setActiveMenu] = useState<'stats' | 'donors' | 'pending' | 'appointments' | 'notify' | 'news' | 'needs'>('stats');
   
   // Dashboard states
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalDonors: 0,
     readyCount: 0,
@@ -314,6 +315,16 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     } catch {}
   };
 
+  const loadAppointments = async () => {
+    try {
+      const res = await fetch(`${apiBase}/appointments?centerId=${center.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAppointments(data);
+      }
+    } catch {}
+  };
+
   const loadDonorCard = async (donorId: number) => {
     try {
       const res = await fetch(`${apiBase}/center/donors/${donorId}?centerId=${center.id}`);
@@ -359,6 +370,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       loadDonors();
     } else if (activeMenu === 'pending') {
       loadPending();
+    } else if (activeMenu === 'appointments') {
+      loadAppointments();
     }
   }, [activeMenu, donorSearch, filterBgs, filterRhs, filterReadiness]);
 
@@ -899,11 +912,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           <p className="text-xs text-slate-500 mt-0.5">{t("Тел")}: {center.phone}</p>
         </div>
 
-        <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1">
+        <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1 flex-wrap">
           {[
             { id: 'stats', label: 'Показатели', icon: Activity },
             { id: 'donors', label: 'Доноры', icon: Users },
             { id: 'pending', label: 'Заявки', icon: HelpCircle },
+            { id: 'appointments', label: 'Записи', icon: Calendar },
             { id: 'notify', label: 'Рассылка', icon: Bell },
             { id: 'news', label: 'Новости', icon: FileText },
             { id: 'needs', label: 'Дефициты', icon: Droplets }
@@ -1729,6 +1743,99 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </>
           )}
+        </motion.div>
+      )}
+
+      {/* MENU: APPOINTMENTS */}
+      {activeMenu === 'appointments' && (
+        <motion.div
+          key="appointments"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="space-y-6"
+        >
+          <div>
+            <h3 className="font-bold text-slate-800 text-base">{t("Записи на донацию")}</h3>
+            <p className="text-xs text-slate-500">{t("Здесь отображаются записи доноров в ваш центр крови на выбранные даты.")}</p>
+          </div>
+            
+          <div className="space-y-8">
+            {Object.entries(
+              appointments.reduce((acc, a) => {
+                if (!acc[a.appointmentDate]) acc[a.appointmentDate] = [];
+                acc[a.appointmentDate].push(a);
+                return acc;
+              }, {} as Record<string, any[]>)
+            ).sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()).map(([date, dayAppts]: [string, any]) => (
+              <div key={date} className="space-y-3.5">
+                <h4 className="font-bold text-slate-700 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 flex justify-between items-center">
+                  <span>{new Date(date).toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">{dayAppts.length} чел.</span>
+                </h4>
+                <div className="space-y-3.5">
+                  {dayAppts.map(a => (
+                    <div key={a.id} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-slate-900 text-sm">{a.donorName}</h4>
+                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-bold ${
+                              a.status === 'pending' ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                              a.status === 'confirmed' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                              a.status === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                              'bg-slate-100 text-slate-700 border border-slate-200'
+                          }`}>
+                            {a.status === 'pending' ? 'Ожидает' : a.status === 'confirmed' ? 'Подтверждена' : a.status === 'completed' ? 'Завершена' : a.status === 'cancelled' ? 'Отменена' : 'Неявка'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-600 space-y-1 font-light flex items-center gap-2">
+                          <span className="font-semibold text-slate-700">{a.appointmentTime || '-'}</span>
+                          <span>•</span>
+                          <span className="bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{a.donorBg}</span>
+                          <span>•</span>
+                          <span>{a.donationType === 'blood' ? 'Цельная кровь' : a.donationType === 'plasma' ? 'Плазма' : 'Тромбоциты'}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2 shrink-0">
+                        {a.status === 'pending' && (
+                          <button 
+                            onClick={async () => {
+                                await fetch(`${apiBase}/appointments/${a.id}`, {
+                                    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'confirmed'})
+                                });
+                                loadAppointments();
+                            }}
+                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
+                          >
+                            Подтвердить
+                          </button>
+                        )}
+                        {(a.status === 'pending' || a.status === 'confirmed') && (
+                          <button 
+                            onClick={async () => {
+                                await fetch(`${apiBase}/appointments/${a.id}`, {
+                                    method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
+                                });
+                                loadAppointments();
+                                refreshDashboard();
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
+                          >
+                            <Check className="w-4 h-4 mr-1" /> Завершена
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {appointments.length === 0 && (
+              <div className="text-sm py-12 text-center text-slate-400">Нет записей на донацию</div>
+            )}
+          </div>
         </motion.div>
       )}
 

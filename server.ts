@@ -341,7 +341,8 @@ app.get('/api/download/contraindications', (req, res) => {
       donations: db.donations,
       medicalNotes: db.medicalNotes,
       news: db.news,
-      notifications: db.notifications
+      notifications: db.notifications,
+      donationAppointments: db.donationAppointments || []
     });
   });
 
@@ -795,11 +796,31 @@ app.get('/api/download/contraindications', (req, res) => {
         sentAt: rec.sentAt || notif?.createdAt || new Date().toISOString(),
         pushStatus: rec.pushStatus,
         emailStatus: rec.emailStatus,
-        channel: notif?.channel || 'all'
+        channel: notif?.channel || 'all',
+        isRead: rec.isRead
       };
     }).sort((a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime());
 
     res.json({ success: true, notifications: history });
+  });
+
+  app.post('/api/donor/notifications/read-all', async (req, res) => {
+    const { donorId } = req.body;
+    if (!donorId) return res.status(400).json({ error: 'Не указан ID донора' });
+
+    const db = await getDb();
+    let changed = false;
+    db.notificationRecipients.forEach(r => {
+      if (r.donorId === donorId && !r.isRead) {
+        r.isRead = true;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      await saveDb(db);
+    }
+    res.json({ success: true });
   });
 
   // CENTER DASHBOARD DATA
@@ -848,14 +869,33 @@ app.get('/api/download/contraindications', (req, res) => {
     // Calculate response metrics
     const centerDonations = db.donations.filter(d => d.centerId === centerId);
     let totalSent = 0;
+    let respondedCount = 0;
+    let totalResponseTimeMs = 0;
+
     db.notifications.filter(n => n.centerId === centerId).forEach(n => {
        const recs = db.notificationRecipients.filter(r => r.notificationId === n.id);
        totalSent += recs.length;
+       
+       recs.forEach(rec => {
+           const sentTime = new Date(rec.sentAt).getTime();
+           const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+           
+           // Check if donor made a donation after sentAt within 7 days
+           const matchingDonation = centerDonations.find(d => 
+               d.donorId === rec.donorId && 
+               new Date(d.donationDate).getTime() >= sentTime &&
+               new Date(d.donationDate).getTime() <= sentTime + sevenDaysMs
+           );
+           
+           if (matchingDonation) {
+               respondedCount++;
+               totalResponseTimeMs += (new Date(matchingDonation.donationDate).getTime() - sentTime);
+           }
+       });
     });
 
-    let respondedCount = centerDonations.length;
-    let rate = totalSent > 0 ? Math.min(100, Math.round((respondedCount / totalSent) * 100)) : 0;
-    if (totalSent === 0 && respondedCount > 0) rate = 100;
+    let rate = totalSent > 0 ? Math.round((respondedCount / totalSent) * 100) : 0;
+    let avgResponseTimeHours = respondedCount > 0 ? (totalResponseTimeMs / respondedCount) / (1000 * 60 * 60) : 0;
 
     // Suspension breakdown
     const activeNotes = db.medicalNotes.filter(m => 
@@ -880,15 +920,29 @@ app.get('/api/download/contraindications', (req, res) => {
         suspensionBreakdown.push({ label: 'Нет медотводов', value: 100, color: 'bg-emerald-400' });
     }
 
-    // Weekly load (mock historical based on centerId to keep it stable)
-    const days = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
-    const weeklyLoad = days.map((day, i) => {
-        const load = 10 + ((centerId * 7 + i * 13) % 70);
+    // Weekly load (based on actual appointments for the next 7 days)
+    const days = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+    const now = new Date();
+    const weeklyLoad = [];
+    
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(now);
+        d.setDate(d.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        
+        const count = db.donationAppointments?.filter(a => 
+            a.centerId === centerId && 
+            a.appointmentDate === dateStr &&
+            a.status === 'confirmed'
+        ).length || 0;
+        
+        // Define color based on load thresholds (e.g., >20 is high, >10 is medium)
         let color = 'bg-emerald-100 text-emerald-700';
-        if (load > 50) color = 'bg-amber-100 text-amber-700';
-        if (load > 70) color = 'bg-red-100 text-red-700';
-        return { day, load, color };
-    });
+        if (count > 10) color = 'bg-amber-100 text-amber-700';
+        if (count > 20) color = 'bg-red-100 text-red-700';
+        
+        weeklyLoad.push({ day: i === 0 ? 'Сегодня' : days[d.getDay()], load: count, color });
+    }
 
     res.json({
       totalDonors: confirmedDonors.length,
@@ -898,10 +952,10 @@ app.get('/api/download/contraindications', (req, res) => {
       bloodGroupStats,
       rhStats,
       responseRate: rate + '%',
-      avgResponseTime: rate > 0 ? (24 - rate / 10).toFixed(1) : '0',
+      avgResponseTime: avgResponseTimeHours.toFixed(1),
       suspensionBreakdown,
       weeklyLoad,
-      tip: 'Данные основаны на истории центра'
+      tip: 'Данные основаны на реальных записях в системе'
     });
   });
 
@@ -1420,7 +1474,8 @@ app.get('/api/download/contraindications', (req, res) => {
         donorId: donor.id,
         pushStatus,
         emailStatus,
-        sentAt: new Date().toISOString()
+        sentAt: new Date().toISOString(),
+        isRead: false
       };
       db.notificationRecipients.push(rec);
       return rec;
@@ -1458,6 +1513,80 @@ app.get('/api/download/contraindications', (req, res) => {
       pushSent: totalPush,
       emailSent: totalEmail
     });
+  });
+
+  // ===================== DONATION APPOINTMENTS =====================
+
+  app.get('/api/appointments', async (req, res) => {
+    const { donorId, centerId } = req.query;
+    const db = await getDb();
+    let result = db.donationAppointments || [];
+    if (donorId) result = result.filter(a => a.donorId === parseInt(donorId as string));
+    if (centerId) result = result.filter(a => a.centerId === parseInt(centerId as string));
+    
+    // Add donor info
+    const enriched = result.map(a => {
+        const d = db.donors.find(d => d.id === a.donorId);
+        return {
+            ...a,
+            donorName: d ? `${d.lastName} ${d.firstName}` : 'Неизвестный донор',
+            donorBg: d ? `${d.bloodGroup} ${d.rhFactor === 'positive' ? 'Rh+' : 'Rh-'}` : ''
+        };
+    });
+    
+    res.json(enriched);
+  });
+
+  app.post('/api/appointments', async (req, res) => {
+    const db = await getDb();
+    const { donorId, centerId, appointmentDate, appointmentTime, donationType } = req.body;
+    
+    if (!db.donationAppointments) db.donationAppointments = [];
+    const newId = db.donationAppointments.length > 0 ? Math.max(...db.donationAppointments.map(a => a.id)) + 1 : 1;
+    
+    const newAppt = {
+      id: newId,
+      donorId: parseInt(donorId),
+      centerId: parseInt(centerId),
+      appointmentDate,
+      appointmentTime,
+      donationType,
+      status: 'pending' as const,
+      createdAt: new Date().toISOString()
+    };
+    
+    db.donationAppointments.push(newAppt);
+    await saveDb(db);
+    res.json(newAppt);
+  });
+
+  app.put('/api/appointments/:id', async (req, res) => {
+    const db = await getDb();
+    const id = parseInt(req.params.id);
+    const { status } = req.body;
+    
+    if (!db.donationAppointments) db.donationAppointments = [];
+    const appt = db.donationAppointments.find(a => a.id === id);
+    if (!appt) return res.status(404).json({ error: 'Not found' });
+    
+    appt.status = status;
+    
+    // If completed, optionally create a donation record (simplification)
+    if (status === 'completed') {
+        const donationId = db.donations.length > 0 ? Math.max(...db.donations.map(d => d.id)) + 1 : 1;
+        db.donations.push({
+            id: donationId,
+            donorId: appt.donorId,
+            centerId: appt.centerId,
+            donationDate: appt.appointmentDate,
+            donationType: appt.donationType,
+            createdAt: new Date().toISOString()
+        });
+        await recalculateDonorStats(appt.donorId);
+    }
+    
+    await saveDb(db);
+    res.json(appt);
   });
 
   // NEWS LOGS

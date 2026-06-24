@@ -18,14 +18,14 @@ import {
   CheckCircle,
   PlusCircle
 } from 'lucide-react';
-import { User, BloodCenter, Donor, Donation, MedicalNote } from '../types';
+import { User, BloodCenter, Donor, Donation, MedicalNote, DonorCenter } from '../types';
 
 interface AdminSectionProps {
   token: string;
   t: (key: string) => string;
 }
 
-type AdminTab = 'users' | 'centers' | 'donors' | 'donations' | 'news' | 'holds';
+type AdminTab = 'users' | 'centers' | 'donors' | 'donations' | 'news' | 'holds' | 'appointments';
 
 export default function AdminSection({ token, t }: AdminSectionProps) {
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
@@ -38,6 +38,8 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [medicalNotes, setMedicalNotes] = useState<MedicalNote[]>([]);
   const [news, setNews] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [donorCenters, setDonorCenters] = useState<DonorCenter[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +112,15 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
     isActive: true 
   });
 
+  const [newAppointment, setNewAppointment] = useState({ 
+    donorId: '', 
+    centerId: '',
+    appointmentDate: new Date().toISOString().split('T')[0], 
+    appointmentTime: '10:00',
+    donationType: 'blood',
+    status: 'pending' as any
+  });
+
   const loadAllData = async () => {
     setLoading(true);
     setError(null);
@@ -127,6 +138,8 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
       setDonations(data.donations || []);
       setMedicalNotes(data.medicalNotes || []);
       setNews(data.news || []);
+      setAppointments(data.donationAppointments || []);
+      setDonorCenters(data.donorCenters || []);
     } catch (err: any) {
       setError(err.message || 'Error fetching records');
     } finally {
@@ -273,6 +286,26 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
     });
   };
 
+  const handleCreateAppointment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAppointment.donorId || !newAppointment.centerId) return alert(t('Выберите донора и медицинский центр'));
+    const donor = donors.find(d => d.id === parseInt(newAppointment.donorId));
+    if (!donor || donor.status !== 'active') return alert(t('Выберите активного (подтвержденного) донора'));
+
+    const link = donorCenters.find(lc => lc.donorId === donor.id && lc.centerId === parseInt(newAppointment.centerId));
+    if (!link || link.status !== 'confirmed') return alert(t('Донор должен быть подтвержден в выбранном центре крови'));
+    
+    handleUpdateEntity('donationAppointments', {
+      donorId: parseInt(newAppointment.donorId),
+      centerId: parseInt(newAppointment.centerId),
+      appointmentDate: newAppointment.appointmentDate,
+      appointmentTime: newAppointment.appointmentTime,
+      donationType: newAppointment.donationType,
+      status: newAppointment.status,
+      createdAt: new Date().toISOString()
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24">
@@ -329,6 +362,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
           { tabId: 'centers', label: t('Центры крови'), count: centers.length, icon: MapPin },
           { tabId: 'donors', label: t('Доноры'), count: donors.length, icon: Activity },
           { tabId: 'donations', label: t('Донации'), count: donations.length, icon: Calendar },
+          { tabId: 'appointments', label: t('Записи'), count: appointments.length, icon: Calendar },
           { tabId: 'news', label: t('Новости'), count: news.length, icon: FileText },
           { tabId: 'holds', label: t('Медотводы'), count: medicalNotes.length, icon: AlertTriangle }
         ].map(item => {
@@ -396,7 +430,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                         <td className="px-4 py-4 font-medium text-slate-900 align-middle">{user.email}</td>
                         <td className="px-4 py-4 align-middle">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide border ${user.role === "admin" ? "bg-amber-50 text-amber-700 border-amber-200" : user.role === "center" ? "bg-indigo-50 text-indigo-700 border-indigo-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
-                            {user.role.toUpperCase()}
+                            {user.role === 'admin' ? 'АДМИНИСТРАТОР' : user.role === 'center' ? 'МЕД.ЦЕНТР' : 'ДОНОР'}
                           </span>
                         </td>
                         <td className="px-4 py-4 align-middle">
@@ -551,7 +585,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                         <td className="px-4 py-4 text-slate-600 align-middle max-w-[150px] truncate">{center ? center.name : `ID: ${donation.centerId}`}</td>
                         <td className="px-4 py-4 align-middle">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {donation.donationType}
+                            {donation.donationType === 'blood' ? 'Цельная кровь' : donation.donationType === 'plasma' ? 'Плазма' : donation.donationType === 'platelets' ? 'Тромбоциты' : donation.donationType}
                           </span>
                         </td>
                         <td className="px-4 py-4 text-slate-600 align-middle font-mono text-xs">{new Date(donation.donationDate).toLocaleDateString()}</td>
@@ -669,6 +703,78 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                             </button>
                             <button 
                               onClick={() => handleDeleteEntity('medicalNotes', note.id)}
+                              className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* --- APPOINTMENTS TAB --- */}
+        {activeTab === 'appointments' && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100/60 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="px-4 py-3 font-mono">ID</th>
+                  <th className="px-4 py-3">{t('Донор')}</th>
+                  <th className="px-4 py-3">{t('Центр')}</th>
+                  <th className="px-4 py-3">{t('Дата и Время')}</th>
+                  <th className="px-4 py-3">{t('Тип')}</th>
+                  <th className="px-4 py-3">{t('Статус')}</th>
+                  <th className="px-4 py-3 text-right">{t('Правка')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/60 text-sm">
+                {appointments
+                  .map(appt => {
+                    const donor = donors.find(d => d.id === appt.donorId);
+                    const center = centers.find(c => c.id === appt.centerId);
+                    return (
+                      <tr key={appt.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-4 text-slate-400 align-middle">#{appt.id}</td>
+                        <td className="px-4 py-4 font-medium text-slate-900 align-middle">{donor ? `${donor.lastName} ${donor.firstName}` : `ID: ${appt.donorId}`}</td>
+                        <td className="px-4 py-4 text-slate-600 align-middle max-w-[150px] truncate">{center ? center.name : `ID: ${appt.centerId}`}</td>
+                        <td className="px-4 py-4 text-slate-600 align-middle font-mono text-xs">
+                          {new Date(appt.appointmentDate).toLocaleDateString()} {appt.appointmentTime}
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {appt.donationType === 'blood' ? 'Цельная кровь' : appt.donationType === 'plasma' ? 'Плазма' : 'Тромбоциты'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                            appt.status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                            appt.status === 'confirmed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                            appt.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            appt.status === 'no_show' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                            'bg-slate-50 text-slate-500 border-slate-200'
+                          }`}>
+                            {appt.status === 'pending' ? 'Ожидает' : 
+                             appt.status === 'confirmed' ? 'Подтверждена' : 
+                             appt.status === 'completed' ? 'Завершена' : 
+                             appt.status === 'cancelled' ? 'Отменена' : 
+                             appt.status === 'no_show' ? 'Неявка' : appt.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <div className="flex justify-end items-center gap-2">
+                            <button 
+                              onClick={() => setEditingEntity({ type: 'donationAppointments', data: appt })}
+                              className="inline-flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteEntity('donationAppointments', appt.id)}
                               className="inline-flex p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-600 transition-colors"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -967,6 +1073,72 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-3 bg-red-600 hover:bg-red-700 hover:bg-opacity-90 text-white rounded-xl text-sm font-semibold transition-all mt-6 shadow-sm">{isSaving ? t('Загрузка...') : t('Наложить медотвод')}</button>
               </form>
             )}
+
+            {/* 7. Add Appointment Form */}
+            {isAdding === 'appointments' && (
+              <form onSubmit={handleCreateAppointment} className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Донор')}</label>
+                  <select required value={newAppointment.donorId} onChange={e => setNewAppointment({...newAppointment, donorId: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all">
+                    <option value="">-- {t('Выберите донора')} --</option>
+                    {donors
+                      .filter(d => d.status === 'active')
+                      .map(d => (
+                        <option key={d.id} value={d.id}>{d.lastName} {d.firstName} (#{d.id})</option>
+                      ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Центр крови')}</label>
+                  <select required value={newAppointment.centerId} onChange={e => setNewAppointment({...newAppointment, centerId: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all">
+                    <option value="">-- {t('Выберите центр')} --</option>
+                    {centers
+                      .filter(c => {
+                        if (!newAppointment.donorId) return true; // Show all if no donor selected
+                        return donorCenters.some(lc => lc.donorId === parseInt(newAppointment.donorId) && lc.centerId === c.id && lc.status === 'confirmed');
+                      })
+                      .map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Дата записи')}</label>
+                    <input required type="date" value={newAppointment.appointmentDate} onChange={e => {
+                      let val = e.target.value;
+                      const parts = val.split('-');
+                      if (parts[0] && parts[0].length > 4) {
+                        parts[0] = parts[0].slice(0, 4);
+                        val = parts.join('-');
+                      }
+                      setNewAppointment({...newAppointment, appointmentDate: val});
+                    }} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 border border-slate-200 rounded-lg text-slate-550 font-mono" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Время записи')}</label>
+                    <input required type="time" value={newAppointment.appointmentTime} onChange={e => setNewAppointment({...newAppointment, appointmentTime: e.target.value})} className="w-full px-3 py-1.5 text-xs bg-slate-50/50 border border-slate-200 rounded-lg text-slate-550 font-mono" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Тип донации')}</label>
+                  <select value={newAppointment.donationType} onChange={e => setNewAppointment({...newAppointment, donationType: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all">
+                    <option value="blood">{t('Цельная кровь')}</option>
+                    <option value="plasma">{t('Плазма')}</option>
+                    <option value="platelets">{t('Тромбоциты')}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Статус записи')}</label>
+                  <select value={newAppointment.status} onChange={e => setNewAppointment({...newAppointment, status: e.target.value as any})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all">
+                    <option value="pending">{t('Ожидает')}</option>
+                    <option value="confirmed">{t('Подтверждена')}</option>
+                    <option value="completed">{t('Завершена')}</option>
+                    <option value="cancelled">{t('Отменена')}</option>
+                    <option value="no_show">{t('Неявка')}</option>
+                  </select>
+                </div>
+                <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-3 bg-red-600 hover:bg-red-700 hover:bg-opacity-90 text-white rounded-xl text-sm font-semibold transition-all mt-6 shadow-sm">{isSaving ? t('Загрузка...') : t('Создать запись')}</button>
+              </form>
+            )}
           </motion.div>
         </div>
       )}
@@ -1254,6 +1426,73 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 </div>
               )}
 
+              {/* --- 7. APPOINTMENTS DIRECT EDIT --- */}
+              {editingEntity.type === 'donationAppointments' && (
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Донор')}</label>
+                    <select 
+                      value={editingEntity.data.donorId} 
+                      onChange={e => {
+                        const newDonorId = parseInt(e.target.value);
+                        setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, donorId: newDonorId } });
+                      }} 
+                      className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                    >
+                      {donors
+                        .filter(d => d.status === 'active' || d.id === editingEntity.data.donorId)
+                        .map(d => (
+                          <option key={d.id} value={d.id}>{d.lastName} {d.firstName} (#{d.id})</option>
+                        ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Центр крови')}</label>
+                    <select 
+                      value={editingEntity.data.centerId} 
+                      onChange={e => setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, centerId: parseInt(e.target.value) } })} 
+                      className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg"
+                    >
+                      {centers
+                        .filter(c => {
+                          const donorId = editingEntity.data.donorId;
+                          if (!donorId) return true;
+                          return donorCenters.some(lc => lc.donorId === donorId && lc.centerId === c.id && lc.status === 'confirmed') || c.id === editingEntity.data.centerId;
+                        })
+                        .map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Дата записи')}</label>
+                      <input type="date" value={editingEntity.data.appointmentDate} onChange={e => setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, appointmentDate: e.target.value } })} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Время записи')}</label>
+                      <input type="time" value={editingEntity.data.appointmentTime} onChange={e => setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, appointmentTime: e.target.value } })} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Тип донации')}</label>
+                    <select value={editingEntity.data.donationType} onChange={e => setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, donationType: e.target.value } })} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                      <option value="blood">Цельная кровь</option>
+                      <option value="plasma">Плазма</option>
+                      <option value="platelets">Тромбоциты</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Статус записи')}</label>
+                    <select value={editingEntity.data.status} onChange={e => setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, status: e.target.value } })} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                      <option value="pending">Ожидает</option>
+                      <option value="confirmed">Подтверждена</option>
+                      <option value="completed">Завершена</option>
+                      <option value="cancelled">Отменена</option>
+                      <option value="no_show">Неявка</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
             </div>
 
             <div className="mt-5 flex justify-end gap-2 border-t pt-3 border-slate-100 dark:border-slate-900">
@@ -1264,7 +1503,17 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 {t('Отмена')}
               </button>
               <button 
-                onClick={() => handleUpdateEntity(editingEntity.type === 'holds' ? 'medicalNotes' : editingEntity.type, editingEntity.data)}
+                onClick={() => {
+                  if (editingEntity.type === 'donationAppointments') {
+                    const donorId = editingEntity.data.donorId;
+                    const centerId = editingEntity.data.centerId;
+                    const donor = donors.find(d => d.id === donorId);
+                    if (!donor || donor.status !== 'active') return alert(t('Донор должен быть подтвержден'));
+                    const link = donorCenters.find(lc => lc.donorId === donorId && lc.centerId === centerId);
+                    if (!link || link.status !== 'confirmed') return alert(t('Донор должен быть прикреплен к выбранному центру'));
+                  }
+                  handleUpdateEntity(editingEntity.type === 'holds' ? 'medicalNotes' : editingEntity.type, editingEntity.data);
+                }}
                 className="px-4 py-1.5 bg-rose-600 text-white hover:bg-rose-700 rounded-lg font-bold text-xs shadow-xs transition duration-150"
               >
                 {t('Сохранить')}

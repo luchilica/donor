@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaClient } from '@prisma/client';
-import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, BloodGroup, RhFactor, DonationType } from '../src/types';
+import { BloodCenter, User, Donor, DonorCenter, Donation, MedicalNote, News, Notification, NotificationRecipient, BloodGroup, RhFactor, DonationType, DonationAppointment } from '../src/types';
 
 let dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
@@ -38,6 +38,7 @@ export interface DatabaseState {
   news: News[];
   notifications: Notification[];
   notificationRecipients: NotificationRecipient[];
+  donationAppointments: DonationAppointment[];
 }
 
 const INITIAL_CENTERS: BloodCenter[] = [
@@ -649,6 +650,7 @@ const seededState: DatabaseState = {
     }
   ],
   notificationRecipients: [],
+  donationAppointments: [],
 };
 
 // Fill up dynamic databases
@@ -1098,7 +1100,8 @@ export async function getDb(): Promise<DatabaseState> {
         dbMedicalNotes,
         dbNews,
         dbNotifications,
-        dbNotificationRecipients
+        dbNotificationRecipients,
+        dbDonationAppointments
       ] = await Promise.all([
         prisma.bloodCenter.findMany({ orderBy: { id: 'asc' } }),
         prisma.user.findMany({ orderBy: { id: 'asc' } }),
@@ -1108,7 +1111,8 @@ export async function getDb(): Promise<DatabaseState> {
         prisma.medicalNote.findMany({ orderBy: { id: 'asc' } }),
         prisma.news.findMany({ orderBy: { id: 'asc' } }),
         prisma.notification.findMany({ orderBy: { id: 'asc' } }),
-        prisma.notificationRecipient.findMany({ orderBy: { id: 'asc' } })
+        prisma.notificationRecipient.findMany({ orderBy: { id: 'asc' } }),
+        prisma.donationAppointment.findMany({ orderBy: { id: 'asc' } })
       ]);
 
       cachedDb = {
@@ -1241,7 +1245,18 @@ export async function getDb(): Promise<DatabaseState> {
           donorId: m.donorId,
           pushStatus: m.pushStatus as any,
           emailStatus: m.emailStatus as any,
-          sentAt: m.sentAt.toISOString()
+          sentAt: m.sentAt.toISOString(),
+          isRead: (m as any).isRead || false
+        })),
+        donationAppointments: dbDonationAppointments.map(m => ({
+          id: m.id,
+          donorId: m.donorId,
+          centerId: m.centerId,
+          appointmentDate: m.appointmentDate.toISOString().split('T')[0],
+          appointmentTime: m.appointmentTime,
+          donationType: m.donationType as any,
+          status: m.status as any,
+          createdAt: m.createdAt.toISOString()
         }))
       };
 
@@ -1254,7 +1269,91 @@ export async function getDb(): Promise<DatabaseState> {
           notesChanged = true;
         }
       });
-      if (notesChanged) {
+
+      // Seed valid initial appointments if empty (as requested)
+      if (cachedDb.donationAppointments.length === 0 && cachedDb.donors.length > 0 && cachedDb.centers.length > 0) {
+        // Try to find a donor that has a confirmed link to a center
+        const confirmedLink = cachedDb.donorCenters.find(lc => lc.status === 'confirmed');
+        if (confirmedLink) {
+          const donor = cachedDb.donors.find(d => d.id === confirmedLink.donorId && d.status === 'active');
+          if (donor) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            
+            cachedDb.donationAppointments = [
+              {
+                id: 1,
+                donorId: donor.id,
+                centerId: confirmedLink.centerId,
+                appointmentDate: tomorrowStr,
+                appointmentTime: "09:00",
+                donationType: "blood",
+                status: "confirmed",
+                createdAt: new Date().toISOString()
+              }
+            ];
+            // Trigger sync back to DB
+            saveDb(cachedDb).catch(console.error);
+          }
+        }
+      }
+
+      // 2. Generate Appointment Reminders
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      
+      let remindersCreated = false;
+      cachedDb.donationAppointments.forEach(appt => {
+        if (appt.status === 'confirmed' && appt.appointmentDate === tomorrowStr) {
+          // Check if reminder already exists
+          const exists = cachedDb.notificationRecipients.some(nr => 
+            nr.donorId === appt.donorId && 
+            cachedDb.notifications.find(n => n.id === nr.notificationId)?.messageText.includes(`Напоминание о записи на завтра`)
+          );
+          
+          if (!exists) {
+            const nextNotifId = cachedDb.notifications.length > 0 ? Math.max(...cachedDb.notifications.map(n => n.id)) + 1 : 1;
+            const center = cachedDb.centers.find(c => c.id === appt.centerId);
+            
+            const newNotif: Notification = {
+              id: nextNotifId,
+              centerId: appt.centerId,
+              sentBy: 1, // System
+              bloodGroups: [],
+              rhFactor: 'both',
+              donationType: 'any',
+              minDaysSinceDonation: 0,
+              excludeMedical: false,
+              excludePause: false,
+              channel: 'all',
+              messageText: `Напоминание о записи на завтра (${appt.appointmentDate}) в ${appt.appointmentTime} в ${center?.name || 'центр крови'}. Ждем вас!`,
+              recipientsCount: 1,
+              pushSent: 1,
+              emailSent: 1,
+              status: 'sent',
+              createdAt: new Date().toISOString()
+            };
+            
+            cachedDb.notifications.push(newNotif);
+            
+            const nextRecipientId = cachedDb.notificationRecipients.length > 0 ? Math.max(...cachedDb.notificationRecipients.map(nr => nr.id)) + 1 : 1;
+            cachedDb.notificationRecipients.push({
+              id: nextRecipientId,
+              notificationId: nextNotifId,
+              donorId: appt.donorId,
+              pushStatus: 'sent',
+              emailStatus: 'sent',
+              sentAt: new Date().toISOString(),
+              isRead: false
+            });
+            remindersCreated = true;
+          }
+        }
+      });
+
+      if (remindersCreated || notesChanged) {
         saveDb(JSON.parse(JSON.stringify(cachedDb))).catch(console.error);
       }
 
@@ -1269,6 +1368,7 @@ export async function getDb(): Promise<DatabaseState> {
     try {
       const data = fs.readFileSync(STORE_PATH, 'utf-8');
       cachedDb = JSON.parse(data);
+      if (!cachedDb.donationAppointments) cachedDb.donationAppointments = [];
 
       if (cachedDb && cachedDb.centers) {
         cachedDb.centers.forEach((c: any) => {
@@ -1648,6 +1748,36 @@ export async function saveDb(state: DatabaseState): Promise<void> {
             sentAt: rec.sentAt ? new Date(rec.sentAt) : new Date(),
           }
         });
+      }
+
+      // 9. Sync Appointments
+      if (state.donationAppointments) {
+        for (const appt of state.donationAppointments) {
+          const prev = oldDb && oldDb.donationAppointments && oldDb.donationAppointments.find(x => x.id === appt.id );
+          if (prev && JSON.stringify(prev) === JSON.stringify(appt)) continue;
+
+          await prisma.donationAppointment.upsert({
+            where: { id: appt.id },
+            update: {
+              donorId: appt.donorId,
+              centerId: appt.centerId,
+              appointmentDate: new Date(appt.appointmentDate),
+              appointmentTime: appt.appointmentTime,
+              donationType: appt.donationType as any,
+              status: appt.status as any,
+            },
+            create: {
+              id: appt.id,
+              donorId: appt.donorId,
+              centerId: appt.centerId,
+              appointmentDate: new Date(appt.appointmentDate),
+              appointmentTime: appt.appointmentTime,
+              donationType: appt.donationType as any,
+              status: appt.status as any,
+              createdAt: appt.createdAt ? new Date(appt.createdAt) : new Date(),
+            }
+          });
+        }
       }
 
       console.log('PostgreSQL state fully synchronized.');

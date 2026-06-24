@@ -26,6 +26,7 @@ model BloodCenter {
   medicalNotes MedicalNote[]
   notifications Notification[]
   news        News[]
+  donationAppointments DonationAppointment[]
 
   @@map("blood_centers")
 }
@@ -95,6 +96,7 @@ model Donor {
   donations     Donation[]
   medicalNotes  MedicalNote[]
   notificationRecipients NotificationRecipient[]
+  donationAppointments DonationAppointment[]
 
   @@map("donors")
 }
@@ -253,6 +255,7 @@ model NotificationRecipient {
   pushStatus     DeliveryStatus
   emailStatus    DeliveryStatus
   sentAt         DateTime
+  isRead         Boolean  @default(false)
 
   @@map("notification_recipients")
 }
@@ -261,6 +264,29 @@ enum DeliveryStatus {
   sent
   failed
   skipped
+}
+
+model DonationAppointment {
+  id              Int      @id @default(autoincrement())
+  donorId         Int
+  donor           Donor    @relation(fields: [donorId], references: [id])
+  centerId        Int
+  center          BloodCenter @relation(fields: [centerId], references: [id])
+  appointmentDate DateTime @db.Date
+  appointmentTime String   @db.VarChar(5)
+  donationType    DonationType
+  status          AppointmentStatus @default(pending)
+  createdAt       DateTime @default(now())
+
+  @@map("donation_appointments")
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+  no_show
 }
 
 model News {

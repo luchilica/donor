@@ -8,6 +8,19 @@ export type DonorCenterStatus = 'pending' | 'confirmed' | 'rejected';
 export type NotificationChannel = 'push' | 'email' | 'all';
 export type NotificationStatus = 'sent' | 'partial' | 'failed';
 
+export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+
+export interface DonationAppointment {
+  id: number;
+  donorId: number;
+  centerId: number;
+  appointmentDate: string; // ISO date YYYY-MM-DD
+  appointmentTime?: string; // HH:MM
+  donationType: DonationType;
+  status: AppointmentStatus;
+  createdAt: string;
+}
+
 export interface BloodNeeds {
   I_pos: number;
   I_neg: number;
@@ -163,6 +176,7 @@ export interface NotificationRecipient {
   pushStatus: 'sent' | 'failed' | 'skipped';
   emailStatus: 'sent' | 'failed' | 'skipped';
   sentAt: string;
+  isRead: boolean;
 }
 
 // Client helper translations

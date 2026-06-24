@@ -786,6 +786,50 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 </div>
               </div>
             )}
+
+            {/* FAQ Section */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:border-red-100">
+              <h2 className="text-xl font-semibold text-slate-800 mb-6 flex items-center">
+                <HelpCircle className="w-5 h-5 text-red-500 mr-2" />
+                {t("Частые вопросы")}
+              </h2>
+              <div className="space-y-2">
+                <AccordionItem title={t("Как подготовиться к донации?")}>
+                  <p className="mb-2 font-medium">{t("Подготовка начинается за несколько дней:")}</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                    <li>{t("За 10 дней — не принимать антибиотики.")}</li>
+                    <li>{t("За 5 дней — не принимать обезболивающие (аспирин, анальгин).")}</li>
+                    <li>{t("За 48 часов — исключить алкоголь.")}</li>
+                    <li>{t("За 2 часа — не курить.")}</li>
+                    <li>{t("Обязательно выспитесь и не приходите натощак.")}</li>
+                  </ul>
+                </AccordionItem>
+                <AccordionItem title={t("Какая диета должна быть у донора?")}>
+                  <p className="mb-2 font-medium">{t("Накануне и в день сдачи:")}</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                    <li><strong className="text-red-600 font-semibold">{t("Исключить:")}</strong> {t("жирное, жареное, острое, копченое, молочные продукты, яйца, масло, орехи, шоколад, бананы.")}</li>
+                    <li><strong className="text-emerald-600 font-semibold">{t("Можно:")}</strong> {t("каши на воде, отварные овощи, хлеб, сушки, галетное печенье, сладкий чай, морсы, соки.")}</li>
+                  </ul>
+                </AccordionItem>
+                <AccordionItem title={t("Какие основные противопоказания?")}>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-slate-700 mb-1">{t("Постоянные:")}</p>
+                      <p className="text-sm">{t("Инфекционные заболевания (ВИЧ, гепатиты, туберкулез), серьезные хронические заболевания органов и систем, злокачественные новообразования.")}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-700 mb-1">{t("Временные:")}</p>
+                      <ul className="list-disc list-inside space-y-1 ml-2 text-sm">
+                        <li>{t("ОРВИ и грипп — 2 недели после выздоровления.")}</li>
+                        <li>{t("Татуировки и пирсинг — 6 месяцев.")}</li>
+                        <li>{t("Прием лекарств — от 5 до 14 дней.")}</li>
+                        <li>{t("Период беременности и лактации.")}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </AccordionItem>
+              </div>
+            </div>
           </div>
 
 
