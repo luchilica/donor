@@ -115,6 +115,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
       minZoom: 7,
       maxZoom: 18,
       zoomControl: false,
+      attributionControl: false,
       scrollWheelZoom: true,
       maxBounds: belarusBounds,
       maxBoundsViscosity: 1.0,
@@ -362,6 +363,9 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
         }
         .leaflet-popup {
           margin-bottom: 24px !important;
+        }
+        .leaflet-control-attribution {
+          display: none !important;
         }
         @keyframes pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
