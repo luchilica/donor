@@ -780,6 +780,54 @@ app.get('/api/download/contraindications', (req, res) => {
     donor.personalPauseUntil = personalPause ? (personalPauseUntil || null) : null;
     donor.personalPauseNote = personalPause ? (personalPauseNote || null) : null;
 
+    const todayStr = new Date().toISOString().split('T')[0];
+    const donorTies = db.donorCenters.filter(dc => dc.donorId === donor.id && dc.status === 'confirmed');
+    const centerIds = donorTies.length > 0 ? donorTies.map(dc => dc.centerId) : (db.centers && db.centers.length > 0 ? [db.centers[0].id] : [1]);
+
+    if (donor.personalPause) {
+      // Find or create medical notes for each associated center
+      centerIds.forEach(cid => {
+        let existingNote = db.medicalNotes.find(m => m.donorId === donor.id && m.centerId === cid && m.reason.startsWith('Временный медотвод: Личная пауза'));
+        
+        if (existingNote) {
+          existingNote.reason = `Временный медотвод: Личная пауза донора (${personalPauseNote || 'Временно не могу сдавать'})`;
+          existingNote.startDate = todayStr;
+          existingNote.endDate = personalPauseUntil || null;
+          existingNote.isActive = true;
+          existingNote.liftedAt = null;
+          existingNote.liftedBy = null;
+          existingNote.liftNote = null;
+        } else {
+          const nextId = db.medicalNotes.length > 0 ? Math.max(...db.medicalNotes.map(m => m.id)) + 1 : 1;
+          const newNote = {
+            id: nextId,
+            donorId: donor.id,
+            centerId: cid,
+            createdBy: 1, // System
+            reason: `Временный медотвод: Личная пауза донора (${personalPauseNote || 'Временно не могу сдавать'})`,
+            startDate: todayStr,
+            endDate: personalPauseUntil || null,
+            isActive: true,
+            liftedAt: null,
+            liftedBy: null,
+            liftNote: null,
+            createdAt: new Date().toISOString()
+          };
+          db.medicalNotes.push(newNote);
+        }
+      });
+    } else {
+      // Deactivate / lift any active personal pause medical notes
+      db.medicalNotes.forEach(m => {
+        if (m.donorId === donor.id && m.reason.startsWith('Временный медотвод: Личная пауза') && m.isActive) {
+          m.isActive = false;
+          m.liftedAt = new Date().toISOString();
+          m.liftedBy = 1; // System
+          m.liftNote = 'Личная пауза отключена донором';
+        }
+      });
+    }
+
     await saveDb(db);
     res.json({ success: true, donor });
   });
