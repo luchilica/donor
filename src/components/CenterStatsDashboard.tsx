@@ -55,7 +55,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       {/* 1. Inventory Status */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4 flex flex-col">
         <div className="flex items-center gap-2 mb-4">
-            <h3 className="font-bold text-slate-800 text-base">{t("Запасы крови")}</h3>
+            <h3 className="font-bold text-slate-800 text-lg">{t("Запасы крови")}</h3>
         </div>
         <div className="grid grid-cols-4 gap-2 flex-grow">
           {bloodTypes.map(type => {
@@ -72,7 +72,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
                     <div className={`w-full h-full ${level < 40 ? gradient : barColor}`}></div>
                   </div>
                 </div>
-                <span className="text-[8px] font-bold text-slate-600 text-center uppercase truncate w-full">{type.label}</span>
+                <span className="text-[10px] font-bold text-slate-600 text-center uppercase truncate w-full">{type.label}</span>
               </div>
             );
           })}
@@ -82,16 +82,16 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       {/* 2. Conversion/Alerts */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4 flex flex-col">
         <div className="flex items-center gap-2 mb-4">
-            <h3 className="font-bold text-slate-800 text-base">{t("Эффективность оповещений")}</h3>
+            <h3 className="font-bold text-slate-800 text-lg">{t("Эффективность оповещений")}</h3>
         </div>
         <div className="flex flex-col gap-3 flex-grow">
           <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-            <span className="text-[10px] text-slate-500">{t("Отклик на вызовы")}</span>
+            <span className="text-xs text-slate-500">{t("Отклик на вызовы")}</span>
             <div className="text-lg font-bold text-slate-900">{stats?.responseRate || '0%'}</div>
           </div>
           <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-            <span className="text-[10px] text-slate-500">{t("Ср. время прибытия")}</span>
-            <div className="text-lg font-bold text-slate-900">{stats?.avgResponseTime || '0'}<span className='text-[10px] ml-1 text-slate-400'>{t("ч")}</span></div>
+            <span className="text-xs text-slate-500">{t("Ср. время прибытия")}</span>
+            <div className="text-lg font-bold text-slate-900">{stats?.avgResponseTime || '0'}<span className='text-xs ml-1 text-slate-400'>{t("ч")}</span></div>
           </div>
         </div>
       </motion.div>
@@ -99,14 +99,14 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       {/* 3. Suspensions */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4 flex flex-col">
         <div className="flex items-center gap-2 mb-4">
-            <h3 className="font-bold text-slate-800 text-base">{t("Медотводы")}</h3>
+            <h3 className="font-bold text-slate-800 text-lg">{t("Медотводы")}</h3>
         </div>
         <div className="w-full bg-slate-100 h-2 rounded-full flex overflow-hidden mb-4">
           {(stats?.suspensionBreakdown || []).map((item, i) => (
             <div key={i} className={`${item.color} h-full`} style={{ width: `${item.value}%` }}></div>
           ))}
         </div>
-        <div className="text-[10px] space-y-1 mt-auto">
+        <div className="text-xs space-y-1 mt-auto">
           {(stats?.suspensionBreakdown || []).map((item, i) => (
              <div key={i} className="flex justify-between items-center text-slate-600">
                <span className='flex items-center gap-1.5'><div className={`w-1.5 h-1.5 rounded-full ${item.color}`}></div>{item.label}</span>
@@ -119,17 +119,17 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
       {/* 4. Planner */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.3 }} className="bg-white p-6 rounded-2xl border border-red-100 shadow-sm space-y-4 flex flex-col">
         <div className="flex items-center gap-2 mb-4">
-            <h3 className="font-bold text-slate-800 text-base">{t("Планер загрузки")}</h3>
+            <h3 className="font-bold text-slate-800 text-lg">{t("Планер загрузки")}</h3>
         </div>
         <div className="grid grid-cols-7 gap-1 mb-3">
           {(stats?.weeklyLoad || []).map((day, i) => (
             <div key={i} className="flex flex-col items-center gap-1">
-              <span className="text-[9px] text-slate-400 font-semibold uppercase">{day.day}</span>
-              <div className={`w-full text-center text-[9px] font-bold p-1 rounded ${day.color}`}>{day.load} чел.</div>
+              <span className="text-[11px] text-slate-400 font-semibold uppercase">{day.day}</span>
+              <div className={`w-full text-center text-[11px] font-bold p-1 rounded ${day.color}`}>{day.load} чел.</div>
             </div>
           ))}
         </div>
-        <div className="mt-auto p-2 bg-slate-50 text-slate-600 text-[10px] rounded-lg border border-slate-100 flex gap-2 items-center">
+        <div className="mt-auto p-2 bg-slate-50 text-slate-600 text-xs rounded-lg border border-slate-100 flex gap-2 items-center">
           <AlertCircle className="w-3 h-3 shrink-0 text-red-500" />
           <span>{stats?.tip || t("Данные обновляются")}</span>
         </div>

@@ -816,23 +816,32 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   };
 
   // Manage regional news CRUD
-  const handleNeedsSubmit = async () => {
-    setNeedsSaving(true);
-    try {
-      const res = await fetch(`${apiBase}/centers/${center.id}/needs`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ bloodNeeds: needsForm })
-      });
-      if (!res.ok) throw new Error();
-      setNeedsSuccess(true);
-      setTimeout(() => setNeedsSuccess(false), 3000);
-      if (onRefresh) onRefresh();
-    } catch (e) {
-      alert("Ошибка при сохранении дефицитов");
-    } finally {
-      setNeedsSaving(false);
-    }
+  const handleNeedsSubmit = () => {
+    requestConfirm({
+      title: 'Сохранить дефициты?',
+      message: 'Вы уверены, что хотите обновить уровни запасов крови в донорском светофоре вашего центра?',
+      variant: 'success',
+      confirmText: 'Сохранить',
+      cancelText: 'Отмена',
+      onConfirm: async () => {
+        setNeedsSaving(true);
+        try {
+          const res = await fetch(`${apiBase}/centers/${center.id}/needs`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ bloodNeeds: needsForm })
+          });
+          if (!res.ok) throw new Error();
+          setNeedsSuccess(true);
+          setTimeout(() => setNeedsSuccess(false), 3000);
+          if (onRefresh) onRefresh();
+        } catch (e) {
+          alert("Ошибка при сохранении дефицитов");
+        } finally {
+          setNeedsSaving(false);
+        }
+      }
+    });
   };
 
   const handleNewsSubmit = (e: React.FormEvent) => {
@@ -1756,7 +1765,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           transition={{ duration: 0.3, ease: 'easeOut' }}
           className="space-y-6"
         >
-          <div>
+          <div className="pl-3">
             <h3 className="font-bold text-slate-800 text-base">{t("Записи на донацию")}</h3>
             <p className="text-xs text-slate-500">{t("Здесь отображаются записи доноров в ваш центр крови на выбранные даты.")}</p>
           </div>
@@ -1815,12 +1824,21 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         {(a.status === 'pending' || a.status === 'confirmed') && (
                           <>
                             <button 
-                              onClick={async () => {
-                                  await fetch(`${apiBase}/appointments/${a.id}`, {
-                                      method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
+                              onClick={() => {
+                                  requestConfirm({
+                                      title: 'Завершить донацию?',
+                                      message: `Вы уверены, что хотите отметить донацию донора ${a.donorName} как завершенную?`,
+                                      variant: 'success',
+                                      confirmText: 'Завершить',
+                                      cancelText: 'Отмена',
+                                      onConfirm: async () => {
+                                          await fetch(`${apiBase}/appointments/${a.id}`, {
+                                              method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
+                                          });
+                                          loadAppointments();
+                                          refreshDashboard();
+                                      }
                                   });
-                                  loadAppointments();
-                                  refreshDashboard();
                               }}
                               className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >

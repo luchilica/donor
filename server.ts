@@ -922,9 +922,21 @@ app.get('/api/download/contraindications', (req, res) => {
     let avgResponseTimeHours = respondedCount > 0 ? (totalResponseTimeMs / respondedCount) / (1000 * 60 * 60) : 0;
 
     // Suspension breakdown
-    const activeNotes = db.medicalNotes.filter(m => 
-       m.isActive && confirmedDonors.some(d => d.id === m.donorId)
-    );
+    const todayForMedical = new Date();
+    todayForMedical.setHours(0,0,0,0);
+    const activeNotes = db.medicalNotes.filter(m => {
+       if (!m.isActive) return false;
+       if (!confirmedDonors.some(d => d.id === m.donorId)) return false;
+       const start = new Date(m.startDate);
+       start.setHours(0,0,0,0);
+       if (start > todayForMedical) return false;
+       if (m.endDate) {
+           const end = new Date(m.endDate);
+           end.setHours(23,59,59,999);
+           if (end < todayForMedical) return false;
+       }
+       return true;
+    });
     const reasonCounts: Record<string, number> = {};
     activeNotes.forEach(m => {
        const shortReason = m.reason.length > 20 ? m.reason.substring(0, 20) + '...' : m.reason;
