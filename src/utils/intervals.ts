@@ -101,7 +101,7 @@ export function isDonorReady(
     age--;
   }
   if (age < 18 || age > 65) {
-    return { ready: false, reason: `Возраст ${age} лет находится вне допустимого интервала (18-65)` };
+    return { ready: false, reason: 'Возраст находится вне допустимого интервала (18-65)' };
   }
 
   // 5. Active medical notes (медотводы)
@@ -122,17 +122,17 @@ export function isDonorReady(
       const end = new Date(note.endDate);
       return end >= today;
     });
-    return { ready: false, reason: `Действует медицинский отвод: ${active?.reason || 'по медицинским показаниям'}` };
+    return { ready: false, reason: 'Действует медицинский отвод' };
   }
 
   // 6. Active personal pause
   if (donor.personalPause) {
     if (!donor.personalPauseUntil) {
-      return { ready: false, reason: `Установлена личная пауза: ${donor.personalPauseNote || 'Временно не могу сдавать'}` };
+      return { ready: false, reason: 'Установлена личная пауза' };
     }
     const pauseUntil = new Date(donor.personalPauseUntil);
     if (pauseUntil >= today) {
-      return { ready: false, reason: `Установлена личная пауза до ${donor.personalPauseUntil}: ${donor.personalPauseNote || ''}` };
+      return { ready: false, reason: 'Установлена личная пауза' };
     }
   }
 
@@ -140,8 +140,7 @@ export function isDonorReady(
   if (donor.nextAvailableDate) {
     const nextAvail = new Date(donor.nextAvailableDate);
     if (nextAvail > today) {
-      const days = Math.ceil((nextAvail.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      return { ready: false, reason: `Слишком мало времени прошло с последней донации (следующая возможна через ${days} дн., ${donor.nextAvailableDate})` };
+      return { ready: false, reason: 'Слишком мало времени прошло с последней донации' };
     }
   }
 

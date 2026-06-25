@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { User, BloodCenter, Donor, Donation, MedicalNote, DonorCenter } from '../types';
 import { ConfirmationModal } from './ConfirmationModal';
+import { useLanguage } from '../LanguageContext';
 
 interface AdminSectionProps {
   token: string;
@@ -29,6 +30,7 @@ interface AdminSectionProps {
 type AdminTab = 'users' | 'centers' | 'donors' | 'donations' | 'news' | 'holds' | 'appointments';
 
 export default function AdminSection({ token, t }: AdminSectionProps) {
+  const { language, setLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -364,13 +366,31 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
           </div>
         </div>
 
-        <button 
-          onClick={loadAllData}
-          title={t('Обновить данные')}
-          className="p-2.5 text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm min-h-[44px] md:min-h-0"
-        >
-          <RefreshCw className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Language Switcher */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl shadow-xs">
+            <button
+              onClick={() => setLanguage('RU')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'RU' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              RU
+            </button>
+            <button
+              onClick={() => setLanguage('BY')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'BY' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              BY
+            </button>
+          </div>
+
+          <button 
+            onClick={loadAllData}
+            title={t('Обновить данные')}
+            className="p-2.5 text-slate-500 hover:text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm min-h-[44px] md:min-h-0"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -462,7 +482,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                         <td className="px-4 py-4 font-medium text-slate-900 align-middle">{user.email}</td>
                         <td className="px-4 py-4 align-middle">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide border ${user.role === "admin" ? "bg-amber-50 text-amber-700 border-amber-200" : user.role === "center" ? "bg-indigo-50 text-indigo-700 border-indigo-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
-                            {user.role === 'admin' ? 'АДМИНИСТРАТОР' : user.role === 'center' ? 'МЕД.ЦЕНТР' : 'ДОНОР'}
+                            {user.role === 'admin' ? t('АДМИНИСТРАТОР') : user.role === 'center' ? t('МЕД.ЦЕНТР') : t('ДОНОР')}
                           </span>
                         </td>
                         <td className="px-4 py-4 align-middle">
@@ -617,7 +637,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                         <td className="px-4 py-4 text-slate-600 align-middle max-w-[150px] truncate">{center ? center.name : `ID: ${donation.centerId}`}</td>
                         <td className="px-4 py-4 align-middle">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {donation.donationType === 'blood' ? 'Цельная кровь' : donation.donationType === 'plasma' ? 'Плазма' : donation.donationType === 'platelets' ? 'Тромбоциты' : donation.donationType}
+                            {donation.donationType === 'blood' ? t('Цельная кровь') : donation.donationType === 'plasma' ? t('Плазма') : donation.donationType === 'platelets' ? t('Тромбоциты') : donation.donationType}
                           </span>
                         </td>
                         <td className="px-4 py-4 text-slate-600 align-middle font-mono text-xs">{new Date(donation.donationDate).toLocaleDateString()}</td>
@@ -779,7 +799,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                         </td>
                         <td className="px-4 py-4 align-middle">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {appt.donationType === 'blood' ? 'Цельная кровь' : appt.donationType === 'plasma' ? 'Плазма' : 'Тромбоциты'}
+                            {appt.donationType === 'blood' ? t('Цельная кровь') : appt.donationType === 'plasma' ? t('Плазма') : t('Тромбоциты')}
                           </span>
                         </td>
                         <td className="px-4 py-4 align-middle">
@@ -790,11 +810,11 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                             appt.status === 'no_show' ? 'bg-rose-50 text-rose-700 border-rose-200' :
                             'bg-slate-50 text-slate-500 border-slate-200'
                           }`}>
-                            {appt.status === 'pending' ? 'Ожидает' : 
-                             appt.status === 'confirmed' ? 'Подтверждена' : 
-                             appt.status === 'completed' ? 'Завершена' : 
-                             appt.status === 'cancelled' ? 'Отменена' : 
-                             appt.status === 'no_show' ? 'Неявка' : appt.status}
+                            {appt.status === 'pending' ? t('Ожидает') : 
+                             appt.status === 'confirmed' ? t('Подтверждена') : 
+                             appt.status === 'completed' ? t('Завершена') : 
+                             appt.status === 'cancelled' ? t('Отменена') : 
+                             appt.status === 'no_show' ? t('Неявка') : appt.status}
                           </span>
                         </td>
                         <td className="px-4 py-4 align-middle">
@@ -875,15 +895,15 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
               <form onSubmit={handleCreateCenter} className="space-y-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Полное наименование')}</label>
-                  <input required type="text" value={newCenter.name} onChange={e => setNewCenter({...newCenter, name: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder="РНПЦ трансфузиологии" />
+                  <input required type="text" value={newCenter.name} onChange={e => setNewCenter({...newCenter, name: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder={t("РНПЦ трансфузиологии")} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Юридический адрес')}</label>
-                  <input required type="text" value={newCenter.address} onChange={e => setNewCenter({...newCenter, address: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder="г. Минск, Долгиновский тракт" />
+                  <input required type="text" value={newCenter.address} onChange={e => setNewCenter({...newCenter, address: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder={t("г. Минск, Долгиновский тракт")} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Телефон регистратуры')}</label>
-                  <input required type="text" value={newCenter.phone} onChange={e => setNewCenter({...newCenter, phone: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder="+375 (...)" />
+                  <input required type="text" value={newCenter.phone} onChange={e => setNewCenter({...newCenter, phone: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder={t("+375 (...)")} />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('E-mail службы клиники')} ({t('необязательно')})</label>
@@ -891,7 +911,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Рабочие часы')}</label>
-                  <input type="text" value={newCenter.workingHours} onChange={e => setNewCenter({...newCenter, workingHours: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder="Пн-Пт: 08:00 - 15:00" />
+                  <input type="text" value={newCenter.workingHours} onChange={e => setNewCenter({...newCenter, workingHours: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder={t("Пн-Пт: 08:00 - 15:00")} />
                 </div>
                 <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-3 bg-red-600 hover:bg-red-700 hover:bg-opacity-90 text-white rounded-xl text-sm font-semibold transition-all mt-6 shadow-sm min-h-[44px] md:min-h-0">{isSaving ? t('Загрузка...') : t('Зарегистрировать клинику')}</button>
               </form>
@@ -921,7 +941,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Телефон владельца')}</label>
-                  <input required type="text" value={newDonor.phone} onChange={e => setNewDonor({...newDonor, phone: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder="+375 (...)" />
+                  <input required type="text" value={newDonor.phone} onChange={e => setNewDonor({...newDonor, phone: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder={t("+375 (...)")} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -1017,7 +1037,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Примечание/Комментарий')}</label>
-                  <input type="text" value={newDonation.note} onChange={e => setNewDonation({...newDonation, note: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder="Стандартный сеанс" />
+                  <input type="text" value={newDonation.note} onChange={e => setNewDonation({...newDonation, note: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder={t("Стандартный сеанс")} />
                 </div>
                 <button type="submit" disabled={isSaving} className="disabled:opacity-50 disabled:cursor-not-allowed w-full py-3 bg-red-600 hover:bg-red-700 hover:bg-opacity-90 text-white rounded-xl text-sm font-semibold transition-all mt-6 shadow-sm min-h-[44px] md:min-h-0">{isSaving ? t('Загрузка...') : t('Зафиксировать донацию')}</button>
               </form>
@@ -1070,7 +1090,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Причина отстранения')}</label>
-                  <input required type="text" value={newHold.reason} onChange={e => setNewHold({...newHold, reason: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder="Временная ОРВИ, татуировка..." />
+                  <input required type="text" value={newHold.reason} onChange={e => setNewHold({...newHold, reason: e.target.value})} className="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none transition-all" placeholder={t("Временная ОРВИ, татуировка...")} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -1507,19 +1527,19 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Тип донации')}</label>
                     <select value={editingEntity.data.donationType} onChange={e => setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, donationType: e.target.value } })} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                      <option value="blood">Цельная кровь</option>
-                      <option value="plasma">Плазма</option>
-                      <option value="platelets">Тромбоциты</option>
+                      <option value="blood">{t("Цельная кровь")}</option>
+                      <option value="plasma">{t("Плазма")}</option>
+                      <option value="platelets">{t("Тромбоциты")}</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Статус записи')}</label>
                     <select value={editingEntity.data.status} onChange={e => setEditingEntity({ ...editingEntity, data: { ...editingEntity.data, status: e.target.value } })} className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-                      <option value="pending">Ожидает</option>
-                      <option value="confirmed">Подтверждена</option>
-                      <option value="completed">Завершена</option>
-                      <option value="cancelled">Отменена</option>
-                      <option value="no_show">Неявка</option>
+                      <option value="pending">{t("Ожидает")}</option>
+                      <option value="confirmed">{t("Подтверждена")}</option>
+                      <option value="completed">{t("Завершена")}</option>
+                      <option value="cancelled">{t("Отменена")}</option>
+                      <option value="no_show">{t("Неявка")}</option>
                     </select>
                   </div>
                 </div>

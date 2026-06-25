@@ -220,10 +220,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   // Alert templates state with local storage support
   const [templatesList, setTemplatesList] = useState<Array<{ id: string; name: string; text: string; isCustom?: boolean }>>(() => {
     const base = [
-      { id: 'urgent_color', name: 'Дефицит крови', text: 'Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови. Пожалуйста, придите на донацию в ближайшее время.' },
-      { id: 'plasma_call', name: 'Аферез плазмы', text: 'Донор-Алерт: Просим доноров плазмы подойти для аппаратного плазмафереза в ближайшее время.' },
-      { id: 'platelet_call', name: 'Аферез тромбоцитов', text: 'Донор-Алерт: Требуются доноры тромбоцитов. Просим вас подойти в центр крови в ближайшее время.' },
-      { id: 'granulocyte_call', name: 'Дефицит гранулоцитов', text: 'Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов! Сдача клеток крови требуется в ближайшие время. ' }
+      { id: 'urgent_color', name: t('Дефицит крови'), text: t('Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови. Пожалуйста, придите на донацию в ближайшее время.') },
+      { id: 'plasma_call', name: t('Аферез плазмы'), text: t('Донор-Алерт: Просим доноров плазмы подойти для аппаратного плазмафереза в ближайшее время.') },
+      { id: 'platelet_call', name: t('Аферез тромбоцитов'), text: t('Донор-Алерт: Требуются доноры тромбоцитов. Просим вас подойти в центр крови в ближайшее время.') },
+      { id: 'granulocyte_call', name: t('Дефицит гранулоцитов'), text: t('Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов! Сдача клеток крови требуется в ближайшие время. ') }
     ];
     try {
       const saved = localStorage.getItem(`donor_alert_templates_${center?.id || 'default'}`);
@@ -409,19 +409,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     e.preventDefault();
     setManualError('');
     if (!manualForm.lastName || !manualForm.firstName || !manualForm.email || !manualForm.phone) {
-      setManualError('Заполните обязательные поля');
+      setManualError(t('Заполните обязательные поля'));
       return;
     }
     if (isBirthDateInvalid()) {
-      setManualError('Возраст донора должен быть от 18 до 65 лет');
+      setManualError(t('Возраст донора должен быть от 18 до 65 лет'));
       return;
     }
     if (isWeightInvalid()) {
-      setManualError('К донорству допускаются лица с массой тела не менее 55 кг');
+      setManualError(t('К донорству допускаются лица с массой тела не менее 55 кг'));
       return;
     }
     if (isEmailInvalid()) {
-      setManualError('Введите корректный e-mail');
+      setManualError(t('Введите корректный e-mail'));
       return;
     }
     try {
@@ -445,10 +445,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   // Confirm pending application
   const handleConfirmPending = (linkId: number) => {
     requestConfirm({
-      title: 'Одобрить заявку',
-      message: 'Вы уверены, что хотите одобрить заявку донора на прикрепление к вашему центру крови?',
+      title: t('Одобрить заявку'),
+      message: t('Вы уверены, что хотите одобрить заявку донора на прикрепление к вашему центру крови?'),
       variant: 'success',
-      confirmText: 'Одобрить',
+      confirmText: t('Одобрить'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/center/pending/${linkId}/resolve`, {
@@ -474,10 +474,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       return;
     }
     requestConfirm({
-      title: 'Отклонить заявку?',
-      message: 'Вы уверены, что хотите отклонить эту заявку? Донору будет направлено соответствующее извещение с указанной вами причиной.',
+      title: t('Отклонить заявку?'),
+      message: t('Вы уверены, что хотите отклонить эту заявку? Донору будет направлено соответствующее извещение с указанной вами причиной.'),
       variant: 'danger',
-      confirmText: 'Отклонить',
+      confirmText: t('Отклонить'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/center/pending/${rejectionModalLinkId}/resolve`, {
@@ -502,10 +502,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     e.preventDefault();
     if (!selectedDonorId) return;
     requestConfirm({
-      title: 'Сохранить донацию?',
-      message: 'Вы уверены, что хотите добавить эту запись в реестр донаций донора?',
+      title: t('Сохранить донацию?'),
+      message: t('Вы уверены, что хотите добавить эту запись в реестр донаций донора?'),
       variant: 'success',
-      confirmText: 'Сохранить',
+      confirmText: t('Сохранить'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}/donations`, {
@@ -529,10 +529,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     e.preventDefault();
     if (!selectedDonorId) return;
     requestConfirm({
-      title: 'Сохранить медотвод?',
-      message: 'Вы уверены, что хотите добавить медицинский отвод данному донору?',
+      title: t('Сохранить медотвод?'),
+      message: t('Вы уверены, что хотите добавить медицинский отвод данному донору?'),
       variant: 'danger',
-      confirmText: 'Сохранить',
+      confirmText: t('Сохранить'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}/medical-notes`, {
@@ -605,7 +605,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     // 1. Birth Date check: age between 18 and 65
     const birthDateObj = new Date(editDonorForm.birthDate);
     if (isNaN(birthDateObj.getTime())) {
-      setEditError('Пожалуйста, введите корректную дату рождения');
+      setEditError(t('Пожалуйста, введите корректную дату рождения'));
       return;
     }
     const today = new Date();
@@ -615,29 +615,29 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       age--;
     }
     if (age < 18 || age > 65) {
-      setEditError('Возраст донора должен быть от 18 до 65 лет');
+      setEditError(t('Возраст донора должен быть от 18 до 65 лет'));
       return;
     }
 
     // 2. Email pattern check: *@* (at least 1 character before and after @)
     const emailRegex = /^.+@.+$/;
     if (!emailRegex.test(editDonorForm.email)) {
-      setEditError('Укажите корректный e-mail в формате user@example.com (должен содержать символы до и после @)');
+      setEditError(t('Укажите корректный e-mail в формате user@example.com (должен содержать символы до и после @)'));
       return;
     }
 
     // 3. Weight check: not less than 55 kg
     const weightVal = parseFloat(editDonorForm.weight);
     if (isNaN(weightVal) || weightVal < 55) {
-      setEditError('Минимальный вес донора для сдачи крови — 55 кг');
+      setEditError(t('Минимальный вес донора для сдачи крови — 55 кг'));
       return;
     }
 
     requestConfirm({
-      title: 'Сохранить изменения?',
-      message: 'Вы уверены, что хотите обновить данные донора?',
+      title: t('Сохранить изменения?'),
+      message: t('Вы уверены, что хотите обновить данные донора?'),
       variant: 'success',
-      confirmText: 'Сохранить',
+      confirmText: t('Сохранить'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/center/donors/${selectedDonorId}`, {
@@ -652,10 +652,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             loadDonors();
           } else {
             const data = await res.json();
-            setEditError(data.error || 'Произошла ошибка при сохранении');
+            setEditError(data.error || t('Произошла ошибка при сохранении'));
           }
         } catch {
-          setEditError('Произошла ошибка сети');
+          setEditError(t('Произошла ошибка сети'));
         }
         closeConfirm();
       }
@@ -665,16 +665,16 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const handleLiftMedical = (noteId: number) => {
     if (!selectedDonorId) return;
     requestConfirm({
-      title: 'Снять медотвод?',
-      message: 'Вы уверены, что хотите досрочно снять медицинский отвод? Это действие позволит донору снова записываться на донации.',
+      title: t('Снять медотвод?'),
+      message: t('Вы уверены, что хотите досрочно снять медицинский отвод? Это действие позволит донору снова записываться на донации.'),
       variant: 'warning',
-      confirmText: 'Снять',
+      confirmText: t('Снять'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/center/medical-notes/${noteId}/lift`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ liftNote: 'Снят досрочно лечащим врачом-трансфузиологом РНПЦ', liftedBy: 2 })
+            body: JSON.stringify({ liftNote: t('Снят досрочно лечащим врачом-трансфузиологом РНПЦ'), liftedBy: 2 })
           });
           if (res.ok) {
             // alert('Медотвод снят!');
@@ -695,10 +695,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       return;
     }
     requestConfirm({
-      title: 'Подтвердите отправку оповещения',
-      message: `Потенциальное количество получателей: ${notifyPreviewCount}. Начать рассылку?`,
+      title: t('Подтвердите отправку оповещения'),
+      message: `${t('Потенциальное количество получателей:')} ${notifyPreviewCount}. ${t('Начать рассылку?')}`,
       variant: 'warning',
-      confirmText: 'Отправить',
+      confirmText: t('Отправить'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/center/notify/send`, {
@@ -708,7 +708,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           });
           const data = await res.json();
           if (res.ok) {
-            setNotifySuccessMsg(`Рассылка отправлена! Получателей: ${data.recipientsCount}. Подробности:\n- Push получено: ${data.pushSent}\n- Email направлено: ${data.emailSent}`);
+            setNotifySuccessMsg(`${t('Рассылка отправлена! Получателей:')} ${data.recipientsCount}. ${t('Подробности:')}\n- ${t('Push получено:')} ${data.pushSent}\n- ${t('Email направлено:')} ${data.emailSent}`);
             setNotifyForm({ ...notifyForm, messageText: '' });
             refreshDashboard();
           }
@@ -720,34 +720,34 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
   const getUrgentColorText = (groups: string[]) => {
     const groupsText = groups.length > 0 
-      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' ' + t('и') + ' ' + groups[groups.length - 1])
       : '';
     const bloodSpace = groupsText ? ' ' + groupsText : '';
-    return `Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови${bloodSpace}. Пожалуйста, придите на донацию в ближайшее время.`;
+    return `${t('Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови')}${bloodSpace}. ${t('Пожалуйста, придите на донацию в ближайшее время.')}`;
   };
 
   const getPlasmaCallText = (groups: string[]) => {
     const groupsText = groups.length > 0 
-      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' ' + t('и') + ' ' + groups[groups.length - 1])
       : '';
     const bloodSpace = groupsText ? ' ' + groupsText : '';
-    return `Донор-Алерт: Просим доноров плазмы${bloodSpace} подойти для аппаратного плазмафереза в ближайшее время.`;
+    return `${t('Донор-Алерт: Просим доноров плазмы')}${bloodSpace} ${t('подойти для аппаратного плазмафереза в ближайшее время.')}`;
   };
 
   const getPlateletCallText = (groups: string[]) => {
     const groupsText = groups.length > 0 
-      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' ' + t('и') + ' ' + groups[groups.length - 1])
       : '';
     const bloodSpace = groupsText ? ' ' + groupsText : '';
-    return `Донор-Алерт: Требуются доноры тромбоцитов${bloodSpace}. Просим вас подойти в центр крови в ближайшее время.`;
+    return `${t('Донор-Алерт: Требуются доноры тромбоцитов')}${bloodSpace}. ${t('Просим вас подойти в центр крови в ближайшее время.')}`;
   };
 
   const getGranulocyteCallText = (groups: string[]) => {
     const groupsText = groups.length > 0 
-      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+      ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' ' + t('и') + ' ' + groups[groups.length - 1])
       : '';
     const bloodSpace = groupsText ? ' ' + groupsText : '';
-    return `Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов${bloodSpace}! Сдача клеток крови требуется в ближайшие время. `;
+    return `${t('Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов')}${bloodSpace}! ${t('Сдача клеток крови требуется в ближайшие время. ')}`;
   };
 
   const getUpdatedTemplateText = (id: string, groups: string[]) => {
@@ -818,11 +818,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   // Manage regional news CRUD
   const handleNeedsSubmit = () => {
     requestConfirm({
-      title: 'Сохранить дефициты?',
-      message: 'Вы уверены, что хотите обновить уровни запасов крови в донорском светофоре вашего центра?',
+      title: t('Сохранить дефициты?'),
+      message: t('Вы уверены, что хотите обновить уровни запасов крови в донорском светофоре вашего центра?'),
       variant: 'success',
-      confirmText: 'Сохранить',
-      cancelText: 'Отмена',
+      confirmText: t('Сохранить'),
+      cancelText: t('Отмена'),
       onConfirm: async () => {
         setNeedsSaving(true);
         try {
@@ -847,10 +847,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const handleNewsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     requestConfirm({
-      title: editingNews ? 'Сохранить публикацию?' : 'Опубликовать новость?',
-      message: 'Вы уверены, что хотите сохранить изменения и опубликовать новость на портале?',
+      title: editingNews ? 'Сохранить публикацию?' : t('Опубликовать новость?'),
+      message: t('Вы уверены, что хотите сохранить изменения и опубликовать новость на портале?'),
       variant: 'info',
-      confirmText: 'Сохранить',
+      confirmText: t('Сохранить'),
       onConfirm: async () => {
         try {
           const method = editingNews ? 'PUT' : 'POST';
@@ -873,10 +873,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
   const handleNewsDelete = (id: number) => {
     requestConfirm({
-      title: 'Удалить новость?',
-      message: 'Вы уверены, что хотите безвозвратно удалить эту новость?',
+      title: t('Удалить новость?'),
+      message: t('Вы уверены, что хотите безвозвратно удалить эту новость?'),
       variant: 'danger',
-      confirmText: 'Удалить',
+      confirmText: t('Удалить'),
       onConfirm: async () => {
         try {
           const res = await fetch(`${apiBase}/news/${id}`, { method: 'DELETE' });
@@ -890,10 +890,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   };
 
   const bloodSlices = [
-    { id: 'I_O', label: 'I (O) – Первая', count: stats.bloodGroupStats.I_O, stroke: '#dc2626', bg: 'bg-red-600' },
-    { id: 'II_A', label: 'II (A) – Вторая', count: stats.bloodGroupStats.II_A, stroke: '#b91c1c', bg: 'bg-red-700' },
-    { id: 'III_B', label: 'III (B) – Третья', count: stats.bloodGroupStats.III_B, stroke: '#f87171', bg: 'bg-red-400' },
-    { id: 'IV_AB', label: 'IV (AB) – Четвертая', count: stats.bloodGroupStats.IV_AB, stroke: '#fca5a5', bg: 'bg-red-300' }
+    { id: 'I_O', label: t('I (O) – Первая'), count: stats.bloodGroupStats.I_O, stroke: '#dc2626', bg: 'bg-red-600' },
+    { id: 'II_A', label: t('II (A) – Вторая'), count: stats.bloodGroupStats.II_A, stroke: '#b91c1c', bg: 'bg-red-700' },
+    { id: 'III_B', label: t('III (B) – Третья'), count: stats.bloodGroupStats.III_B, stroke: '#f87171', bg: 'bg-red-400' },
+    { id: 'IV_AB', label: t('IV (AB) – Четвертая'), count: stats.bloodGroupStats.IV_AB, stroke: '#fca5a5', bg: 'bg-red-300' }
   ];
   let currentAccum = 0;
   const pieData = bloodSlices.map(slice => {
@@ -923,13 +923,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
         <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1 overflow-x-auto max-w-full scrollbar-hide flex-nowrap md:flex-wrap scroll-fade-edge pr-8 md:pr-1">
           {[
-            { id: 'stats', label: 'Показатели', icon: Activity },
-            { id: 'donors', label: 'Доноры', icon: Users },
-            { id: 'pending', label: 'Заявки', icon: HelpCircle },
-            { id: 'appointments', label: 'Записи', icon: Calendar },
-            { id: 'notify', label: 'Рассылка', icon: Bell },
-            { id: 'news', label: 'Новости', icon: FileText },
-            { id: 'needs', label: 'Дефициты', icon: Droplets }
+            { id: 'stats', label: t('Показатели'), icon: Activity },
+            { id: 'donors', label: t('Доноры'), icon: Users },
+            { id: 'pending', label: t('Заявки'), icon: HelpCircle },
+            { id: 'appointments', label: t('Записи'), icon: Calendar },
+            { id: 'notify', label: t('Рассылка'), icon: Bell },
+            { id: 'news', label: t('Новости'), icon: FileText },
+            { id: 'needs', label: t('Дефициты'), icon: Droplets }
           ].map(menu => {
             const Icon = menu.icon;
             return (
@@ -966,9 +966,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               
               {/* Popover summary list on hover */}
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
-                Все зарегистрированные доноры, отслеживаемые данным центром.
-              </div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>{t("Все зарегистрированные доноры, отслеживаемые данным центром.")}</div>
             </div>
 
             <div className="bg-white border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
@@ -977,7 +975,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
-                Остальные — временно отстранены (сроки/медотводы).
+                {t('Остальные — временно отстранены (сроки/медотводы).')}
               </div>
             </div>
 
@@ -986,9 +984,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <span className="text-3xl sm:text-4xl font-bold text-amber-500 leading-none tracking-tight">{stats.pendingCount}</span>
 
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
-                Новые заявки от доноров на прикрепление к вашему центру.
-              </div>
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>{t("Новые заявки от доноров на прикрепление к вашему центру.")}</div>
             </div>
 
             <div className="bg-white border border-blue-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
@@ -997,7 +993,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
-                Количество отправленных SMS-оповещений.
+                {t('Количество отправленных SMS-оповещений.')}
               </div>
             </div>
           </div>
@@ -1050,7 +1046,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   {pieData.map(slice => (
                     <div key={slice.id} className="flex items-center gap-2 whitespace-nowrap">
                       <span className={`w-3 h-3 rounded ${slice.bg} block shrink-0`}></span>
-                      <span className="truncate"><strong>{slice.label}:</strong> {slice.count} дон.</span>
+                      <span className="truncate"><strong>{slice.label}:</strong> {slice.count} {t('дон.')}</span>
                     </div>
                   ))}
                 </div>
@@ -1128,20 +1124,17 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   onClick={handleOpenEditDonor}
                   className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs px-4 py-2 rounded-xl flex items-center min-h-[44px] md:min-h-0"
                 >
-                  <Edit3 className="w-4 h-4 mr-1" /> Редактировать данные донора
-                </button>
+                  <Edit3 className="w-4 h-4 mr-1" />{t("Редактировать данные донора")}</button>
                 <button 
                   onClick={() => setShowAddDonationModal(true)}
                   className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center"
                 >
-                  <Plus className="w-4 h-4 mr-1" /> Добавить запись о донации
-                </button>
+                  <Plus className="w-4 h-4 mr-1" />{t("Добавить запись о донации")}</button>
                 <button 
                   onClick={() => setShowAddMedicalModal(true)}
                   className="bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center"
                 >
-                  <ShieldAlert className="w-4 h-4 mr-1" /> Добавить медотвод
-                </button>
+                  <ShieldAlert className="w-4 h-4 mr-1" />{t("Добавить медотвод")}</button>
               </div>
 
               {/* Collapsible Accordions for Donor Card details */}
@@ -1167,19 +1160,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                             if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
                             return age;
                           })()
-                        } лет)
+                         } {t('лет')})
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
                       <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                        {donorCard.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+                        {donorCard.donor.gender === 'male' ? t('Мужской') : t('Женский')}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
                       <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                        {donorCard.donor.weight} кг
+                        {donorCard.donor.weight} {t('кг')}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2.5 gap-2">
@@ -1200,13 +1193,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("E-mail / Личный ID")}</span>
                       <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                        {donorCard.donor.email || donorCard.donor.onesignalPlayerId || 'Не указан'}
+                        {donorCard.donor.email || donorCard.donor.onesignalPlayerId || t('Не указан')}
                       </span>
                     </div>
                   </div>
                 </CenterAccordionItem>
 
-                <CenterAccordionItem title={`История процедур сдачи крови (${donorCard.donations.length})`}>
+                <CenterAccordionItem title={`${t('История процедур сдачи крови')} (${donorCard.donations.length})`}>
                   <div className="overflow-x-auto border border-slate-100 rounded-2xl bg-white dark:border-slate-800">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
@@ -1221,8 +1214,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       <tbody className="divide-y divide-slate-100 text-slate-600 dark:divide-slate-800">
                         {donorCard.donations.map(don => {
                           const donType = don.donationType || don.type;
-                          const typeLabel = donType === 'blood' ? 'Кровь' : donType === 'plasma' ? 'Плазма' : donType === 'platelets' ? 'Тромбоциты' : donType;
-                          const paidLabel = don.isPaid ? 'возмездно' : 'безвозмездно';
+                          const typeLabel = donType === 'blood' ? 'Кровь' : donType === 'plasma' ? t('Плазма') : donType === 'platelets' ? t('Тромбоциты') : donType;
+                          const paidLabel = don.isPaid ? t('возмездно') : t('безвозмездно');
                           const volume = don.volumeMl || don.volume || '—';
                           
                           return (
@@ -1240,10 +1233,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                   onClick={(e) => {
                                     e.preventDefault();
                                     requestConfirm({
-                                      title: 'Удалить донацию?',
-                                      message: 'Это действие необратимо. Запись будет навсегда удалена из истории донора.',
+                                      title: t('Удалить донацию?'),
+                                      message: t('Это действие необратимо. Запись будет навсегда удалена из истории донора.'),
                                       variant: 'danger',
-                                      confirmText: 'Удалить',
+                                      confirmText: t('Удалить'),
                                       onConfirm: async () => {
                                         try {
                                           const res = await fetch(`${apiBase}/donations/${don.id}`, { method: 'DELETE' });
@@ -1257,9 +1250,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                     });
                                   }}
                                   className="text-red-500 hover:text-red-700 font-semibold text-[10px] uppercase tracking-wider"
-                                >
-                                  Удалить
-                                </button>
+                                >{t("Удалить")}</button>
                             </td>
                           </tr>
                           );
@@ -1274,7 +1265,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   </div>
                 </CenterAccordionItem>
 
-                <CenterAccordionItem title={`Медицинские отводы и ограничения (${donorCard.medicalNotes.length})`}>
+                <CenterAccordionItem title={`${t('Медицинские отводы и ограничения')} (${donorCard.medicalNotes.length})`}>
                   <div className="space-y-2.5">
                     {donorCard.medicalNotes.map(note => (
                       <div key={note.id} className={`p-4 rounded-xl border flex justify-between items-start gap-4 ${note.isActive ? 'bg-red-50/55 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
@@ -1291,9 +1282,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <button 
                             onClick={() => handleLiftMedical(note.id)}
                             className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 hover:border-slate-300 text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 cursor-pointer"
-                          >
-                            Снять медотвод
-                          </button>
+                          >{t("Снять медотвод")}</button>
                         )}
                       </div>
                     ))}
@@ -1326,8 +1315,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     }}
                     className="bg-red-650 hover:bg-red-700 bg-red-600 text-white font-semibold text-xs px-4 py-2.5 rounded-xl flex items-center"
                   >
-                    <Plus className="w-4 h-4 mr-1" /> Занести нового донора
-                  </button>
+                    <Plus className="w-4 h-4 mr-1" />{t("Занести нового донора")}</button>
                 </div>
               </div>
 
@@ -1462,27 +1450,22 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         </td>
                         <td className="p-3">
                           {item.readiness?.ready ? (
-                            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wide">
-                              Готов к сдаче
-                            </span>
+                            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wide">{t("Готов к сдаче")}</span>
                           ) : (
                             <span 
                               className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-wide cursor-help"
-                              title={item.readiness?.reason || 'Имеет ограничения или отвод'}
-                            >
-                              Медотвод
-                            </span>
+                              title={item.readiness?.reason || t('Имеет ограничения или отвод')}
+                            >{t("Медотвод")}</span>
                           )}
                         </td>
-                        <td className="p-3 font-mono">{item.lastDonationDate ? formatDateHuman(item.lastDonationDate) : 'Ни разу'}</td>
+                        <td className="p-3 font-mono">{item.lastDonationDate ? formatDateHuman(item.lastDonationDate) : t('Ни разу')}</td>
                         <td className="p-3 font-semibold text-slate-800">{item.donationsCount}</td>
                         <td className="p-3">
                           <button 
                             onClick={() => loadDonorCard(item.id)}
                             className="p-1 text-red-600 hover:text-red-700 font-semibold text-[11px] inline-flex items-center"
                           >
-                            <Eye className="w-3.5 h-3.5 mr-1" /> Карта донора
-                          </button>
+                            <Eye className="w-3.5 h-3.5 mr-1" />{t("Карта донора")}</button>
                         </td>
                       </tr>
                     ))}
@@ -1515,7 +1498,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 onClick={() => setPendingDonorProfile(null)}
                 className="absolute right-4 top-4 bg-slate-100 hover:bg-slate-200 text-slate-750 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
               >
-                ← Вернуться к заявкам
+                {t('← Вернуться к заявкам')}
               </button>
 
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pt-4 border-b pb-4 border-slate-100">
@@ -1530,8 +1513,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       : 'bg-red-50 text-red-700 border border-red-100'
                   }`}>
                     {pendingDonorProfile.card.readiness.ready 
-                      ? 'Готов к донации цельной крови' 
-                      : 'Медотвод / Ограничение'}
+                      ? t('Готов к донации цельной крови') 
+                      : t('Медотвод / Ограничение')}
                   </span>
                 </div>
               </div>
@@ -1561,13 +1544,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                             if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
                             return age;
                           })()
-                        } лет)
+                         } {t('лет')})
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
                       <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                        {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+                        {pendingDonorProfile.card.donor.gender === 'male' ? t('Мужской') : t('Женский')}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
@@ -1577,12 +1560,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("E-mail / Личный идентификатор")}</span>
                       <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                        {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
+                        {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || t('Не указан')}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
-                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{pendingDonorProfile.card.donor.weight} кг</span>
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{pendingDonorProfile.card.donor.weight} {t('кг')}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Группа / Резус")}</span>
@@ -1599,7 +1582,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       <span className="text-slate-500 font-medium font-sans">{t("Уведомления")}</span>
                       <span className="font-semibold text-slate-650 text-left sm:text-right text-xs w-full sm:w-auto">
                         {pendingDonorProfile.card.donor.pushEnabled ? 'Push' : ''} {pendingDonorProfile.card.donor.emailNotificationsEnabled ? 'Email' : ''} 
-                        {!pendingDonorProfile.card.donor.pushEnabled && !pendingDonorProfile.card.donor.emailNotificationsEnabled ? 'Отключены' : ''}
+                        {!pendingDonorProfile.card.donor.pushEnabled && !pendingDonorProfile.card.donor.emailNotificationsEnabled ? t('Отключены') : ''}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
@@ -1620,15 +1603,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <div key={note.id} className="p-3.5 rounded-xl border border-red-150 bg-red-50/30 text-xs text-slate-700">
                             <p className="font-semibold text-red-800">{t("Причина")}: {note.reason}</p>
                             <p className="text-[11px] text-slate-500 mt-1">
-                              Срок проведения отвода: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : 'бессрочно'}
+                              Срок проведения отвода: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : t('бессрочно')}
                             </p>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="p-4 bg-emerald-50/20 border border-emerald-100 rounded-2xl text-xs text-emerald-800 italic">
-                        Противопоказания и временные ограничения отсутствуют.
-                      </div>
+                      <div className="p-4 bg-emerald-50/20 border border-emerald-100 rounded-2xl text-xs text-emerald-800 italic">{t("Противопоказания и временные ограничения отсутствуют.")}</div>
                     )}
                   </div>
 
@@ -1652,10 +1633,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                   {formatDateHuman(don.donationDate || don.date)}
                                 </td>
                                 <td className="p-3 border-r border-slate-100 capitalize">
-                                  {don.donationType === 'blood' ? 'кровь' : don.donationType === 'plasma' ? 'плазма' : 'тромбоциты'}
+                                  {don.donationType === 'blood' ? t('кровь') : don.donationType === 'plasma' ? t('плазма') : t('тромбоциты')}
                                 </td>
                                 <td className="p-3 font-semibold text-slate-800">
-                                  {don.volumeMl || don.volume || '—'} мл
+                                  {don.volumeMl || don.volume || '—'} {t('мл')}
                                 </td>
                               </tr>
                             ))}
@@ -1663,9 +1644,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         </table>
                       </div>
                     ) : (
-                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs text-slate-400 italic">
-                        История донаций в системе не найдена.
-                      </div>
+                      <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs text-slate-400 italic">{t("История донаций в системе не найдена.")}</div>
                     )}
                   </div>
                 </div>
@@ -1680,8 +1659,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   }}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-6 py-3 rounded-xl flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md cursor-pointer transition-all"
                 >
-                  <Check className="w-4 h-4" /> Одобрить анкету кандидата
-                </button>
+                  <Check className="w-4 h-4" />{t("Одобрить анкету кандидата")}</button>
                 <button 
                   onClick={() => {
                     setRejectionModalLinkId(pendingDonorProfile.linkId);
@@ -1690,14 +1668,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   }}
                   className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-6 py-3 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                 >
-                  <X className="w-4 h-4" /> Отклонить обращение
-                </button>
+                  <X className="w-4 h-4" />{t("Отклонить обращение")}</button>
                 <button 
                   onClick={() => setPendingDonorProfile(null)}
                   className="border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-6 py-3 rounded-xl cursor-pointer transition-colors"
-                >
-                  Вернуться назад
-                </button>
+                >{t("Вернуться назад")}</button>
               </div>
             </div>
           ) : (
@@ -1715,7 +1690,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         <h4 className="font-bold text-slate-900 text-sm">{item.donor.lastName} {item.donor.firstName} {item.donor.middleName}</h4>
                         {item.link.resubmissionCount > 0 && (
                           <span className="bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                            Повторная подача ({item.link.resubmissionCount})
+                            {t('Повторная подача')} ({item.link.resubmissionCount})
                           </span>
                         )}
                       </div>
@@ -1729,20 +1704,17 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         onClick={() => handleViewPendingProfile(item.donor.id, item.link.id)}
                         className="w-full md:w-auto bg-red-50 hover:bg-red-150 border border-red-200 text-red-700 text-xs font-bold px-4 py-3 md:py-2 rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer min-h-[44px] md:min-h-0"
                       >
-                        <Eye className="w-4 h-4" /> Посмотреть анкету
-                      </button>
+                        <Eye className="w-4 h-4" />{t("Посмотреть анкету")}</button>
                       <button 
                         onClick={() => handleConfirmPending(item.link.id)}
                         className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-3 md:py-2 rounded-xl flex items-center justify-center shadow-xs min-h-[44px] md:min-h-0"
                       >
-                        <Check className="w-4 h-4 mr-1" /> Одобрить анкету
-                      </button>
+                        <Check className="w-4 h-4 mr-1" />{t("Одобрить анкету")}</button>
                       <button 
                         onClick={() => { setRejectionModalLinkId(item.link.id); setRejectionReason(''); }}
                         className="w-full md:w-auto bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4 py-3 md:py-2 rounded-xl flex items-center justify-center min-h-[44px] md:min-h-0"
                       >
-                        <X className="w-4 h-4 mr-1" /> Отклонить
-                      </button>
+                        <X className="w-4 h-4 mr-1" />{t("Отклонить")}</button>
                     </div>
                   </div>
                 ))}
@@ -1781,7 +1753,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <div key={date} className="space-y-3.5">
                 <h4 className="font-bold text-slate-700 bg-slate-50 px-4 py-2 rounded-lg border border-slate-100 flex justify-between items-center">
                   <span>{new Date(date).toLocaleDateString('ru-RU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                  <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">{dayAppts.length} чел.</span>
+                  <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">{dayAppts.length} {t('чел.')}</span>
                 </h4>
                 <div className="space-y-3.5">
                   {dayAppts.map(a => (
@@ -1795,7 +1767,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                               a.status === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
                               'bg-slate-100 text-slate-700 border border-slate-200'
                           }`}>
-                            {a.status === 'pending' ? 'Ожидает' : a.status === 'confirmed' ? 'Подтверждена' : a.status === 'completed' ? 'Завершена' : a.status === 'cancelled' ? 'Отменена' : 'Неявка'}
+                            {a.status === 'pending' ? t('Ожидает') : a.status === 'confirmed' ? t('Подтверждена') : a.status === 'completed' ? t('Завершена') : a.status === 'cancelled' ? t('Отменена') : t('Неявка')}
                           </span>
                         </div>
                         <div className="text-xs text-slate-600 space-y-1 font-light flex items-center gap-2">
@@ -1803,7 +1775,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <span>•</span>
                           <span className="bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{a.donorBg}</span>
                           <span>•</span>
-                          <span>{a.donationType === 'blood' ? 'Цельная кровь' : a.donationType === 'plasma' ? 'Плазма' : 'Тромбоциты'}</span>
+                          <span>{a.donationType === 'blood' ? t('Цельная кровь') : a.donationType === 'plasma' ? t('Плазма') : t('Тромбоциты')}</span>
                         </div>
                       </div>
 
@@ -1817,20 +1789,18 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                 loadAppointments();
                             }}
                             className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
-                          >
-                            Подтвердить
-                          </button>
+                          >{t("Подтвердить")}</button>
                         )}
                         {(a.status === 'pending' || a.status === 'confirmed') && (
                           <>
                             <button 
                               onClick={() => {
                                   requestConfirm({
-                                      title: 'Завершить донацию?',
-                                      message: `Вы уверены, что хотите отметить донацию донора ${a.donorName} как завершенную?`,
+                                      title: t('Завершить донацию?'),
+                                      message: `${t('Вы уверены, что хотите отметить донацию донора')} ${a.donorName} ${t('как завершенную?')}`,
                                       variant: 'success',
-                                      confirmText: 'Завершить',
-                                      cancelText: 'Отмена',
+                                      confirmText: t('Завершить'),
+                                      cancelText: t('Отмена'),
                                       onConfirm: async () => {
                                           await fetch(`${apiBase}/appointments/${a.id}`, {
                                               method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
@@ -1842,16 +1812,15 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                               }}
                               className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >
-                              <Check className="w-4 h-4 mr-1" /> Завершена
-                            </button>
+                              <Check className="w-4 h-4 mr-1" />{t("Завершена")}</button>
                             <button 
                               onClick={() => {
                                   requestConfirm({
-                                      title: 'Отклонить запись?',
-                                      message: `Вы уверены, что хотите отклонить запись донора ${a.donorName} на донацию?`,
+                                      title: t('Отклонить запись?'),
+                                      message: `${t('Вы уверены, что хотите отклонить запись донора')} ${a.donorName} ${t('на донацию?')}`,
                                       variant: 'danger',
-                                      confirmText: 'Отклонить',
-                                      cancelText: 'Отмена',
+                                      confirmText: t('Отклонить'),
+                                      cancelText: t('Отмена'),
                                       onConfirm: async () => {
                                           await fetch(`${apiBase}/appointments/${a.id}`, {
                                               method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'cancelled'})
@@ -1861,9 +1830,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                   });
                               }}
                               className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
-                            >
-                              Отклонить
-                            </button>
+                            >{t("Отклонить")}</button>
                           </>
                         )}
                       </div>
@@ -1873,7 +1840,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             ))}
             {appointments.length === 0 && (
-              <div className="text-sm py-12 text-center text-slate-400">Нет записей на донацию</div>
+              <div className="text-sm py-12 text-center text-slate-400">{t("Нет записей на донацию")}</div>
             )}
           </div>
         </motion.div>
@@ -2003,9 +1970,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         <label>{t("Предпочтительный канал доставки рассылки:")}</label>
                         <div className="flex flex-wrap gap-4 pt-1 font-medium">
                           {[
-                            { id: 'all', label: 'Оба канала (Push + Email)' },
-                            { id: 'push', label: 'Только Push-уведомления' },
-                            { id: 'email', label: 'Только письма на E-mail' }
+                            { id: 'all', label: t('Оба канала (Push + Email)') },
+                            { id: 'push', label: t('Только Push-уведомления') },
+                            { id: 'email', label: t('Только письма на E-mail') }
                           ].map(chan => (
                             <label key={chan.id} className="flex items-center text-sm cursor-pointer font-semibold text-slate-700">
                               <input 
@@ -2317,11 +2284,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
                       {/* LIVE RECIPIENT COUNT INDICATOR */}
                       <div className="p-4 bg-red-50/40 rounded-xl border border-red-100 flex justify-between items-center text-sm">
-                        <span className="font-semibold text-red-850 text-red-800">
-                          Рассылка будет отправлена строго:
-                        </span>
+                        <span className="font-semibold text-red-850 text-red-800">{t("Рассылка будет отправлена строго:")}</span>
                         <span className="bg-red-600 text-white font-mono font-bold text-sm px-4 py-1.5 rounded-full">
-                          {notifyPreviewCount} подходящим донорам центра
+                          {notifyPreviewCount} {t('подходящим донорам центра')}
                         </span>
                       </div>
 
@@ -2422,8 +2387,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               }}
               className="bg-red-600 hover:bg-red-700 text-white font-semibold text-xs px-4 py-2 rounded-xl flex items-center shrink-0 w-max"
             >
-              <Plus className="w-4 h-4 mr-1" /> Опубликовать новость
-            </button>
+              <Plus className="w-4 h-4 mr-1" />{t("Опубликовать новость")}</button>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
@@ -2463,9 +2427,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <button 
                   onClick={() => setNewsDateFilter('')}
                   className="px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-100 rounded-xl w-full sm:w-auto mt-2 sm:mt-0 lg:h-9"
-                >
-                  Сбросить дату
-                </button>
+                >{t("Сбросить дату")}</button>
               </div>
             )}
           </div>
@@ -2491,9 +2453,9 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <div key={item.id} className="bg-white p-5 rounded-2xl border border-slate-250 border-slate-100 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-semibold text-slate-500">{item.publishedAt ? formatDateHuman(item.publishedAt) : 'Проект'}</span>
+                    <span className="text-xs font-semibold text-slate-500">{item.publishedAt ? formatDateHuman(item.publishedAt) : t('Проект')}</span>
                     <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${isActuallyPublished ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-600 border border-amber-200'}`}>
-                      {isActuallyPublished ? 'Опубликовано' : 'Ещё не опубликована'}
+                      {isActuallyPublished ? t('Опубликовано') : t('Ещё не опубликована')}
                     </span>
                   </div>
                   <h4 className="font-bold text-slate-800 text-base mb-2">{item.title}</h4>
@@ -2513,15 +2475,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       setShowNewsModal(true);
                     }}
                     className="text-[13px] font-semibold text-slate-700 hover:underline"
-                  >
-                    Редактировать
-                  </button>
+                  >{t("Редактировать")}</button>
                   <button 
                     onClick={() => handleNewsDelete(item.id)}
                     className="text-[13px] font-semibold text-red-600 hover:underline"
-                  >
-                    Удалить
-                  </button>
+                  >{t("Удалить")}</button>
                 </div>
               </div>
             );
@@ -2549,7 +2507,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               disabled={needsSaving}
               className="bg-red-600 hover:bg-red-700 text-white font-semibold px-5 py-2.5 rounded-xl text-xs flex items-center transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
             >
-              {needsSaving ? 'Сохранение...' : (needsSuccess ? 'Сохранено!' : 'Сохранить изменения')}
+              {needsSaving ? t('Сохранение...') : (needsSuccess ? t('Сохранено!') : t('Сохранить изменения'))}
             </button>
           </div>
 
@@ -2626,13 +2584,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   type="button" 
                   onClick={() => setRejectionModalLinkId(null)}
                   className="w-1/3 bg-slate-150 bg-slate-100 text-xs font-semibold rounded-xl"
-                >
-                  Отмена
-                </button>
+                >{t("Отмена")}</button>
                 <button 
                   type="submit" disabled={isSaving} 
                   className="w-2/3 bg-red-650 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl min-h-[44px] md:min-h-0"
-                >{isSaving ? 'Подождите...' : 'Отклонить заявку'}</button>
+                >{isSaving ? t('Подождите...') : t('Отклонить заявку')}</button>
               </div>
             </form>
           </div>
@@ -2715,7 +2671,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 />
               </div>
 
-              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Записать в базу и пересчитать сроки'}</button>
+              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? t('Подождите...') : t('Записать в базу и пересчитать сроки')}</button>
             </form>
           </div>
         </div>
@@ -2726,7 +2682,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         const editDonorAgeError = (() => {
           if (!editDonorForm.birthDate) return null;
           const birthDateObj = new Date(editDonorForm.birthDate);
-          if (isNaN(birthDateObj.getTime())) return 'Пожалуйста, введите корректную дату рождения';
+          if (isNaN(birthDateObj.getTime())) return t('Пожалуйста, введите корректную дату рождения');
           const today = new Date();
           let age = today.getFullYear() - birthDateObj.getFullYear();
           const m = today.getMonth() - birthDateObj.getMonth();
@@ -2734,7 +2690,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             age--;
           }
           if (age < 18 || age > 65) {
-            return `Возраст донора должен быть от 18 до 65 лет (сейчас: ${age < 0 ? 0 : age})`;
+            return `${t('Возраст донора должен быть от 18 до 65 лет (сейчас:')} ${age < 0 ? 0 : age})`;
           }
           return null;
         })();
@@ -2743,7 +2699,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           if (!editDonorForm.email) return null;
           const emailRegex = /^.+@.+$/;
           if (!emailRegex.test(editDonorForm.email)) {
-            return 'E-mail должен быть вида *@* (символы до и после @)';
+            return t('E-mail должен быть вида *@* (символы до и после @)');
           }
           return null;
         })();
@@ -2752,7 +2708,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           if (!editDonorForm.weight) return null;
           const w = parseFloat(editDonorForm.weight);
           if (isNaN(w) || w < 55) {
-            return 'Минимальный вес должен быть не менее 55 кг';
+            return t('Минимальный вес должен быть не менее 55 кг');
           }
           return null;
         })();
@@ -2772,11 +2728,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <form onSubmit={handleEditDonorSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Фамилия <span className="text-red-500">*</span></label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">{t("Фамилия")}<span className="text-red-500">*</span></label>
                     <input required type="text" value={editDonorForm.lastName} onChange={e => handleEditDonorNameChange('lastName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Имя <span className="text-red-500">*</span></label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">{t("Имя")}<span className="text-red-500">*</span></label>
                     <input required type="text" value={editDonorForm.firstName} onChange={e => handleEditDonorNameChange('firstName', e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-800 focus:outline-none focus:border-red-500" />
                   </div>
                   <div>
@@ -2788,7 +2744,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                   <div className="relative group/field">
                     <label className="block text-xs font-bold text-slate-500 mb-1 flex items-center justify-between">
-                      <span>Дата рождения <span className="text-red-500">*</span></span>
+                      <span>{t("Дата рождения")}<span className="text-red-500">*</span></span>
                     </label>
                     <input 
                       required 
@@ -2812,7 +2768,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       }`} 
                     />
                     {editDonorAgeError && (
-                      <p className="text-xs text-red-500 mt-1">{t("Возраст донора должен быть от 18 до 65 лет")}</p>
+                      <p className="text-xs text-red-500 mt-1">{t(t("Возраст донора должен быть от 18 до 65 лет"))}</p>
                     )}
                   </div>
                   <div>
@@ -2826,7 +2782,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-1">Телефон <span className="text-red-500">*</span></label>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">{t("Телефон")}<span className="text-red-500">*</span></label>
                     <input required type="tel" value={editDonorForm.phone} onChange={handleEditDonorPhoneChange} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-base md:text-sm min-h-[44px] md:min-h-0 font-bold text-slate-800 focus:outline-none focus:border-red-500" />
                   </div>
                   <div className="relative group/field">
@@ -2860,7 +2816,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                   <div className="relative group/field">
                     <label className="block text-xs font-bold text-slate-500 mb-1 flex items-center justify-between">
-                      <span>Вес (кг) <span className="text-red-500">*</span></span>
+                      <span>{t("Вес (кг)")}<span className="text-red-500">*</span></span>
                     </label>
                     <input 
                       required 
@@ -2899,10 +2855,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </div>
 
                 <div className="flex justify-end gap-3 pt-6 border-t border-slate-100/60 mt-8 font-sans">
-                  <button type="button" onClick={() => setShowEditDonorModal(false)} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">
-                    Отмена
-                  </button>
-                  <button type="submit" disabled={isSaving} className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Сохранить изменения'}</button>
+                  <button type="button" onClick={() => setShowEditDonorModal(false)} className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors">{t("Отмена")}</button>
+                  <button type="submit" disabled={isSaving} className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade min-h-[44px] md:min-h-0">{isSaving ? t('Подождите...') : t('Сохранить изменения')}</button>
                 </div>
               </form>
             </div>
@@ -2981,7 +2935,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </div>
               )}
 
-              <button type="submit" disabled={isSaving} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Накладывать медотвод'}</button>
+              <button type="submit" disabled={isSaving} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? t('Подождите...') : t('Накладывать медотвод')}</button>
             </form>
           </div>
         </div>
@@ -3037,7 +2991,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 />
               </div>
 
-              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2 min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Сохранить публикацию'}</button>
+              <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2 min-h-[44px] md:min-h-0">{isSaving ? t('Подождите...') : t('Сохранить публикацию')}</button>
             </form>
           </div>
         </div>
@@ -3056,11 +3010,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             <form onSubmit={handleManualReg} className="space-y-3.5">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Фамилия <span className="text-red-500">*</span></label>
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Фамилия")}<span className="text-red-500">*</span></label>
                   <input type="text" required placeholder={t("Иванов")} value={manualForm.lastName} onChange={(e) => handleManualNameChange('lastName', e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Имя <span className="text-red-500">*</span></label>
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Имя")}<span className="text-red-500">*</span></label>
                   <input type="text" required placeholder={t("Иван")} value={manualForm.firstName} onChange={(e) => handleManualNameChange('firstName', e.target.value)} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none" />
                 </div>
               </div>
@@ -3072,7 +3026,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Дата рождения <span className="text-red-500">*</span></label>
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Дата рождения")}<span className="text-red-500">*</span></label>
                   <input 
                     type="date" 
                     required 
@@ -3095,11 +3049,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     }`}
                   />
                   {isBirthDateInvalid() && (
-                    <p className="text-xs text-red-500 mt-1">{t("Возраст донора должен быть от 18 до 65 лет")}</p>
+                    <p className="text-xs text-red-500 mt-1">{t(t("Возраст донора должен быть от 18 до 65 лет"))}</p>
                   )}
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Пол <span className="text-red-500">*</span></label>
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Пол")}<span className="text-red-500">*</span></label>
                   <select value={manualForm.gender} onChange={(e) => setManualForm({...manualForm, gender: e.target.value as any})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white">
                     <option value="male">{t("Мужской")}</option>
                     <option value="female">{t("Женский")}</option>
@@ -3109,7 +3063,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2 space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Группа крови <span className="text-red-500">*</span></label>
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Группа крови")}<span className="text-red-500">*</span></label>
                   <select value={manualForm.bloodGroup} onChange={(e) => setManualForm({...manualForm, bloodGroup: e.target.value as any})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white">
                     <option value="I_O">{t("I (O) - Первая")}</option>
                     <option value="II_A">{t("II (A) - Вторая")}</option>
@@ -3118,7 +3072,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Резус-фактор <span className="text-red-500">*</span></label>
+                  <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Резус-фактор")}<span className="text-red-500">*</span></label>
                   <select value={manualForm.rhFactor} onChange={(e) => setManualForm({...manualForm, rhFactor: e.target.value as any})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white">
                     <option value="positive">Rh +</option>
                     <option value="negative">Rh -</option>
@@ -3127,7 +3081,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Вес донора (кг) <span className="text-red-500">*</span></label>
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Вес донора (кг)")}<span className="text-red-500">*</span></label>
                 <input 
                   type="number" 
                   required 
@@ -3142,12 +3096,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   }`}
                 />
                 {isWeightInvalid() && (
-                  <p className="text-xs text-red-500 mt-1">{t("К донорству допускаются лица с массой тела не менее 55 кг")}</p>
+                  <p className="text-xs text-red-500 mt-1">{t(t("К донорству допускаются лица с массой тела не менее 55 кг"))}</p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Номер телефона <span className="text-red-500">*</span></label>
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Номер телефона")}<span className="text-red-500">*</span></label>
                 <input 
                   type="tel" 
                   required 
@@ -3175,7 +3129,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Рабочий E-Mail (Логин) <span className="text-red-500">*</span></label>
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Рабочий E-Mail (Логин) ")}<span className="text-red-500">*</span></label>
                 <input 
                   type="email" 
                   required 
@@ -3189,16 +3143,16 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   }`}
                 />
                 {isEmailInvalid() && manualForm.email.length > 0 && (
-                  <p className="text-xs text-red-500 mt-1">{t("Введите корректный e-mail")}</p>
+                  <p className="text-xs text-red-500 mt-1">{t(t("Введите корректный e-mail"))}</p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Временный пароль для входа <span className="text-red-500">*</span></label>
+                <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Временный пароль для входа")}<span className="text-red-500">*</span></label>
                 <input type="text" required value={manualForm.password} onChange={(e) => setManualForm({...manualForm, password: e.target.value})} className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl font-mono focus:border-red-500 focus:outline-none text-red-700 bg-red-50" />
               </div>
 
-              <button type="submit" disabled={isSaving} className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Создать профиль донора (Подтвержден на месте)'}</button>
+              <button type="submit" disabled={isSaving} className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm min-h-[44px] md:min-h-0">{isSaving ? t('Подождите...') : t('Создать профиль донора (Подтвержден на месте)')}</button>
             </form>
           </div>
         </div>
@@ -3216,14 +3170,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
             {/* Header section with profile name and status badge */}
             <div>
-              <span className="inline-block bg-rose-50 text-rose-600 text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-2">
-                Анкета кандидата на подтверждение
-              </span>
+              <span className="inline-block bg-rose-50 text-rose-600 text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-2">{t("Анкета кандидата на подтверждение")}</span>
               <h3 className="text-xl font-bold text-slate-900 leading-tight">
                 {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
               </h3>
               <p className="text-xs text-slate-500 font-light mt-1">
-                Дата регистрации: {formatDateHuman(pendingDonorProfile.card.donor.createdAt)}
+                {t('Дата регистрации: ')} {formatDateHuman(pendingDonorProfile.card.donor.createdAt)}
               </p>
             </div>
 
@@ -3248,19 +3200,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
                         return age;
                       })()
-                    } лет)
+                     } {t('лет')})
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
                   <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+                    {pendingDonorProfile.card.donor.gender === 'male' ? t('Мужской') : t('Женский')}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
                   <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {pendingDonorProfile.card.donor.weight} кг
+                    {pendingDonorProfile.card.donor.weight} {t('кг')}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2.5 gap-2">
@@ -3281,7 +3233,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("E-mail / Личный ID")}</span>
                   <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
+                    {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || t('Не указан')}
                   </span>
                 </div>
               </div>
@@ -3296,12 +3248,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <div key={note.id} className="p-3.5 rounded-xl border border-red-150 bg-red-50/30 text-xs text-slate-700">
                       <p className="font-semibold text-red-800">{t("Причина")}: {note.reason}</p>
                       <p className="text-[11px] text-slate-500 mt-1">
-                        Период: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : 'бессрочно'}
+                        Период: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : t('бессрочно')}
                       </p>
                       {note.isActive && (
-                        <span className="inline-block mt-1 bg-red-150 text-red-900 border border-red-200 text-[9px] font-bold px-2 py-0.5 rounded-full">
-                          Действует в настоящий момент
-                        </span>
+                        <span className="inline-block mt-1 bg-red-150 text-red-900 border border-red-200 text-[9px] font-bold px-2 py-0.5 rounded-full">{t("Действует в настоящий момент")}</span>
                       )}
                     </div>
                   ))}
@@ -3318,8 +3268,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 }}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-colors"
               >
-                <Check className="w-4 h-4" /> Одобрить анкету
-              </button>
+                <Check className="w-4 h-4" />{t("Одобрить анкету")}</button>
               <button 
                 onClick={() => {
                   setRejectionModalLinkId(pendingDonorProfile.linkId);
@@ -3328,14 +3277,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 }}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
               >
-                <X className="w-4 h-4" /> Отклонить
-              </button>
+                <X className="w-4 h-4" />{t("Отклонить")}</button>
               <button 
                 onClick={() => setPendingDonorProfile(null)}
                 className="border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-4.5 py-2.5 rounded-xl cursor-pointer transition-colors"
-              >
-                Закрыть
-              </button>
+              >{t("Закрыть")}</button>
             </div>
           </div>
         </div>

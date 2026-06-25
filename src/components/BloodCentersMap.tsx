@@ -159,7 +159,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
           if (val < lowest) { lowest = val; lowestBg = key; }
         });
         if (lowest < 40) {
-          needsText = `<div style="margin-top: 6px; padding: 4px 6px; background-color: #fee2e2; color: #b91c1c; border-radius: 6px; font-size: 10px; font-weight: 700; text-align: center;">🩸 Острый дефицит некоторых групп крови</div>`;
+          needsText = `<div style="margin-top: 6px; padding: 4px 6px; background-color: #fee2e2; color: #b91c1c; border-radius: 6px; font-size: 10px; font-weight: 700; text-align: center;">${t("🩸 Острый дефицит некоторых групп крови")}</div>`;
         }
       }
 
@@ -170,21 +170,21 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
           </div>
           
           <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 800; color: #0f172a; line-height: 1.35; tracking: -0.01em;">
-            ${center.name}
+            ${t(center.name)}
           </h4>
           
           <p style="margin: 0 0 10px 0; font-size: 11px; color: #475569; font-weight: 500; line-height: 1.45;">
-            📍 ${center.address}
+            📍 ${t(center.address)}
           </p>
           
           <div style="border-top: 1px dotted #e2e8f0; padding-top: 8px; display: flex; flex-direction: column; gap: 5px; font-size: 11px;">
             <div style="display: flex; align-items: center; gap: 6px; color: #334155;">
               <span style="font-size: 12px;">📞</span>
-              <strong>Тел:</strong> <span style="font-weight: 600; color: #0f172a;">${center.phone}</span>
+              <strong>${t("Тел")}:</strong> <span style="font-weight: 600; color: #0f172a;">${center.phone}</span>
             </div>
             <div style="display: flex; align-items: center; gap: 6px; color: #475569;">
               <span style="font-size: 12px;">⏰</span>
-              <strong>Время:</strong> <span style="font-weight: 550; color: #334155;">${center.workingHours || '-'}</span>
+              <strong>${t("Время")}:</strong> <span style="font-weight: 550; color: #334155;">${t(center.workingHours || '-')}</span>
             </div>
             ${needsText}
           </div>
@@ -251,7 +251,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
       return;
     }
 
-    if (!window.confirm("Разрешить доступ к вашей геопозиции, чтобы показать вас на карте?")) {
+    if (!window.confirm(t("Разрешить доступ к вашей геопозиции, чтобы показать вас на карте?"))) {
       return;
     }
 
@@ -386,7 +386,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
               setShowSearchResults(true);
             }}
             onFocus={() => setShowSearchResults(true)}
-            placeholder="Поиск города или учреждения..."
+            placeholder={t("Поиск города или учреждения...")}
             className="w-full bg-transparent text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none"
           />
           {searchQuery && (
@@ -416,8 +416,8 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
                 type="button"
                 className="w-full text-left px-3 py-2 hover:bg-slate-50 transition-colors rounded-lg flex flex-col gap-0.5 focus:outline-none cursor-pointer"
               >
-                <span className="text-xs font-bold text-slate-800 line-clamp-1">{center.name}</span>
-                <span className="text-[10px] text-slate-500 line-clamp-1">📍 {center.address}</span>
+                <span className="text-xs font-bold text-slate-800 line-clamp-1">{t(center.name)}</span>
+                <span className="text-[10px] text-slate-500 line-clamp-1">📍 {t(center.address)}</span>
               </button>
             ))}
           </div>
@@ -425,15 +425,13 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
 
         {showSearchResults && searchQuery.trim() !== '' && filteredSearch.length === 0 && (
           <div className="absolute left-0 right-0 mt-1.5 bg-white rounded-xl border border-slate-200 shadow-lg p-3 text-center z-[2000]">
-            <span className="text-xs text-slate-500">Ничего не найдено</span>
+            <span className="text-xs text-slate-500">{t("Ничего не найдено")}</span>
           </div>
         )}
       </div>
 
       <div className="absolute bottom-3 left-3 md:bottom-auto md:left-auto md:top-3 md:right-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm text-[10px] font-bold text-slate-700 uppercase tracking-widest z-[1000] flex items-center select-none pointer-events-none">
-        <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse" />
-        Карта центров крови РБ
-      </div>
+        <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse" />{t("Карта центров крови РБ")}</div>
       
       {/* Zoom & Location Control Cluster */}
       <div className="absolute top-14 right-3 flex flex-col gap-1.5 z-[1000]">
@@ -441,7 +439,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
           onClick={handleZoomIn}
           type="button"
           className="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-200/80 rounded-xl shadow-md transition-all cursor-pointer font-bold text-lg focus:outline-none min-h-[44px] md:min-h-0"
-          title="Приблизить"
+          title={t("Приблизить")}
         >
           <Plus size={18} className="stroke-[2.5]" />
         </button>
@@ -449,7 +447,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
           onClick={handleZoomOut}
           type="button"
           className="w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 active:scale-95 text-slate-700 border border-slate-200/80 rounded-xl shadow-md transition-all cursor-pointer font-bold text-lg focus:outline-none min-h-[44px] md:min-h-0"
-          title="Отдалить"
+          title={t("Отдалить")}
         >
           <Minus size={18} className="stroke-[2.5]" />
         </button>
@@ -458,7 +456,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
           type="button"
           disabled={locating}
           className={`w-10 h-10 flex items-center justify-center bg-white hover:bg-slate-50 active:scale-95 border border-slate-200/80 rounded-xl shadow-md transition-all cursor-pointer focus:outline-none ${locating ? 'animate-pulse' : ''}`}
-          title="Мое местоположение"
+          title={t("Мое местоположение")}
         >
           <Locate size={18} className={`stroke-[2.5] ${locating ? 'text-red-500' : 'text-slate-700'}`} />
         </button>

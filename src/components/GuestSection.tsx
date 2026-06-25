@@ -109,23 +109,23 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
   const getPasswordHint = (pwd: string) => {
     if (!pwd) return '';
-    if (pwd.length < 6) return 'Пароль должен быть не менее 6 символов';
+    if (pwd.length < 6) return t('Пароль должен быть не менее 6 символов');
     const hasLetters = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(pwd);
     const hasNumbers = /[0-9]/.test(pwd);
     
     if (!hasLetters || !hasNumbers) {
-      return 'пароль ненадёжный должен содержать буквы и цифры';
+      return t('пароль ненадёжный должен содержать буквы и цифры');
     }
     return '';
   };
 
   const getResetPasswordHint = (pwd: string) => {
     if (!pwd) return '';
-    if (pwd.length < 6) return 'Пароль должен быть не менее 6 символов';
+    if (pwd.length < 6) return t('Пароль должен быть не менее 6 символов');
     const hasLetters = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(pwd);
     const hasNumbers = /[0-9]/.test(pwd);
     if (!hasLetters || !hasNumbers) {
-      return 'пароль не надёжный должны присутствовать цифры и буквы';
+      return t('пароль не надёжный должны присутствовать цифры и буквы');
     }
     return '';
   };
@@ -241,7 +241,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Ошибка входа');
+        throw new Error(data.error || t('Ошибка входа'));
       }
       onLoginSuccess(data);
       setShowAuthModal(null);
@@ -255,7 +255,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!loginEmail) {
-      setLoginError('Введите ваш e-mail');
+      setLoginError(t('Введите ваш e-mail'));
       return;
     }
     setLoginError('');
@@ -269,9 +269,9 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Ошибка при запросе сброса пароля');
+        throw new Error(data.error || t('Ошибка при запросе сброса пароля'));
       }
-      alert(data.message || 'Письмо отправлено');
+      alert(data.message || t('Письмо отправлено'));
       setShowAuthModal('resetAuth');
       setResetCode('');
       setResetPassword('');
@@ -287,7 +287,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const handleResendCode = async () => {
     if (resendCooldown > 0) return;
     if (!loginEmail) {
-      setLoginError('Введите ваш e-mail');
+      setLoginError(t('Введите ваш e-mail'));
       return;
     }
     setLoginError('');
@@ -301,7 +301,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Ошибка при запросе сброса пароля');
+        throw new Error(data.error || t('Ошибка при запросе сброса пароля'));
       }
       alert('Новый код отправлен на ваш e-mail!');
       setResendCooldown(30);
@@ -315,7 +315,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resetCode) {
-      setLoginError('Введите код из письма');
+      setLoginError(t('Введите код из письма'));
       return;
     }
     const hint = getResetPasswordHint(resetPassword);
@@ -324,7 +324,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       return;
     }
     if (resetPassword !== resetConfirmPassword) {
-      setLoginError('Пароли не совпадают');
+      setLoginError(t('Пароли не совпадают'));
       return;
     }
     setLoginError('');
@@ -338,9 +338,9 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Ошибка при сохранении пароля');
+        throw new Error(data.error || t('Ошибка при сохранении пароля'));
       }
-      alert(data.message || 'Пароль изменён');
+      alert(data.message || t('Пароль изменён'));
       setShowAuthModal('login');
       setLoginPassword('');
     } catch (err: any) {
@@ -357,26 +357,26 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
     if (regStep === 1) {
       // Validate Step 1
       if (!regForm.lastName || !regForm.firstName || !regForm.birthDate || !regForm.phone || !regForm.email || !regForm.password || !regConfirmPassword) {
-        setRegError('Пожалуйста, заполните необходимые личные данные');
+        setRegError(t('Пожалуйста, заполните необходимые личные данные'));
         return;
       }
       if (isEmailInvalid()) {
-        setRegError('Введите корректный e-mail');
+        setRegError(t('Введите корректный e-mail'));
         return;
       }
       if (regForm.password.length < 6) {
-        setRegError('Пароль должен быть длиной не менее 6 символов');
+        setRegError(t('Пароль должен быть длиной не менее 6 символов'));
         return;
       }
       if (regForm.password !== regConfirmPassword) {
-        setRegError('Пароли не совпадают');
+        setRegError(t('Пароли не совпадают'));
         return;
       }
       const bDate = new Date(regForm.birthDate);
       const minDate = new Date(); minDate.setFullYear(minDate.getFullYear() - 65);
       const maxDate = new Date(); maxDate.setFullYear(maxDate.getFullYear() - 18);
       if (bDate < minDate || bDate > maxDate) {
-        setRegError('Возраст донора должен быть от 18 до 65 лет');
+        setRegError(t('Возраст донора должен быть от 18 до 65 лет'));
         return;
       }
       setRegStep(2);
@@ -385,15 +385,15 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
     // Step 2 Validation and submit
     if (parseFloat(regForm.weight) < 55) {
-      setRegError('К донорству допускаются лица с массой тела не менее 55 кг');
+      setRegError(t('К донорству допускаются лица с массой тела не менее 55 кг'));
       return;
     }
     if (!regForm.primaryCenterId) {
-      setRegError('Пожалуйста, выберите ваш основной центр крови из списка');
+      setRegError(t('Пожалуйста, выберите ваш основной центр крови из списка'));
       return;
     }
     if (!regForm.agreeTerms) {
-      setRegError('Необходимо подтвердить согласие на обработку персональных данных');
+      setRegError(t('Необходимо подтвердить согласие на обработку персональных данных'));
       return;
     }
 
@@ -406,10 +406,10 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Ошибка регистрации');
+        throw new Error(data.error || t('Ошибка регистрации'));
       }
 
-      alert(data.message || 'Регистрация успешна! Теперь вы можете войти в свой личный кабинет.');
+      alert(data.message || t('Регистрация успешна! Теперь вы можете войти в свой личный кабинет.'));
       setLoginEmail(regForm.email);
       setLoginPassword(regForm.password);
       setShowAuthModal('login');
@@ -447,7 +447,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
     }
 
     const center = centers.find(c => c.id === item.centerId);
-    const centerName = center?.name || 'Центр переливания крови';
+    const centerName = center?.name || t('Центр переливания крови');
     
     const matchesSearch = item.title.toLowerCase().includes(newsSearch.toLowerCase()) || 
                           item.content.toLowerCase().includes(newsSearch.toLowerCase()) ||
@@ -1030,14 +1030,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
           {/* Oblast filter bar */}
           <div className="flex flex-wrap gap-2 border-b pb-4 border-slate-100">
             {[
-              { id: 'all', label: 'Все области' },
-              { id: 'minsk', label: 'Минск' },
-              { id: 'minsk-region', label: 'Минская область' },
-              { id: 'brest', label: 'Брестская область' },
-              { id: 'vitebsk', label: 'Витебская область' },
-              { id: 'gomel', label: 'Гомельская область' },
-              { id: 'grodno', label: 'Гродненская область' },
-              { id: 'mogilev', label: 'Могилевская область' },
+              { id: 'all', label: t('Все области') },
+              { id: 'minsk', label: t('Минск') },
+              { id: 'minsk-region', label: t('Минская область') },
+              { id: 'brest', label: t('Брестская область') },
+              { id: 'vitebsk', label: t('Витебская область') },
+              { id: 'gomel', label: t('Гомельская область') },
+              { id: 'grodno', label: t('Гродненская область') },
+              { id: 'mogilev', label: t('Могилевская область') },
             ].map(reg => (
               <button
                 key={reg.id}
@@ -1063,11 +1063,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     )} 
                   </div>
                   <span className="text-[5px] uppercase font-bold text-slate-400 tracking-wider"></span>
-                  <h3 className="font-semibold text-slate-800 text-sm mb-3 text-red-950">{center.name}</h3>
+                  <h3 className="font-semibold text-slate-800 text-sm mb-3 text-red-950">{t(center.name)}</h3>
                   <div className="space-y-2 text-xs text-slate-600 mb-6">
                     <p className="flex items-center">
                       <MapPin className="w-4 h-4 text-rose-500 mr-2 flex-shrink-0" />
-                      {center.address}
+                      {t(center.address)}
                     </p>
                     <p className="flex items-center">
                       <Phone className="w-4 h-4 text-emerald-600 mr-2 flex-shrink-0" />
@@ -1076,7 +1076,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     {center.workingHours && (
                       <p className="flex items-center text-slate-500">
                         <Calendar className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
-                        {center.workingHours}
+                        {t(center.workingHours)}
                       </p>
                     )}
                   </div>
@@ -1170,7 +1170,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 >
                   <option value="all">{t("Все центры")}</option>
                   {centers.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                    <option key={c.id} value={c.id}>{t(c.name)}</option>
                   ))}
                 </select>
                 <input
@@ -1194,28 +1194,28 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             <div className="grid grid-cols-1 gap-4 w-full">
               {filteredNews.map(item => {
                 const center = centers.find(c => c.id === item.centerId);
-                let centerName = center?.name || 'Центр переливания крови';
+                let centerName = center?.name || t('Центр переливания крови');
                 // try to shorten centerName if it's very long and starts with ГУ
-                if (centerName.includes('РНПЦ трансфузиологии')) {
-                  centerName = 'РНПЦ трансфузиологии';
+                if (centerName.includes(t('РНПЦ трансфузиологии'))) {
+                  centerName = t('РНПЦ трансфузиологии');
                 } else if (centerName.includes('Оршанская')) {
-                  centerName = 'Оршанская СПК';
-                } else if (centerName.includes('Витебский ОЦТ')) {
-                   centerName = 'Витебский ОЦТ';
+                  centerName = t('Оршанская СПК');
+                } else if (centerName.includes(t('Витебский ОЦТ'))) {
+                   centerName = t('Витебский ОЦТ');
                 }
 
                 return (
                   <div key={item.id} className="group bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:-translate-y-0.5 hover:border-red-100 w-full">
                     <div className="flex flex-wrap sm:flex-nowrap justify-between items-center gap-2 mb-4">
                       <span className="bg-slate-100/80 text-slate-600 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200/60 whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
-                        {centerName}
+                        {t(centerName)}
                       </span>
                       <span className="text-xs text-slate-500 whitespace-nowrap">
-                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Свежая новость'}
+                        {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : t('Свежая новость')}
                       </span>
                     </div>
-                    <h3 className="font-bold text-slate-900 text-[17px] mb-2 leading-snug">{item.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap line-clamp-2">{item.content}</p>
+                    <h3 className="font-bold text-slate-900 text-[17px] mb-2 leading-snug">{t(item.title)}</h3>
+                    <p className="text-sm text-slate-500 leading-relaxed whitespace-pre-wrap line-clamp-2">{t(item.content)}</p>
                     <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center opacity-90 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => setSelectedNews(item)}
@@ -1406,7 +1406,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                           }`}
                         />
                         {isBirthDateInvalid() && (
-                          <p className="text-xs text-red-500 mt-1">{t("Возраст донора должен быть от 18 до 65 лет")}</p>
+                          <p className="text-xs text-red-500 mt-1">{t(t("Возраст донора должен быть от 18 до 65 лет"))}</p>
                         )}
                       </div>
                       <div className="space-y-1">
@@ -1524,7 +1524,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         </button>
                       </div>
                       {isConfirmPasswordInvalid() && (
-                        <p className="text-xs text-red-500 mt-1">{t("Пароли не совпадают")}</p>
+                        <p className="text-xs text-red-500 mt-1">{t(t("Пароли не совпадают"))}</p>
                       )}
                     </div>
 
@@ -1576,11 +1576,11 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                         value={regForm.weight}
                         onChange={(e) => setRegForm({...regForm, weight: e.target.value})}
                         className={`w-full px-3 py-2 text-sm border rounded-xl focus:outline-none transition-colors ${
-                          isWeightInvalid() || regError.includes('масс') ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+                          isWeightInvalid() || regError.includes(t('масс')) ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
                         }`}
                       />
-                      {(isWeightInvalid() || regError.includes('масс')) && (
-                        <p className="text-xs text-red-500 mt-1">{regError.includes('масс') ? regError : t("Минимальный вес — 55 кг.")}</p>
+                      {(isWeightInvalid() || regError.includes(t('масс'))) && (
+                        <p className="text-xs text-red-500 mt-1">{regError.includes(t('масс')) ? regError : t("Минимальный вес — 55 кг.")}</p>
                       )}
                     </div>
 
@@ -1594,7 +1594,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       >
                         <option value=""> {t(" Выберите центр переливания ")} </option>
                         {centers.map(center => (
-                          <option key={center.id} value={center.id}>{center.name}</option>
+                          <option key={center.id} value={center.id}>{t(center.name)}</option>
                         ))}
                       </select>
                     </div>
@@ -1793,7 +1793,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     </button>
                   </div>
                   {resetConfirmPassword && resetPassword !== resetConfirmPassword && (
-                    <p className="text-xs text-red-500 mt-1">{t("Пароли не совпадают")}</p>
+                    <p className="text-xs text-red-500 mt-1">{t(t("Пароли не совпадают"))}</p>
                   )}
                 </div>
 
@@ -1868,20 +1868,20 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               <div className="p-6 sm:p-8 overflow-y-auto w-[100%] max-w-none">
                 <div className="flex flex-wrap items-center gap-3 mb-6 pr-8">
                   <span className="bg-red-50 text-red-700 text-xs font-semibold px-3 py-1 rounded-full border border-red-100">
-                    {centers.find(c => c.id === selectedNews.centerId)?.name || 'Центр переливания'}
+                    {t(centers.find(c => c.id === selectedNews.centerId)?.name || t('Центр переливания'))}
                   </span>
                   <span className="text-sm font-medium text-slate-500">
-                    {selectedNews.publishedAt ? new Date(selectedNews.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Свежая новость'}
+                    {selectedNews.publishedAt ? new Date(selectedNews.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : t('Свежая новость')}
                   </span>
                 </div>
                 
                 <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-6 leading-tight max-w-[100%] overflow-hidden break-words">
-                  {selectedNews.title}
+                  {t(selectedNews.title)}
                 </h2>
                 
                 <div className="prose prose-slate max-w-[100%] text-slate-700 w-full overflow-hidden mb-6">
                   <p className="whitespace-pre-wrap leading-relaxed max-w-[100%] break-words">
-                    {selectedNews.content}
+                    {t(selectedNews.content)}
                   </p>
                 </div>
               </div>

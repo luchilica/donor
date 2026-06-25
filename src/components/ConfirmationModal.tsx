@@ -23,6 +23,9 @@ export function ConfirmationModal({
   onCancel,
   variant = 'warning'
 }: ConfirmationModalProps) {
+  const { t } = useLanguage();
+  confirmText = confirmText === 'Подтвердить' ? t('Подтвердить') : confirmText;
+  cancelText = cancelText === 'Отмена' ? t('Отмена') : cancelText;
   if (!isOpen) return null;
 
   const bgStyles = {

@@ -134,11 +134,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
   const getNewPasswordErrorStr = (val: string): string => {
     if (!val) return '';
-    if (val.length < 6) return 'Пароль должен быть не менее 6 символов';
+    if (val.length < 6) return t('Пароль должен быть не менее 6 символов');
     const hasLetter = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(val);
     const hasDigit = /\d/.test(val);
     if (!hasLetter || !hasDigit) {
-      return 'пароль не надёжный должны присутствовать цифры и буквы';
+      return t('пароль не надёжный должны присутствовать цифры и буквы');
     }
     return '';
   };
@@ -146,7 +146,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const getRepeatPasswordErrorStr = (val: string): string => {
     if (!val) return '';
     if (val !== newPassword) {
-      return 'Неверный пароль';
+      return t('Неверный пароль');
     }
     return '';
   };
@@ -157,28 +157,28 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     setPasswordSuccess('');
 
     if (newPassword.length < 6) {
-      setPasswordError('Пароль должен быть не менее 6 символов');
+      setPasswordError(t('Пароль должен быть не менее 6 символов'));
       return;
     }
     const hasLetter = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(newPassword);
     const hasDigit = /\d/.test(newPassword);
     if (!hasLetter || !hasDigit) {
-      setPasswordError('пароль не надёжный должны присутствовать цифры и буквы');
+      setPasswordError(t('пароль не надёжный должны присутствовать цифры и буквы'));
       return;
     }
 
     if (repeatPassword !== newPassword) {
-      setPasswordError('Неверный пароль');
+      setPasswordError(t('Неверный пароль'));
       return;
     }
 
     requestConfirm({
-      title: 'Обновить пароль?',
-      message: 'Вы уверены, что хотите изменить пароль вашей учетной записи?',
+      title: t('Обновить пароль?'),
+      message: t('Вы уверены, что хотите изменить пароль вашей учетной записи?'),
       variant: 'warning',
-      confirmText: 'Обновить',
+      confirmText: t('Обновить'),
       onConfirm: () => {
-        setPasswordSuccess('Пароль успешно обновлен!');
+        setPasswordSuccess(t('Пароль успешно обновлен!'));
         setCurrentPassword('');
         setNewPassword('');
         setRepeatPassword('');
@@ -299,20 +299,20 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     setEditSuccess('');
     setEditError('');
     if (profileForm.phone.length !== 13) {
-      setEditError('Номер телефона должен содержать ровно 13 символов (например, +375XXXXXXXXX)');
+      setEditError(t('Номер телефона должен содержать ровно 13 символов (например, +375XXXXXXXXX)'));
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+$/;
     if (!emailRegex.test(profileForm.email)) {
-      setEditError('E-mail должен быть в формате имя@домен (например, donor@example.com)');
+      setEditError(t('E-mail должен быть в формате имя@домен (например, donor@example.com)'));
       return;
     }
 
     requestConfirm({
-      title: 'Сохранить изменения?',
-      message: 'Вы уверены, что хотите обновить личные данные профиля?',
+      title: t('Сохранить изменения?'),
+      message: t('Вы уверены, что хотите обновить личные данные профиля?'),
       variant: 'info',
-      confirmText: 'Сохранить',
+      confirmText: t('Сохранить'),
       onConfirm: async () => {
         setIsSaving(true);
         try {
@@ -329,13 +329,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           });
           const data = await res.json();
           if (!res.ok) {
-            throw new Error(data.error || 'Ошибка при сохранении профиля');
+            throw new Error(data.error || t('Ошибка при сохранении профиля'));
           }
-          setEditSuccess('Профиль успешно сохранен и отправлен в центр крови для подтверждения!');
+          setEditSuccess(t('Профиль успешно сохранен и отправлен в центр крови для подтверждения!'));
           setIsEditingProfile(false);
           onRefresh();
         } catch (err: any) {
-          setEditError(err.message || 'Ошибка обновления профиля');
+          setEditError(err.message || t('Ошибка обновления профиля'));
         } finally {
           setIsSaving(false);
           closeConfirm();
@@ -355,10 +355,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     e.preventDefault();
     setPauseSuccess('');
     requestConfirm({
-      title: 'Сохранить настройки паузы?',
-      message: 'Вы уверены, что хотите обновить статус вашей паузы? Во время активной паузы вы не будете получать приглашения на донацию.',
+      title: t('Сохранить настройки паузы?'),
+      message: t('Вы уверены, что хотите обновить статус вашей паузы? Во время активной паузы вы не будете получать приглашения на донацию.'),
       variant: 'warning',
-      confirmText: 'Сохранить',
+      confirmText: t('Сохранить'),
       onConfirm: async () => {
         setIsSaving(true);
         try {
@@ -374,11 +374,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             })
           });
           if (res.ok) {
-            setPauseSuccess('Настройки личной паузы успешно сохранены!');
+            setPauseSuccess(t('Настройки личной паузы успешно сохранены!'));
             onRefresh();
           }
         } catch {
-          setPauseSuccess('Не удалось сохранить изменения во внешнем сервисе');
+          setPauseSuccess(t('Не удалось сохранить изменения во внешнем сервисе'));
         }
         closeConfirm();
       }
@@ -390,10 +390,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     e.preventDefault();
     setNotifSuccess('');
     requestConfirm({
-      title: 'Сохранить настройки уведомлений?',
-      message: 'Текущие каналы для связи будут обновлены. Вы уверены?',
+      title: t('Сохранить настройки уведомлений?'),
+      message: t('Текущие каналы для связи будут обновлены. Вы уверены?'),
       variant: 'info',
-      confirmText: 'Сохранить',
+      confirmText: t('Сохранить'),
       onConfirm: async () => {
         setIsSaving(true);
         try {
@@ -409,11 +409,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             })
           });
           if (res.ok) {
-            setNotifSuccess('Предпочтения каналов рассылок изменены!');
+            setNotifSuccess(t('Предпочтения каналов рассылок изменены!'));
             onRefresh();
           }
         } catch {
-          setNotifSuccess('Ошибка сохранения настроек');
+          setNotifSuccess(t('Ошибка сохранения настроек'));
         }
         closeConfirm();
       }
@@ -431,7 +431,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     }
 
     if (!readiness.ready) {
-        alert(readiness.reason || t('Запись недоступна из-за действующего отвода или периода восстановления'));
+      alert(readiness.reason ? t(readiness.reason) : t('Запись недоступна из-за действующего отвода или периода восстановления'));
         return;
     }
 
@@ -461,7 +461,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
         });
         if (res.ok) {
             setShowAppointmentModal(false);
-            setAppointmentSuccess('Вы успешно записаны на донацию. Ждем вас!');
+            setAppointmentSuccess(t('Вы успешно записаны на донацию. Ждем вас!'));
             setTimeout(() => setAppointmentSuccess(''), 5000);
         }
     } catch {}
@@ -469,10 +469,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
   const handleResubmit = (centerId: number) => {
     requestConfirm({
-      title: 'Переподать заявку?',
-      message: 'Вы уверены, что хотите снова отправить заявку на прикрепление к этому центру крови?',
+      title: t('Переподать заявку?'),
+      message: t('Вы уверены, что хотите снова отправить заявку на прикрепление к этому центру крови?'),
       variant: 'info',
-      confirmText: 'Отправить',
+      confirmText: t('Отправить'),
       onConfirm: async () => {
         setIsSaving(true);
         try {
@@ -499,10 +499,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   // Set center as primary (home)
   const handleSetPrimary = (centerId: number) => {
     requestConfirm({
-      title: 'Сделать домашним центром?',
-      message: 'Вы хотите установить этот центр крови как основной (домашний) для вашей донорской активности?',
+      title: t('Сделать домашним центром?'),
+      message: t('Вы хотите установить этот центр крови как основной (домашний) для вашей донорской активности?'),
       variant: 'info',
-      confirmText: 'Установить',
+      confirmText: t('Установить'),
       onConfirm: async () => {
         setIsSaving(true);
         try {
@@ -531,15 +531,15 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     setLinkError('');
     setLinkSuccess('');
     if (!selectedCenterId) {
-      setLinkError('Пожалуйста, укажите медицинский центр');
+      setLinkError(t('Пожалуйста, укажите медицинский центр'));
       return;
     }
 
     requestConfirm({
-      title: 'Отправить заявку?',
-      message: 'Вы уверены, что хотите подать заявку на прикрепление к выбранному центру крови?',
+      title: t('Отправить заявку?'),
+      message: t('Вы уверены, что хотите подать заявку на прикрепление к выбранному центру крови?'),
       variant: 'info',
-      confirmText: 'Отправить',
+      confirmText: t('Отправить'),
       onConfirm: async () => {
         setIsSaving(true);
         try {
@@ -558,11 +558,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           if (!res.ok) {
             throw new Error(data.error);
           }
-          setLinkSuccess(data.message || 'Связь успешно добавлена!');
+          setLinkSuccess(data.message || t('Связь успешно добавлена!'));
           setSelectedCenterId('');
           onRefresh();
         } catch (err: any) {
-          setLinkError(err.message || 'Ошибка связи');
+          setLinkError(err.message || t('Ошибка связи'));
         } finally {
           setIsSaving(false);
           closeConfirm();
@@ -600,7 +600,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
   const gameStatus = getGamificationStatus(bloodFree, compFree, bloodPaid, compPaid);
 
   const last12MonthsData = React.useMemo(() => {
-    const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+    const months = [t('Янв'), t('Фев'), t('Мар'), t('Апр'), t('Май'), t('Июн'), t('Июл'), t('Авг'), t('Сен'), t('Окт'), t('Ноя'), t('Дек')];
     const result: { name: string; count: number; volume: number }[] = [];
     
     const now = new Date();
@@ -631,7 +631,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       });
     }
     return result;
-  }, [donations]);
+  }, [donations, t]);
 
   const homeCenter = centers.find(c => {
     const primaryLink = links.find(l => l.donorId === donor.id && l.isPrimary);
@@ -722,11 +722,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
           <div className="space-y-3.5 text-sm text-left">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 pb-1.5 sm:pb-0 sm:border-0">
               <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Вес:")}</span>
-              <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{donor.weight || '—'} кг</span>
+              <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{donor.weight || '—'} {t('кг')}</span>
             </div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 pb-1.5 sm:pb-0 sm:border-0">
               <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Возраст:")}</span>
-              <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{calcAge(donor.birthDate)} лет</span>
+              <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{calcAge(donor.birthDate)} {t("лет")}</span>
             </div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 pb-1.5 sm:pb-0 sm:border-0">
               <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Донаций:")}</span>
@@ -735,7 +735,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-1 sm:pb-0">
               <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Статус:")}</span>
               <span className={`text-base sm:text-sm ${readiness.ready ? 'text-emerald-500 font-bold' : readiness.pendingConfirmation ? 'text-amber-500 font-bold' : 'text-red-700 font-bold'}`}>
-                {readiness.ready ? 'Готов к сдаче' : readiness.pendingConfirmation ? 'На подтверждении' : 'Отвод'}
+                {readiness.ready ? t('Готов к сдаче') : readiness.pendingConfirmation ? t('На подтверждении') : t('Отвод')}
               </span>
             </div>
           </div>
@@ -743,13 +743,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
         <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-row md:flex-col overflow-x-auto gap-2 md:gap-1 scrollbar-hide scroll-fade-edge pr-8 md:pr-3">
           {[
-            { id: 'dashboard', label: 'Рабочий стол', icon: Home },
-            { id: 'profile', label: 'Профиль', icon: User },
-            { id: 'history', label: 'История сдач', icon: Calendar },
-            { id: 'links', label: 'Мои центры', icon: Link },
-            { id: 'pause', label: 'Пауза', icon: Pause },
-            { id: 'notifications', label: 'Уведомления', icon: Bell },
-            { id: 'account', label: 'Аккаунт', icon: Settings }
+            { id: 'dashboard', label: t('Рабочий стол'), icon: Home },
+            { id: 'profile', label: t('Профиль'), icon: User },
+            { id: 'history', label: t('История сдач'), icon: Calendar },
+            { id: 'links', label: t('Мои центры'), icon: Link },
+            { id: 'pause', label: t('Пауза'), icon: Pause },
+            { id: 'notifications', label: t('Уведомления'), icon: Bell },
+            { id: 'account', label: t('Аккаунт'), icon: Settings }
           ].map(it => {
             const Icon = it.icon;
             const isActive = activeMenu === it.id;
@@ -792,9 +792,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     onClick={handleStartEdit}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors min-h-[44px] md:min-h-0"
                   >
-                    <User className="w-4 h-4" />
-                    Редактировать
-                  </button>
+                    <User className="w-4 h-4" />{t("Редактировать")}</button>
                 )}
               </div>
 
@@ -938,7 +936,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                       <span className="text-slate-400 font-medium font-sans">{t("Последняя сдача (вносится автоматически)")}</span>
                       <span className="font-bold text-slate-500 text-left sm:text-right font-mono w-full sm:w-auto">
-                        {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
+                        {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : t('Нет данных')}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
@@ -952,15 +950,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       type="button"
                       onClick={handleCancelEdit}
                       className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors min-h-[44px] md:min-h-0"
-                    >
-                      Отмена
-                    </button>
+                    >{t("Отмена")}</button>
                     <button 
                       type="submit"
                       disabled={isSaving}
                       className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                     >
-                      {isSaving ? 'Сохранение...' : 'Сохранить изменения'}
+                      {isSaving ? t('Сохранение...') : t('Сохранить изменения')}
                     </button>
                   </div>
                 </form>
@@ -972,11 +968,11 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Дата рождения")}</span>
-                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} {t("лет")})</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Пол")}</span>
-                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.gender === 'male' ? t('Мужской') : t('Женский')}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Телефон")}</span>
@@ -988,7 +984,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Вес")}</span>
-                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.weight} кг</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.weight} {t('кг')}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-3 gap-1.5 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Группа / Резус")}</span>
@@ -1004,7 +1000,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Последняя сдача")}</span>
                     <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto font-mono">
-                      {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
+                      {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : t('Нет данных')}
                     </span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
@@ -1039,9 +1035,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   {/* Small arrow pin */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
                   
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-1.5 mb-1.5">
-                    Статистика по типам
-                  </div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-1.5 mb-1.5">{t("Статистика по типам")}</div>
                   <div className="flex justify-between items-center text-slate-200">
                     <span>{t("Цельная кровь:")}</span>
                     <span className="font-bold text-rose-300">{bCounts}</span>
@@ -1095,7 +1089,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
                 <div>
                   <span className={`inline-flex items-center px-4 py-1.5 rounded-full border text-xs sm:text-sm font-semibold tracking-wide shadow-xs ${readiness.ready ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-amber-700 bg-amber-50 border-amber-200'}`}>
-                    {readiness.ready ? 'Организм готов' : 'Идет восстановление'}
+                    {readiness.ready ? t('Организм готов') : t('Идет восстановление')}
                   </span>
                 </div>
               </div>
@@ -1105,7 +1099,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                    <div className="flex flex-col">
                      <span className="text-[13px] font-bold text-slate-800">{t("Уровень восстановления крови и железа")}</span>
                      {/* {!readiness.ready && recoveryDaysLeft > 0 && (
-                         <span className="text-xs text-slate-500 mt-1.5 font-medium bg-slate-50 px-2.5 py-1 rounded-md self-start border border-slate-200/60 leading-none">До допуска: <strong className="text-slate-700">{recoveryDaysLeft} дней</strong></span>
+                         <span className="text-xs text-slate-500 mt-1.5 font-medium bg-slate-50 px-2.5 py-1 rounded-md self-start border border-slate-200/60 leading-none">{t("До допуска:")}<strong className="text-slate-700">{recoveryDaysLeft} дней</strong></span>
                       )} */}
                    </div>
                    <div className="text-right">
@@ -1140,7 +1134,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 {readiness.reason && !readiness.ready && (
                   <div className="flex items-start gap-2.5 mt-4 p-3.5 bg-red-50 border border-red-100 rounded-xl text-xs font-semibold text-red-700 leading-relaxed shadow-sm">
                     <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>{readiness.reason}</span>
+                    <span>{t(readiness.reason)}</span>
                   </div>
                 )}
               </div>
@@ -1157,7 +1151,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
                 <div>
                   <span className={`inline-flex items-center px-4 py-1.5 rounded-full border text-xs sm:text-sm font-semibold tracking-wide shadow-xs ${gameStatus.color}`}>
-                    {gameStatus.title.charAt(0) + gameStatus.title.slice(1).toLowerCase()}
+                    {t(gameStatus.title).charAt(0) + t(gameStatus.title).slice(1).toLowerCase()}
                   </span>
                 </div>
               </div>
@@ -1171,9 +1165,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
                       <div className="absolute bottom-full left-0 mb-2 w-72 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal text-left">
                         <strong className="block text-red-400 border-b border-white/10 pb-1 mb-1">{t("Расчет баллов донаций:")}</strong>
-                        • 4 балла — Кровь (безвозм)<br/>
-                        • 2 балла — Кровь (возм) или Компонент (безвозм)<br/>
-                        • 1 балл — Компонент (возм)
+                        • 4 {t("балла")} — Кровь (безвозм)<br/>
+                        • 2 {t("балла")} — Кровь (возм) или Компонент (безвозм)<br/>
+                        • 1 {t("балл")} — Компонент (возм)
                       </div>
                     </div>
                     <div className="text-right">
@@ -1198,13 +1192,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 }`}>
                   <div>
                     <h4 className="text-sm md:text-base font-bold text-blue-600 flex items-center gap-1.5">
-                      100% больничный
+                      {t('100% больничный')}
                       <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
                     </h4>
                     <p className="text-xs text-slate-500 font-semibold mt-1">{t("4+ донаций в год")}</p>
                   </div>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal border border-slate-800 animate-fade">
-                    При систематической сдаче крови (4+ раза в год) гарантируется выплата пособия по временной нетрудоспособности в размере 100% среднего заработка.
+                    {t('При систематической сдаче крови (4+ раза в год) гарантируется выплата пособия по временной нетрудоспособности в размере 100% среднего заработка.')}
                   </div>
 
                   <div className="space-y-1.5 mt-3">
@@ -1228,13 +1222,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 }`}>
                   <div>
                     <h4 className="text-sm md:text-base font-bold text-amber-600 flex items-center gap-1.5">
-                      «Ганаровы донар»
+                      {t('«Ганаровы донар»')}
                       <span className="text-slate-400 group-hover:text-slate-600 text-xs">ⓘ</span>
                     </h4>
                     <p className="text-xs text-slate-500 font-semibold mt-1">{t("Знак отличия и льготы")}</p>
                   </div>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 leading-relaxed normal-case font-normal border border-slate-800">
-                    20+ безвозмездных сдач крови (или эквивалент в баллах) дают право на знак отличия «Почётный донор Республики Беларусь» и полный пакет гос. льгот.
+                    {t('20+ безвозмездных сдач крови (или эквивалент в баллах) дают право на знак отличия «Почётный донор Республики Беларусь» и полный пакет гос. льгот.')}
                   </div>
 
                   <div className="space-y-1.5 mt-3">
@@ -1279,13 +1273,14 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       axisLine={false}
                       stroke="#94a3b8" 
                       fontSize={11}
+                      interval={0}
                     />
                     <YAxis 
                       tickLine={false}
                       axisLine={false}
                       stroke="#94a3b8"
                       fontSize={11}
-                      tickFormatter={(v) => `${v} мл`}
+                      tickFormatter={(v) => `${v} ${t("мл")}`}
                     />
                     <Tooltip 
                       content={({ active, payload }) => {
@@ -1296,7 +1291,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                               <p className="font-semibold text-slate-400">{data.name}</p>
                               <div className="flex justify-between gap-4">
                                 <span className="text-slate-300">{t("Объем:")}</span>
-                                <span className="font-bold text-red-400">{data.volume} мл</span>
+                                <span className="font-bold text-red-400">{data.volume} {t("мл")}</span>
                               </div>
                               <div className="flex justify-between gap-4">
                                 <span className="text-slate-300">{t("Донаций:")}</span>
@@ -1330,9 +1325,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 {[
-                  { label: 'Цельная кровь', date: nextBloodDate ? nextBloodDate.toISOString().split('T')[0] : donor.nextAvailableDate, interval: `${bloodDays} дней` },
-                  { label: 'Плазма / Тромбоциты', date: nextAferesisDate ? nextAferesisDate.toISOString().split('T')[0] : null, interval: `${aferezisDays} дней` },
-                  { label: 'Гранулоциты', date: nextGranDate ? nextGranDate.toISOString().split('T')[0] : null, interval: `${granulocytesDays} дней` },
+                  { label: t('Цельная кровь'), date: nextBloodDate ? nextBloodDate.toISOString().split('T')[0] : donor.nextAvailableDate, interval: `${bloodDays} ${t('дней')}` },
+                  { label: t('Плазма / Тромбоциты'), date: nextAferesisDate ? nextAferesisDate.toISOString().split('T')[0] : null, interval: `${aferezisDays} ${t('дней')}` },
+                  { label: t('Гранулоциты'), date: nextGranDate ? nextGranDate.toISOString().split('T')[0] : null, interval: `${granulocytesDays} ${t('дней')}` },
                 ].map((item, idx) => {
                   const now = new Date();
                   now.setHours(0, 0, 0, 0);
@@ -1360,7 +1355,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         <span className={`font-mono text-base font-bold block ${
                           isAvailable ? 'text-emerald-800' : 'text-rose-800'
                         }`}>
-                          {isAvailable ? 'Доступно' : itemDateObj?.toLocaleDateString('ru-RU')}
+                          {isAvailable ? t('Доступно') : itemDateObj?.toLocaleDateString('ru-RU')}
                         </span>
                       </div>
                       <span className={`text-[11px] font-bold ${
@@ -1395,7 +1390,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <p className="text-sm text-slate-500 mt-1">{t("Все зарегистрированные процедуры")}</p>
               </div>
               <span className="bg-slate-100 text-red-600 font-bold px-3 py-1 rounded-full text-xs">
-                {donations.length} записей
+                {donations.length} {t('записей')}
               </span>
             </div>
 
@@ -1414,8 +1409,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   {donations.map(don => {
                     const center = centers.find(c => c.id === don.centerId);
                     const donType = don.donationType || don.type;
-                    const typeLabel = donType === 'blood' ? 'Цельная кровь' : donType === 'plasma' ? 'Плазма' : 'Тромбоциты';
-                    const paidLabel = don.isPaid ? 'возмездно' : 'безвозмездно';
+                    const typeLabel = donType === 'blood' ? t('Цельная кровь') : donType === 'plasma' ? t('Плазма') : t('Тромбоциты');
+                    const paidLabel = don.isPaid ? t('возмездно') : t('безвозмездно');
                     const volume = don.volumeMl || don.volume || '—';
                     return (
                       <tr key={don.id} className="hover:bg-slate-50/50 transition-colors">
@@ -1425,17 +1420,15 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                             {typeLabel} ({paidLabel})
                           </span>
                         </td>
-                        <td className="px-5 py-4 font-medium text-slate-600">{center?.shortName || center?.name || 'Центр крови'}</td>
-                        <td className="px-5 py-4 font-bold text-red-600">{volume} мл</td>
+                        <td className="px-5 py-4 font-medium text-slate-600">{t(center?.shortName || center?.name || t('Центр крови'))}</td>
+                        <td className="px-5 py-4 font-bold text-red-600">{volume} {t("мл")}</td>
                         <td className="px-5 py-4 text-xs text-slate-400 italic max-w-[200px] truncate" title={don.note || ''}>{don.note || '—'}</td>
                       </tr>
                     );
                   })}
                   {donations.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-5 py-12 text-center text-slate-400 italic">
-                        У вас пока нет зарегистрированных донаций.
-                      </td>
+                      <td colSpan={5} className="px-5 py-12 text-center text-slate-400 italic">{t("У вас пока нет зарегистрированных донаций.")}</td>
                     </tr>
                   )}
                 </tbody>
@@ -1522,7 +1515,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <button disabled={isSaving || false} 
                     type="submit"
                     className="disabled:opacity-50 disabled:cursor-not-allowed bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold px-5 py-2.5 rounded-xl transition duration-150 shadow-xs min-h-[44px] md:min-h-0"
-                  >{isSaving ? '...' : 'Сохранить'}</button>
+                  >{isSaving ? '...' : t('Сохранить')}</button>
                 </div>
               </form>
             </div>
@@ -1549,8 +1542,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   onClick={() => { const el = document.getElementById('link-form'); el?.scrollIntoView({ behavior: 'smooth' }); }}
                   className="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shadow-sm flex items-center gap-2 self-start"
                 >
-                  <Plus className="w-4 h-4" /> Добавить центр
-                </button>
+                  <Plus className="w-4 h-4" />{t("Добавить центр")}</button>
               </div>
 
               <div className="space-y-4">
@@ -1570,20 +1562,20 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="font-bold text-slate-800 text-sm tracking-tight leading-none">{center ? center.name : `Центр #${link.centerId}`}</h4>
+                            <h4 className="font-bold text-slate-800 text-sm tracking-tight leading-none">{center ? t(center.name) : `${t("Центр #")}${link.centerId}`}</h4>
                           </div>
                           
                           <div className="flex items-center gap-2 text-xs text-slate-500 font-medium leading-none">
                             <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>{center?.address}</span>
+                            <span>{t(center?.address)}</span>
                           </div>
 
                           <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-2 leading-none">
                             <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                             <span>
                               {isConfirmed 
-                                ? `Подтверждён: ${statusDate}` 
-                                : `Подан: ${statusDate}`}
+                                ? `${t('Подтверждён:')} ${statusDate}` 
+                                : `${t('Подан:')} ${statusDate}`}
                             </span>
                           </div>
                           
@@ -1601,12 +1593,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                                     ? 'bg-red-100 hover:bg-red-200 text-red-700 cursor-pointer' 
                                     : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-75'
                                 }`}
-                              >
-                                Записаться на донацию
-                              </button>
+                              >{t("Записаться на донацию")}</button>
                               {!readiness.ready && (
                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 text-white text-[11px] leading-normal p-2.5 rounded-lg shadow-xl z-50 text-center font-normal">
-                                  <span>Запись недоступна: {readiness.reason || 'действует медотвод или период восстановления'}</span>
+                                  <span>{t("Запись недоступна: ")} {readiness.reason ? t(readiness.reason) : t('действует медотвод или период восстановления')}</span>
                                   <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
                                 </div>
                               )}
@@ -1674,8 +1664,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                             <button 
                               onClick={() => handleResubmit(link.centerId)}
                               className="text-xs md:text-sm font-bold text-red-600 hover:text-red-700 transition-colors flex items-center gap-2"
-                            >
-                              Отправить анкету повторно <RefreshCw className="w-4 h-4" />
+                            >{t("Отправить анкету повторно")}<RefreshCw className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
@@ -1703,10 +1692,10 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                     onChange={(e) => setSelectedCenterId(e.target.value)}
                     className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-600 focus:ring-4 focus:ring-red-50 transition-all focus:outline-none bg-slate-50/50 font-semibold text-slate-700 cursor-pointer shadow-xs"
                   >
-                    <option value=""> Список центров переливания </option>
+                    <option value=""> {t("Список центров переливания")} </option>
                     {centers.map(center => {
                       if (links.some(l => l.centerId === center.id)) return null;
-                      return <option key={center.id} value={center.id}>{center.name}</option>;
+                      return <option key={center.id} value={center.id}>{t(center.name)}</option>;
                     })}
                   </select>
                 </div>
@@ -1732,9 +1721,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             {/* LEFT / MAIN COLUMN: INBOX (HISTORY) */}
             <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
               <div className="space-y-0.5">
-                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">
-                  Входящие уведомления и вызовы
-                </h3>
+                <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">{t("Входящие уведомления и вызовы")}</h3>
                 <p className="text-xs text-slate-500 font-medium">{t("История сообщений, направленных вам центрами крови")}</p>
               </div>
 
@@ -1768,9 +1755,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                               isUnread 
                                 ? 'bg-white/20 text-white border-white/25' 
                                 : 'bg-rose-50 text-rose-600 border-rose-100'
-                            }`}>
-                              Вызов донора
-                            </span>
+                            }`}>{t("Вызов донора")}</span>
                             <h4 className={`font-bold text-xs md:text-sm leading-tight ${
                               isUnread ? 'text-white' : 'text-slate-800'
                             }`}>
@@ -1820,8 +1805,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <form onSubmit={handleNotifSubmit} className="space-y-4">
                 <div className="space-y-2.5">
                   {[
-                    { id: 'push', title: 'Push-уведомления', desc: 'Всплывающие окна в браузере или приложении', enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
-                    { id: 'email', title: 'Email-рассылки', desc: 'Письма с приглашениями и результатами', enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
+                    { id: 'push', title: 'Push-уведомления', desc: t('Всплывающие окна в браузере или приложении'), enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
+                    { id: 'email', title: 'Email-рассылки', desc: t('Письма с приглашениями и результатами'), enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
                   ].map((notif, idx) => (
                     <div key={notif.id} className="flex items-center justify-between p-3.5 md:p-4 bg-slate-50/50 rounded-xl border border-slate-100 transition-hover hover:border-slate-200">
                       <div className="space-y-1 pr-2">
@@ -1839,7 +1824,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <button disabled={isSaving || false} 
                     type="submit"
                     className="disabled:opacity-50 disabled:cursor-not-allowed w-full bg-red-600 hover:bg-red-700 text-white text-xs md:text-sm font-bold py-2.5 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm flex items-center justify-center min-h-[44px] md:min-h-0"
-                  >{isSaving ? 'Сохранение...' : 'Сохранить изменения'}</button>
+                  >{isSaving ? t('Сохранение...') : t('Сохранить изменения')}</button>
                 </div>
               </form>
             </div>
@@ -1966,7 +1951,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
                 <div className="pt-4 border-t border-slate-50">
                   <button type="submit" disabled={isSaving} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 text-xs md:text-sm rounded-xl shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0">
-                    {isSaving ? 'Обновление...' : 'Обновить пароль'}
+                    {isSaving ? t('Обновление...') : t('Обновить пароль')}
                   </button>
                 </div>
               </form>
@@ -2015,7 +2000,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               >
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold text-slate-800">Запись на донацию</h3>
+                    <h3 className="text-xl font-bold text-slate-800">{t("Запись на донацию")}</h3>
                     <button onClick={() => setShowAppointmentModal(false)} className="text-slate-400 hover:text-slate-600">
                       <X className="w-5 h-5" />
                     </button>
@@ -2029,7 +2014,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
                   <form onSubmit={handleAppointmentSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Дата *</label>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">{t("Дата *")}</label>
                       <input 
                         type="date"
                         required
@@ -2040,7 +2025,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Время</label>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">{t("Время")}</label>
                       <input 
                         type="time"
                         min="09:00"
@@ -2049,24 +2034,22 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         onChange={e => setAppointmentForm({ ...appointmentForm, appointmentTime: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                       />
-                      <p className="text-[10px] text-slate-500 mt-1">Доступное время для записи: с 09:00 до 17:00</p>
+                      <p className="text-[10px] text-slate-500 mt-1">{t("Доступное время для записи: с 09:00 до 17:00")}</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Тип донации</label>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">{t("Тип донации")}</label>
                       <select 
                         value={appointmentForm.donationType}
                         onChange={e => setAppointmentForm({ ...appointmentForm, donationType: e.target.value as any })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                       >
-                        <option value="blood">Цельная кровь</option>
-                        <option value="plasma">Плазма</option>
-                        <option value="platelets">Тромбоциты</option>
+                        <option value="blood">{t("Цельная кровь")}</option>
+                        <option value="plasma">{t("Плазма")}</option>
+                        <option value="platelets">{t("Тромбоциты")}</option>
                       </select>
                     </div>
                     <div className="pt-4 flex justify-end">
-                      <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-sm transition-colors min-h-[44px] md:min-h-0">
-                        Записаться
-                      </button>
+                      <button type="submit" className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-xl shadow-sm transition-colors min-h-[44px] md:min-h-0">{t("Записаться")}</button>
                     </div>
                   </form>
                 </div>

@@ -147,7 +147,7 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
           {(stats?.weeklyLoad || []).map((day, i) => (
             <div key={i} className="flex flex-col items-center gap-1">
               <span className="text-[11px] text-slate-400 font-semibold uppercase">{day.day}</span>
-              <div className={`w-full text-center text-[11px] font-bold p-1 rounded ${day.color}`}>{day.load} чел.</div>
+              <div className={`w-full text-center text-[11px] font-bold p-1 rounded ${day.color}`}>{day.load} {t('чел.')}</div>
             </div>
           ))}
         </div>

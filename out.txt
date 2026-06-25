@@ -1,0 +1,66 @@
+[/app/applet/src/App.tsx:262] {showSwitcher ? "Скрыть панель ролей" : "⚙️ Панель ролей"}
+[/app/applet/src/App.tsx:420] Русский (RU)
+[/app/applet/src/App.tsx:426] Беларуская (BY)
+[/app/applet/src/components/BloodCentersMap.tsx:23] if (norm.includes('барановичи')) return [53.117530, 26.038360];
+[/app/applet/src/components/BloodCentersMap.tsx:24] if (norm.includes('пинск')) return [52.114261, 26.104361];
+[/app/applet/src/components/BloodCentersMap.tsx:25] if (norm.includes('кобрин')) return [52.211765, 24.324141];
+[/app/applet/src/components/BloodCentersMap.tsx:26] if (norm.includes('лунинец')) return [52.247246, 26.821312];
+[/app/applet/src/components/BloodCentersMap.tsx:27] if (norm.includes('берёза') || norm.includes('береза')) return [52.537847, 24.996791];
+[/app/applet/src/components/BloodCentersMap.tsx:28] if (norm.includes('брест')) return [52.105539, 23.811586];
+[/app/applet/src/components/BloodCentersMap.tsx:31] if (norm.includes('полоцк')) return [55.483534, 28.776898];
+[/app/applet/src/components/BloodCentersMap.tsx:32] if (norm.includes('новополоцк')) return [55.541164, 28.619149];
+[/app/applet/src/components/BloodCentersMap.tsx:33] if (norm.includes('орша')) return [54.510448, 30.419590];
+[/app/applet/src/components/BloodCentersMap.tsx:34] if (norm.includes('витебск')) return [55.194571, 30.239669];
+[/app/applet/src/components/BloodCentersMap.tsx:37] if (norm.includes('мозырь')) return [52.047579, 29.246375];
+[/app/applet/src/components/BloodCentersMap.tsx:38] if (norm.includes('рогачев') || norm.includes('рогачёв')) return [53.087769, 30.050890];
+[/app/applet/src/components/BloodCentersMap.tsx:39] if (norm.includes('жлобин')) return [52.898536, 30.030617];
+[/app/applet/src/components/BloodCentersMap.tsx:40] if (norm.includes('светлогорск')) return [52.623200, 29.745892];
+[/app/applet/src/components/BloodCentersMap.tsx:41] if (norm.includes('речица')) {
+[/app/applet/src/components/BloodCentersMap.tsx:45] if (norm.includes('калинковичи')) return [52.131346, 29.349982];
+[/app/applet/src/components/BloodCentersMap.tsx:46] if (norm.includes('добруш')) return [52.413570, 31.321355];
+[/app/applet/src/components/BloodCentersMap.tsx:47] if (norm.includes('хойники')) return [51.910630, 29.976188];
+[/app/applet/src/components/BloodCentersMap.tsx:48] if (norm.includes('гомель')) {
+[/app/applet/src/components/BloodCentersMap.tsx:49] if (norm.includes('ильича') || norm.includes('госпиталь')) return [52.356974, 31.032978];
+[/app/applet/src/components/BloodCentersMap.tsx:54] if (norm.includes('лида')) return [53.893444, 25.295131];
+[/app/applet/src/components/BloodCentersMap.tsx:55] if (norm.includes('слоним')) return [53.077115, 25.387509];
+[/app/applet/src/components/BloodCentersMap.tsx:56] if (norm.includes('волковыск')) return [53.161959, 24.442766];
+[/app/applet/src/components/BloodCentersMap.tsx:57] if (norm.includes('сморгонь')) return [54.489142, 26.405664];
+[/app/applet/src/components/BloodCentersMap.tsx:58] if (norm.includes('гродно')) return [53.645849, 23.857395];
+[/app/applet/src/components/BloodCentersMap.tsx:61] if (norm.includes('бобруйск')) return [53.146986, 29.226595];
+[/app/applet/src/components/BloodCentersMap.tsx:62] if (norm.includes('горки')) return [54.288119, 30.997413];
+[/app/applet/src/components/BloodCentersMap.tsx:63] if (norm.includes('кричев')) return [53.689392, 31.709691];
+[/app/applet/src/components/BloodCentersMap.tsx:64] if (norm.includes('осиповичи')) return [53.294841, 28.646046];
+[/app/applet/src/components/BloodCentersMap.tsx:65] if (norm.includes('могилев') || norm.includes('могилёв')) return [53.898991, 30.340580];
+[/app/applet/src/components/BloodCentersMap.tsx:68] if (norm.includes('боpисов') || norm.includes('борисов')) return [54.223219, 28.521752];
+[/app/applet/src/components/BloodCentersMap.tsx:69] if (norm.includes('молодечно')) return [54.300156, 26.835877];
+[/app/applet/src/components/BloodCentersMap.tsx:70] if (norm.includes('солигорск')) return [52.779750, 27.532537];
+[/app/applet/src/components/BloodCentersMap.tsx:71] if (norm.includes('слуцк')) return [53.017424, 27.556559];
+[/app/applet/src/components/BloodCentersMap.tsx:72] if (norm.includes('жодино')) return [54.108826, 28.307891];
+[/app/applet/src/components/BloodCentersMap.tsx:73] if (norm.includes('несвиж') || norm.includes('городея')) return [53.304797, 26.511476];
+[/app/applet/src/components/BloodCentersMap.tsx:74] if (norm.includes('вилейка')) return [54.485518, 26.910283];
+[/app/applet/src/components/CenterSection.tsx:386] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+[/app/applet/src/components/CenterSection.tsx:560] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+[/app/applet/src/components/ConfirmationModal.tsx:20] confirmText = 'Подтвердить',
+[/app/applet/src/components/ConfirmationModal.tsx:21] cancelText = 'Отмена',
+[/app/applet/src/components/DonorSection.tsx:218] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+[/app/applet/src/components/GuestSection.tsx:197] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\s\-]/g, '');
+[/app/applet/src/components/GuestSection.tsx:433] if (regionFilter === 'brest') return matchesSearch && (c.address.includes('Брест') || c.name.includes('Брест') || c.id === 3 || (c.id >= 12 && c.id <= 14) || c.id === 41 || c.id === 42);
+[/app/applet/src/components/GuestSection.tsx:434] if (regionFilter === 'vitebsk') return matchesSearch && (c.address.includes('Витебск') || c.name.includes('Витебск') || c.id === 2 || (c.id >= 15 && c.id <= 17));
+[/app/applet/src/components/GuestSection.tsx:435] if (regionFilter === 'gomel') return matchesSearch && (c.address.includes('Гомель') || c.name.includes('Мозырь') || c.name.includes('Рогачев') || c.id === 4 || c.id === 5 || (c.id >= 18 && c.id <= 22) || (c.id >= 37 && c.id <= 40));
+[/app/applet/src/components/GuestSection.tsx:436] if (regionFilter === 'grodno') return matchesSearch && (c.address.includes('Гродно') || c.name.includes('Гродно') || (c.id >= 23 && c.id <= 27));
+[/app/applet/src/components/GuestSection.tsx:437] if (regionFilter === 'mogilev') return matchesSearch && (c.address.includes('Могилев') || c.name.includes('Бобруйск') || c.id === 6 || c.id === 7 || (c.id >= 28 && c.id <= 30));
+[/app/applet/src/components/GuestSection.tsx:1201] } else if (centerName.includes('Оршанская')) {
+[/app/applet/src/types.ts:205] if (points === 0) return { title: 'НОВЫЙ', currentPoints: 0, nextAt: 4, color: 'text-slate-500 bg-slate-50 border-slate-200' };
+[/app/applet/src/types.ts:206] if (points < 12) return { title: 'НАЧИНАЮЩИЙ', currentPoints: points, nextAt: 12, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
+[/app/applet/src/types.ts:207] if (points < 24) return { title: 'АКТИВНЫЙ', currentPoints: points, nextAt: 24, color: 'text-blue-600 bg-blue-50 border-blue-200' };
+[/app/applet/src/types.ts:208] if (points < 40) return { title: 'ОПЫТНЫЙ', currentPoints: points, nextAt: 40, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
+[/app/applet/src/types.ts:209] if (points < 80) return { title: 'СЕРЕБРЯНЫЙ', currentPoints: points, nextAt: 80, color: 'text-amber-600 bg-amber-50 border-amber-200' };
+[/app/applet/src/types.ts:211] return { title: 'ПОЧЁТНЫЙ', currentPoints: points, nextAt: 80, color: 'text-rose-600 bg-rose-50 border-rose-300 animate-pulse' };
+[/app/applet/src/utils/intervals.ts:83] return { ready: false, reason: 'Аккаунт отключен' };
+[/app/applet/src/utils/intervals.ts:88] return { ready: false, reason: 'Нет подтвержденной связи ни с одним центром крови', pendingConfirmation: true };
+[/app/applet/src/utils/intervals.ts:93] return { ready: false, reason: 'Вес меньше 55 кг (противопоказано)' };
+[/app/applet/src/utils/intervals.ts:104] return { ready: false, reason: 'Возраст находится вне допустимого интервала (18-65)' };
+[/app/applet/src/utils/intervals.ts:125] return { ready: false, reason: 'Действует медицинский отвод' };
+[/app/applet/src/utils/intervals.ts:131] return { ready: false, reason: 'Установлена личная пауза' };
+[/app/applet/src/utils/intervals.ts:135] return { ready: false, reason: 'Установлена личная пауза' };
+[/app/applet/src/utils/intervals.ts:143] return { ready: false, reason: 'Слишком мало времени прошло с последней донации' };

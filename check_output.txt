@@ -1,0 +1,400 @@
+[/app/applet/src/App.tsx:262] {showSwitcher ? "Скрыть панель ролей" : "⚙️ Панель ролей"}
+[/app/applet/src/App.tsx:420] Русский (RU)
+[/app/applet/src/App.tsx:426] Беларуская (BY)
+[/app/applet/src/components/AdminSection.tsx:485] {user.role === 'admin' ? 'АДМИНИСТРАТОР' : user.role === 'center' ? 'МЕД.ЦЕНТР' : 'ДОНОР'}
+[/app/applet/src/components/AdminSection.tsx:640] {donation.donationType === 'blood' ? 'Цельная кровь' : donation.donationType === 'plasma' ? 'Плазма' : donation.donationType === 'platelets' ? 'Тромбоциты' : donation.donationType}
+[/app/applet/src/components/AdminSection.tsx:802] {appt.donationType === 'blood' ? 'Цельная кровь' : appt.donationType === 'plasma' ? 'Плазма' : 'Тромбоциты'}
+[/app/applet/src/components/AdminSection.tsx:813] {appt.status === 'pending' ? 'Ожидает' :
+[/app/applet/src/components/AdminSection.tsx:814] appt.status === 'confirmed' ? 'Подтверждена' :
+[/app/applet/src/components/AdminSection.tsx:815] appt.status === 'completed' ? 'Завершена' :
+[/app/applet/src/components/AdminSection.tsx:816] appt.status === 'cancelled' ? 'Отменена' :
+[/app/applet/src/components/AdminSection.tsx:817] appt.status === 'no_show' ? 'Неявка' : appt.status}
+[/app/applet/src/components/BloodCentersMap.tsx:23] if (norm.includes('барановичи')) return [53.117530, 26.038360];
+[/app/applet/src/components/BloodCentersMap.tsx:24] if (norm.includes('пинск')) return [52.114261, 26.104361];
+[/app/applet/src/components/BloodCentersMap.tsx:25] if (norm.includes('кобрин')) return [52.211765, 24.324141];
+[/app/applet/src/components/BloodCentersMap.tsx:26] if (norm.includes('лунинец')) return [52.247246, 26.821312];
+[/app/applet/src/components/BloodCentersMap.tsx:27] if (norm.includes('берёза') || norm.includes('береза')) return [52.537847, 24.996791];
+[/app/applet/src/components/BloodCentersMap.tsx:28] if (norm.includes('брест')) return [52.105539, 23.811586];
+[/app/applet/src/components/BloodCentersMap.tsx:31] if (norm.includes('полоцк')) return [55.483534, 28.776898];
+[/app/applet/src/components/BloodCentersMap.tsx:32] if (norm.includes('новополоцк')) return [55.541164, 28.619149];
+[/app/applet/src/components/BloodCentersMap.tsx:33] if (norm.includes('орша')) return [54.510448, 30.419590];
+[/app/applet/src/components/BloodCentersMap.tsx:34] if (norm.includes('витебск')) return [55.194571, 30.239669];
+[/app/applet/src/components/BloodCentersMap.tsx:37] if (norm.includes('мозырь')) return [52.047579, 29.246375];
+[/app/applet/src/components/BloodCentersMap.tsx:38] if (norm.includes('рогачев') || norm.includes('рогачёв')) return [53.087769, 30.050890];
+[/app/applet/src/components/BloodCentersMap.tsx:39] if (norm.includes('жлобин')) return [52.898536, 30.030617];
+[/app/applet/src/components/BloodCentersMap.tsx:40] if (norm.includes('светлогорск')) return [52.623200, 29.745892];
+[/app/applet/src/components/BloodCentersMap.tsx:41] if (norm.includes('речица')) {
+[/app/applet/src/components/BloodCentersMap.tsx:45] if (norm.includes('калинковичи')) return [52.131346, 29.349982];
+[/app/applet/src/components/BloodCentersMap.tsx:46] if (norm.includes('добруш')) return [52.413570, 31.321355];
+[/app/applet/src/components/BloodCentersMap.tsx:47] if (norm.includes('хойники')) return [51.910630, 29.976188];
+[/app/applet/src/components/BloodCentersMap.tsx:48] if (norm.includes('гомель')) {
+[/app/applet/src/components/BloodCentersMap.tsx:49] if (norm.includes('ильича') || norm.includes('госпиталь')) return [52.356974, 31.032978];
+[/app/applet/src/components/BloodCentersMap.tsx:54] if (norm.includes('лида')) return [53.893444, 25.295131];
+[/app/applet/src/components/BloodCentersMap.tsx:55] if (norm.includes('слоним')) return [53.077115, 25.387509];
+[/app/applet/src/components/BloodCentersMap.tsx:56] if (norm.includes('волковыск')) return [53.161959, 24.442766];
+[/app/applet/src/components/BloodCentersMap.tsx:57] if (norm.includes('сморгонь')) return [54.489142, 26.405664];
+[/app/applet/src/components/BloodCentersMap.tsx:58] if (norm.includes('гродно')) return [53.645849, 23.857395];
+[/app/applet/src/components/BloodCentersMap.tsx:61] if (norm.includes('бобруйск')) return [53.146986, 29.226595];
+[/app/applet/src/components/BloodCentersMap.tsx:62] if (norm.includes('горки')) return [54.288119, 30.997413];
+[/app/applet/src/components/BloodCentersMap.tsx:63] if (norm.includes('кричев')) return [53.689392, 31.709691];
+[/app/applet/src/components/BloodCentersMap.tsx:64] if (norm.includes('осиповичи')) return [53.294841, 28.646046];
+[/app/applet/src/components/BloodCentersMap.tsx:65] if (norm.includes('могилев') || norm.includes('могилёв')) return [53.898991, 30.340580];
+[/app/applet/src/components/BloodCentersMap.tsx:68] if (norm.includes('боpисов') || norm.includes('борисов')) return [54.223219, 28.521752];
+[/app/applet/src/components/BloodCentersMap.tsx:69] if (norm.includes('молодечно')) return [54.300156, 26.835877];
+[/app/applet/src/components/BloodCentersMap.tsx:70] if (norm.includes('солигорск')) return [52.779750, 27.532537];
+[/app/applet/src/components/BloodCentersMap.tsx:71] if (norm.includes('слуцк')) return [53.017424, 27.556559];
+[/app/applet/src/components/BloodCentersMap.tsx:72] if (norm.includes('жодино')) return [54.108826, 28.307891];
+[/app/applet/src/components/BloodCentersMap.tsx:73] if (norm.includes('несвиж') || norm.includes('городея')) return [53.304797, 26.511476];
+[/app/applet/src/components/BloodCentersMap.tsx:74] if (norm.includes('вилейка')) return [54.485518, 26.910283];
+[/app/applet/src/components/BloodCentersMap.tsx:254] if (!window.confirm("Разрешить доступ к вашей геопозиции, чтобы показать вас на карте?")) {
+[/app/applet/src/components/CenterSection.tsx:223] { id: 'urgent_color', name: 'Дефицит крови', text: 'Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови. Пожалуйста, придите на донацию в ближайшее время.' },
+[/app/applet/src/components/CenterSection.tsx:224] { id: 'plasma_call', name: 'Аферез плазмы', text: 'Донор-Алерт: Просим доноров плазмы подойти для аппаратного плазмафереза в ближайшее время.' },
+[/app/applet/src/components/CenterSection.tsx:225] { id: 'platelet_call', name: 'Аферез тромбоцитов', text: 'Донор-Алерт: Требуются доноры тромбоцитов. Просим вас подойти в центр крови в ближайшее время.' },
+[/app/applet/src/components/CenterSection.tsx:226] { id: 'granulocyte_call', name: 'Дефицит гранулоцитов', text: 'Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов! Сдача клеток крови требуется в ближайшие время. ' }
+[/app/applet/src/components/CenterSection.tsx:386] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+[/app/applet/src/components/CenterSection.tsx:412] setManualError('Заполните обязательные поля');
+[/app/applet/src/components/CenterSection.tsx:416] setManualError('Возраст донора должен быть от 18 до 65 лет');
+[/app/applet/src/components/CenterSection.tsx:420] setManualError('К донорству допускаются лица с массой тела не менее 55 кг');
+[/app/applet/src/components/CenterSection.tsx:424] setManualError('Введите корректный e-mail');
+[/app/applet/src/components/CenterSection.tsx:448] title: 'Одобрить заявку',
+[/app/applet/src/components/CenterSection.tsx:449] message: 'Вы уверены, что хотите одобрить заявку донора на прикрепление к вашему центру крови?',
+[/app/applet/src/components/CenterSection.tsx:451] confirmText: 'Одобрить',
+[/app/applet/src/components/CenterSection.tsx:477] title: 'Отклонить заявку?',
+[/app/applet/src/components/CenterSection.tsx:478] message: 'Вы уверены, что хотите отклонить эту заявку? Донору будет направлено соответствующее извещение с указанной вами причиной.',
+[/app/applet/src/components/CenterSection.tsx:480] confirmText: 'Отклонить',
+[/app/applet/src/components/CenterSection.tsx:505] title: 'Сохранить донацию?',
+[/app/applet/src/components/CenterSection.tsx:506] message: 'Вы уверены, что хотите добавить эту запись в реестр донаций донора?',
+[/app/applet/src/components/CenterSection.tsx:508] confirmText: 'Сохранить',
+[/app/applet/src/components/CenterSection.tsx:532] title: 'Сохранить медотвод?',
+[/app/applet/src/components/CenterSection.tsx:533] message: 'Вы уверены, что хотите добавить медицинский отвод данному донору?',
+[/app/applet/src/components/CenterSection.tsx:535] confirmText: 'Сохранить',
+[/app/applet/src/components/CenterSection.tsx:560] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+[/app/applet/src/components/CenterSection.tsx:608] setEditError('Пожалуйста, введите корректную дату рождения');
+[/app/applet/src/components/CenterSection.tsx:618] setEditError('Возраст донора должен быть от 18 до 65 лет');
+[/app/applet/src/components/CenterSection.tsx:625] setEditError('Укажите корректный e-mail в формате user@example.com (должен содержать символы до и после @)');
+[/app/applet/src/components/CenterSection.tsx:632] setEditError('Минимальный вес донора для сдачи крови — 55 кг');
+[/app/applet/src/components/CenterSection.tsx:637] title: 'Сохранить изменения?',
+[/app/applet/src/components/CenterSection.tsx:638] message: 'Вы уверены, что хотите обновить данные донора?',
+[/app/applet/src/components/CenterSection.tsx:640] confirmText: 'Сохранить',
+[/app/applet/src/components/CenterSection.tsx:655] setEditError(data.error || 'Произошла ошибка при сохранении');
+[/app/applet/src/components/CenterSection.tsx:658] setEditError('Произошла ошибка сети');
+[/app/applet/src/components/CenterSection.tsx:668] title: 'Снять медотвод?',
+[/app/applet/src/components/CenterSection.tsx:669] message: 'Вы уверены, что хотите досрочно снять медицинский отвод? Это действие позволит донору снова записываться на донации.',
+[/app/applet/src/components/CenterSection.tsx:671] confirmText: 'Снять',
+[/app/applet/src/components/CenterSection.tsx:677] body: JSON.stringify({ liftNote: 'Снят досрочно лечащим врачом-трансфузиологом РНПЦ', liftedBy: 2 })
+[/app/applet/src/components/CenterSection.tsx:698] title: 'Подтвердите отправку оповещения',
+[/app/applet/src/components/CenterSection.tsx:699] message: `Потенциальное количество получателей: ${notifyPreviewCount}. Начать рассылку?`,
+[/app/applet/src/components/CenterSection.tsx:701] confirmText: 'Отправить',
+[/app/applet/src/components/CenterSection.tsx:711] setNotifySuccessMsg(`Рассылка отправлена! Получателей: ${data.recipientsCount}. Подробности:\n- Push получено: ${data.pushSent}\n- Email направлено: ${data.emailSent}`);
+[/app/applet/src/components/CenterSection.tsx:723] ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+[/app/applet/src/components/CenterSection.tsx:726] return `Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови${bloodSpace}. Пожалуйста, придите на донацию в ближайшее время.`;
+[/app/applet/src/components/CenterSection.tsx:731] ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+[/app/applet/src/components/CenterSection.tsx:734] return `Донор-Алерт: Просим доноров плазмы${bloodSpace} подойти для аппаратного плазмафереза в ближайшее время.`;
+[/app/applet/src/components/CenterSection.tsx:739] ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+[/app/applet/src/components/CenterSection.tsx:742] return `Донор-Алерт: Требуются доноры тромбоцитов${bloodSpace}. Просим вас подойти в центр крови в ближайшее время.`;
+[/app/applet/src/components/CenterSection.tsx:747] ? (groups.length === 1 ? groups[0] : groups.slice(0, -1).join(', ') + ' и ' + groups[groups.length - 1])
+[/app/applet/src/components/CenterSection.tsx:750] return `Донор-Алерт: Объявлен экстренный сбор на дефицит гранулоцитов${bloodSpace}! Сдача клеток крови требуется в ближайшие время. `;
+[/app/applet/src/components/CenterSection.tsx:821] title: 'Сохранить дефициты?',
+[/app/applet/src/components/CenterSection.tsx:822] message: 'Вы уверены, что хотите обновить уровни запасов крови в донорском светофоре вашего центра?',
+[/app/applet/src/components/CenterSection.tsx:824] confirmText: 'Сохранить',
+[/app/applet/src/components/CenterSection.tsx:825] cancelText: 'Отмена',
+[/app/applet/src/components/CenterSection.tsx:850] title: editingNews ? 'Сохранить публикацию?' : 'Опубликовать новость?',
+[/app/applet/src/components/CenterSection.tsx:851] message: 'Вы уверены, что хотите сохранить изменения и опубликовать новость на портале?',
+[/app/applet/src/components/CenterSection.tsx:853] confirmText: 'Сохранить',
+[/app/applet/src/components/CenterSection.tsx:876] title: 'Удалить новость?',
+[/app/applet/src/components/CenterSection.tsx:877] message: 'Вы уверены, что хотите безвозвратно удалить эту новость?',
+[/app/applet/src/components/CenterSection.tsx:879] confirmText: 'Удалить',
+[/app/applet/src/components/CenterSection.tsx:893] { id: 'I_O', label: 'I (O) – Первая', count: stats.bloodGroupStats.I_O, stroke: '#dc2626', bg: 'bg-red-600' },
+[/app/applet/src/components/CenterSection.tsx:894] { id: 'II_A', label: 'II (A) – Вторая', count: stats.bloodGroupStats.II_A, stroke: '#b91c1c', bg: 'bg-red-700' },
+[/app/applet/src/components/CenterSection.tsx:895] { id: 'III_B', label: 'III (B) – Третья', count: stats.bloodGroupStats.III_B, stroke: '#f87171', bg: 'bg-red-400' },
+[/app/applet/src/components/CenterSection.tsx:896] { id: 'IV_AB', label: 'IV (AB) – Четвертая', count: stats.bloodGroupStats.IV_AB, stroke: '#fca5a5', bg: 'bg-red-300' }
+[/app/applet/src/components/CenterSection.tsx:926] { id: 'stats', label: 'Показатели', icon: Activity },
+[/app/applet/src/components/CenterSection.tsx:927] { id: 'donors', label: 'Доноры', icon: Users },
+[/app/applet/src/components/CenterSection.tsx:928] { id: 'pending', label: 'Заявки', icon: HelpCircle },
+[/app/applet/src/components/CenterSection.tsx:929] { id: 'appointments', label: 'Записи', icon: Calendar },
+[/app/applet/src/components/CenterSection.tsx:930] { id: 'notify', label: 'Рассылка', icon: Bell },
+[/app/applet/src/components/CenterSection.tsx:931] { id: 'news', label: 'Новости', icon: FileText },
+[/app/applet/src/components/CenterSection.tsx:932] { id: 'needs', label: 'Дефициты', icon: Droplets }
+[/app/applet/src/components/CenterSection.tsx:978] Остальные — временно отстранены (сроки/медотводы).
+[/app/applet/src/components/CenterSection.tsx:996] Количество отправленных SMS-оповещений.
+[/app/applet/src/components/CenterSection.tsx:1049] <span className="truncate"><strong>{slice.label}:</strong> {slice.count} дон.</span>
+[/app/applet/src/components/CenterSection.tsx:1163] } лет)
+[/app/applet/src/components/CenterSection.tsx:1169] {donorCard.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+[/app/applet/src/components/CenterSection.tsx:1175] {donorCard.donor.weight} кг
+[/app/applet/src/components/CenterSection.tsx:1196] {donorCard.donor.email || donorCard.donor.onesignalPlayerId || 'Не указан'}
+[/app/applet/src/components/CenterSection.tsx:1202] <CenterAccordionItem title={`История процедур сдачи крови (${donorCard.donations.length})`}>
+[/app/applet/src/components/CenterSection.tsx:1217] const typeLabel = donType === 'blood' ? 'Кровь' : donType === 'plasma' ? 'Плазма' : donType === 'platelets' ? 'Тромбоциты' : donType;
+[/app/applet/src/components/CenterSection.tsx:1218] const paidLabel = don.isPaid ? 'возмездно' : 'безвозмездно';
+[/app/applet/src/components/CenterSection.tsx:1236] title: 'Удалить донацию?',
+[/app/applet/src/components/CenterSection.tsx:1237] message: 'Это действие необратимо. Запись будет навсегда удалена из истории донора.',
+[/app/applet/src/components/CenterSection.tsx:1239] confirmText: 'Удалить',
+[/app/applet/src/components/CenterSection.tsx:1268] <CenterAccordionItem title={`Медицинские отводы и ограничения (${donorCard.medicalNotes.length})`}>
+[/app/applet/src/components/CenterSection.tsx:1457] title={item.readiness?.reason || 'Имеет ограничения или отвод'}
+[/app/applet/src/components/CenterSection.tsx:1461] <td className="p-3 font-mono">{item.lastDonationDate ? formatDateHuman(item.lastDonationDate) : 'Ни разу'}</td>
+[/app/applet/src/components/CenterSection.tsx:1501] ← Вернуться к заявкам
+[/app/applet/src/components/CenterSection.tsx:1516] ? 'Готов к донации цельной крови'
+[/app/applet/src/components/CenterSection.tsx:1517] : 'Медотвод / Ограничение'}
+[/app/applet/src/components/CenterSection.tsx:1547] } лет)
+[/app/applet/src/components/CenterSection.tsx:1553] {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+[/app/applet/src/components/CenterSection.tsx:1563] {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
+[/app/applet/src/components/CenterSection.tsx:1568] <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{pendingDonorProfile.card.donor.weight} кг</span>
+[/app/applet/src/components/CenterSection.tsx:1585] {!pendingDonorProfile.card.donor.pushEnabled && !pendingDonorProfile.card.donor.emailNotificationsEnabled ? 'Отключены' : ''}
+[/app/applet/src/components/CenterSection.tsx:1606] Срок проведения отвода: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : 'бессрочно'}
+[/app/applet/src/components/CenterSection.tsx:1636] {don.donationType === 'blood' ? 'кровь' : don.donationType === 'plasma' ? 'плазма' : 'тромбоциты'}
+[/app/applet/src/components/CenterSection.tsx:1639] {don.volumeMl || don.volume || '—'} мл
+[/app/applet/src/components/CenterSection.tsx:1693] Повторная подача ({item.link.resubmissionCount})
+[/app/applet/src/components/CenterSection.tsx:1756] <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full">{dayAppts.length} чел.</span>
+[/app/applet/src/components/CenterSection.tsx:1770] {a.status === 'pending' ? 'Ожидает' : a.status === 'confirmed' ? 'Подтверждена' : a.status === 'completed' ? 'Завершена' : a.status === 'cancelled' ? 'Отменена' : 'Неявка'}
+[/app/applet/src/components/CenterSection.tsx:1778] <span>{a.donationType === 'blood' ? 'Цельная кровь' : a.donationType === 'plasma' ? 'Плазма' : 'Тромбоциты'}</span>
+[/app/applet/src/components/CenterSection.tsx:1799] title: 'Завершить донацию?',
+[/app/applet/src/components/CenterSection.tsx:1800] message: `Вы уверены, что хотите отметить донацию донора ${a.donorName} как завершенную?`,
+[/app/applet/src/components/CenterSection.tsx:1802] confirmText: 'Завершить',
+[/app/applet/src/components/CenterSection.tsx:1803] cancelText: 'Отмена',
+[/app/applet/src/components/CenterSection.tsx:1819] title: 'Отклонить запись?',
+[/app/applet/src/components/CenterSection.tsx:1820] message: `Вы уверены, что хотите отклонить запись донора ${a.donorName} на донацию?`,
+[/app/applet/src/components/CenterSection.tsx:1822] confirmText: 'Отклонить',
+[/app/applet/src/components/CenterSection.tsx:1823] cancelText: 'Отмена',
+[/app/applet/src/components/CenterSection.tsx:1973] { id: 'all', label: 'Оба канала (Push + Email)' },
+[/app/applet/src/components/CenterSection.tsx:1974] { id: 'push', label: 'Только Push-уведомления' },
+[/app/applet/src/components/CenterSection.tsx:1975] { id: 'email', label: 'Только письма на E-mail' }
+[/app/applet/src/components/CenterSection.tsx:2289] {notifyPreviewCount} подходящим донорам центра
+[/app/applet/src/components/CenterSection.tsx:2456] <span className="text-xs font-semibold text-slate-500">{item.publishedAt ? formatDateHuman(item.publishedAt) : 'Проект'}</span>
+[/app/applet/src/components/CenterSection.tsx:2458] {isActuallyPublished ? 'Опубликовано' : 'Ещё не опубликована'}
+[/app/applet/src/components/CenterSection.tsx:2510] {needsSaving ? 'Сохранение...' : (needsSuccess ? 'Сохранено!' : 'Сохранить изменения')}
+[/app/applet/src/components/CenterSection.tsx:2591] >{isSaving ? 'Подождите...' : 'Отклонить заявку'}</button>
+[/app/applet/src/components/CenterSection.tsx:2674] <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Записать в базу и пересчитать сроки'}</button>
+[/app/applet/src/components/CenterSection.tsx:2685] if (isNaN(birthDateObj.getTime())) return 'Пожалуйста, введите корректную дату рождения';
+[/app/applet/src/components/CenterSection.tsx:2693] return `Возраст донора должен быть от 18 до 65 лет (сейчас: ${age < 0 ? 0 : age})`;
+[/app/applet/src/components/CenterSection.tsx:2702] return 'E-mail должен быть вида *@* (символы до и после @)';
+[/app/applet/src/components/CenterSection.tsx:2711] return 'Минимальный вес должен быть не менее 55 кг';
+[/app/applet/src/components/CenterSection.tsx:2859] <button type="submit" disabled={isSaving} className="px-6 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow-xs hover:shadow-sm transition-all animate-fade min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Сохранить изменения'}</button>
+[/app/applet/src/components/CenterSection.tsx:2938] <button type="submit" disabled={isSaving} className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Накладывать медотвод'}</button>
+[/app/applet/src/components/CenterSection.tsx:2994] <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors mt-2 min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Сохранить публикацию'}</button>
+[/app/applet/src/components/CenterSection.tsx:3132] <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">Рабочий E-Mail (Логин) <span className="text-red-500">*</span></label>
+[/app/applet/src/components/CenterSection.tsx:3155] <button type="submit" disabled={isSaving} className="w-full mt-4 bg-red-650 hover:bg-red-700 bg-red-600 text-white font-medium py-3 rounded-xl transition duration-150 text-sm min-h-[44px] md:min-h-0">{isSaving ? 'Подождите...' : 'Создать профиль донора (Подтвержден на месте)'}</button>
+[/app/applet/src/components/CenterSection.tsx:3178] Дата регистрации: {formatDateHuman(pendingDonorProfile.card.donor.createdAt)}
+[/app/applet/src/components/CenterSection.tsx:3203] } лет)
+[/app/applet/src/components/CenterSection.tsx:3209] {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
+[/app/applet/src/components/CenterSection.tsx:3215] {pendingDonorProfile.card.donor.weight} кг
+[/app/applet/src/components/CenterSection.tsx:3236] {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
+[/app/applet/src/components/CenterSection.tsx:3251] Период: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : 'бессрочно'}
+[/app/applet/src/components/CenterStatsDashboard.tsx:150] <div className={`w-full text-center text-[11px] font-bold p-1 rounded ${day.color}`}>{day.load} чел.</div>
+[/app/applet/src/components/ConfirmationModal.tsx:20] confirmText = 'Подтвердить',
+[/app/applet/src/components/ConfirmationModal.tsx:21] cancelText = 'Отмена',
+[/app/applet/src/components/DonorSection.tsx:137] if (val.length < 6) return 'Пароль должен быть не менее 6 символов';
+[/app/applet/src/components/DonorSection.tsx:138] const hasLetter = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(val);
+[/app/applet/src/components/DonorSection.tsx:141] return 'пароль не надёжный должны присутствовать цифры и буквы';
+[/app/applet/src/components/DonorSection.tsx:149] return 'Неверный пароль';
+[/app/applet/src/components/DonorSection.tsx:160] setPasswordError('Пароль должен быть не менее 6 символов');
+[/app/applet/src/components/DonorSection.tsx:163] const hasLetter = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(newPassword);
+[/app/applet/src/components/DonorSection.tsx:166] setPasswordError('пароль не надёжный должны присутствовать цифры и буквы');
+[/app/applet/src/components/DonorSection.tsx:171] setPasswordError('Неверный пароль');
+[/app/applet/src/components/DonorSection.tsx:176] title: 'Обновить пароль?',
+[/app/applet/src/components/DonorSection.tsx:177] message: 'Вы уверены, что хотите изменить пароль вашей учетной записи?',
+[/app/applet/src/components/DonorSection.tsx:179] confirmText: 'Обновить',
+[/app/applet/src/components/DonorSection.tsx:181] setPasswordSuccess('Пароль успешно обновлен!');
+[/app/applet/src/components/DonorSection.tsx:218] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
+[/app/applet/src/components/DonorSection.tsx:302] setEditError('Номер телефона должен содержать ровно 13 символов (например, +375XXXXXXXXX)');
+[/app/applet/src/components/DonorSection.tsx:307] setEditError('E-mail должен быть в формате имя@домен (например, donor@example.com)');
+[/app/applet/src/components/DonorSection.tsx:312] title: 'Сохранить изменения?',
+[/app/applet/src/components/DonorSection.tsx:313] message: 'Вы уверены, что хотите обновить личные данные профиля?',
+[/app/applet/src/components/DonorSection.tsx:315] confirmText: 'Сохранить',
+[/app/applet/src/components/DonorSection.tsx:332] throw new Error(data.error || 'Ошибка при сохранении профиля');
+[/app/applet/src/components/DonorSection.tsx:334] setEditSuccess('Профиль успешно сохранен и отправлен в центр крови для подтверждения!');
+[/app/applet/src/components/DonorSection.tsx:338] setEditError(err.message || 'Ошибка обновления профиля');
+[/app/applet/src/components/DonorSection.tsx:358] title: 'Сохранить настройки паузы?',
+[/app/applet/src/components/DonorSection.tsx:359] message: 'Вы уверены, что хотите обновить статус вашей паузы? Во время активной паузы вы не будете получать приглашения на донацию.',
+[/app/applet/src/components/DonorSection.tsx:361] confirmText: 'Сохранить',
+[/app/applet/src/components/DonorSection.tsx:377] setPauseSuccess('Настройки личной паузы успешно сохранены!');
+[/app/applet/src/components/DonorSection.tsx:381] setPauseSuccess('Не удалось сохранить изменения во внешнем сервисе');
+[/app/applet/src/components/DonorSection.tsx:393] title: 'Сохранить настройки уведомлений?',
+[/app/applet/src/components/DonorSection.tsx:394] message: 'Текущие каналы для связи будут обновлены. Вы уверены?',
+[/app/applet/src/components/DonorSection.tsx:396] confirmText: 'Сохранить',
+[/app/applet/src/components/DonorSection.tsx:412] setNotifSuccess('Предпочтения каналов рассылок изменены!');
+[/app/applet/src/components/DonorSection.tsx:416] setNotifSuccess('Ошибка сохранения настроек');
+[/app/applet/src/components/DonorSection.tsx:464] setAppointmentSuccess('Вы успешно записаны на донацию. Ждем вас!');
+[/app/applet/src/components/DonorSection.tsx:472] title: 'Переподать заявку?',
+[/app/applet/src/components/DonorSection.tsx:473] message: 'Вы уверены, что хотите снова отправить заявку на прикрепление к этому центру крови?',
+[/app/applet/src/components/DonorSection.tsx:475] confirmText: 'Отправить',
+[/app/applet/src/components/DonorSection.tsx:502] title: 'Сделать домашним центром?',
+[/app/applet/src/components/DonorSection.tsx:503] message: 'Вы хотите установить этот центр крови как основной (домашний) для вашей донорской активности?',
+[/app/applet/src/components/DonorSection.tsx:505] confirmText: 'Установить',
+[/app/applet/src/components/DonorSection.tsx:534] setLinkError('Пожалуйста, укажите медицинский центр');
+[/app/applet/src/components/DonorSection.tsx:539] title: 'Отправить заявку?',
+[/app/applet/src/components/DonorSection.tsx:540] message: 'Вы уверены, что хотите подать заявку на прикрепление к выбранному центру крови?',
+[/app/applet/src/components/DonorSection.tsx:542] confirmText: 'Отправить',
+[/app/applet/src/components/DonorSection.tsx:561] setLinkSuccess(data.message || 'Связь успешно добавлена!');
+[/app/applet/src/components/DonorSection.tsx:565] setLinkError(err.message || 'Ошибка связи');
+[/app/applet/src/components/DonorSection.tsx:603] const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+[/app/applet/src/components/DonorSection.tsx:725] <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{donor.weight || '—'} кг</span>
+[/app/applet/src/components/DonorSection.tsx:729] <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{calcAge(donor.birthDate)} лет</span>
+[/app/applet/src/components/DonorSection.tsx:746] { id: 'dashboard', label: 'Рабочий стол', icon: Home },
+[/app/applet/src/components/DonorSection.tsx:747] { id: 'profile', label: 'Профиль', icon: User },
+[/app/applet/src/components/DonorSection.tsx:748] { id: 'history', label: 'История сдач', icon: Calendar },
+[/app/applet/src/components/DonorSection.tsx:749] { id: 'links', label: 'Мои центры', icon: Link },
+[/app/applet/src/components/DonorSection.tsx:750] { id: 'pause', label: 'Пауза', icon: Pause },
+[/app/applet/src/components/DonorSection.tsx:751] { id: 'notifications', label: 'Уведомления', icon: Bell },
+[/app/applet/src/components/DonorSection.tsx:752] { id: 'account', label: 'Аккаунт', icon: Settings }
+[/app/applet/src/components/DonorSection.tsx:939] {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
+[/app/applet/src/components/DonorSection.tsx:959] {isSaving ? 'Сохранение...' : 'Сохранить изменения'}
+[/app/applet/src/components/DonorSection.tsx:971] <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
+[/app/applet/src/components/DonorSection.tsx:975] <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
+[/app/applet/src/components/DonorSection.tsx:987] <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.weight} кг</span>
+[/app/applet/src/components/DonorSection.tsx:1003] {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
+[/app/applet/src/components/DonorSection.tsx:1168] • 4 балла — Кровь (безвозм)<br/>
+[/app/applet/src/components/DonorSection.tsx:1169] • 2 балла — Кровь (возм) или Компонент (безвозм)<br/>
+[/app/applet/src/components/DonorSection.tsx:1170] • 1 балл — Компонент (возм)
+[/app/applet/src/components/DonorSection.tsx:1195] 100% больничный
+[/app/applet/src/components/DonorSection.tsx:1201] При систематической сдаче крови (4+ раза в год) гарантируется выплата пособия по временной нетрудоспособности в размере 100% среднего заработка.
+[/app/applet/src/components/DonorSection.tsx:1225] «Ганаровы донар»
+[/app/applet/src/components/DonorSection.tsx:1231] 20+ безвозмездных сдач крови (или эквивалент в баллах) дают право на знак отличия «Почётный донор Республики Беларусь» и полный пакет гос. льгот.
+[/app/applet/src/components/DonorSection.tsx:1282] tickFormatter={(v) => `${v} мл`}
+[/app/applet/src/components/DonorSection.tsx:1293] <span className="font-bold text-red-400">{data.volume} мл</span>
+[/app/applet/src/components/DonorSection.tsx:1357] {isAvailable ? 'Доступно' : itemDateObj?.toLocaleDateString('ru-RU')}
+[/app/applet/src/components/DonorSection.tsx:1392] {donations.length} записей
+[/app/applet/src/components/DonorSection.tsx:1411] const typeLabel = donType === 'blood' ? 'Цельная кровь' : donType === 'plasma' ? 'Плазма' : 'Тромбоциты';
+[/app/applet/src/components/DonorSection.tsx:1412] const paidLabel = don.isPaid ? 'возмездно' : 'безвозмездно';
+[/app/applet/src/components/DonorSection.tsx:1422] <td className="px-5 py-4 font-medium text-slate-600">{t(center?.shortName || center?.name || 'Центр крови')}</td>
+[/app/applet/src/components/DonorSection.tsx:1423] <td className="px-5 py-4 font-bold text-red-600">{volume} мл</td>
+[/app/applet/src/components/DonorSection.tsx:1517] >{isSaving ? '...' : 'Сохранить'}</button>
+[/app/applet/src/components/DonorSection.tsx:1564] <h4 className="font-bold text-slate-800 text-sm tracking-tight leading-none">{center ? t(center.name) : `Центр #${link.centerId}`}</h4>
+[/app/applet/src/components/DonorSection.tsx:1576] ? `Подтверждён: ${statusDate}`
+[/app/applet/src/components/DonorSection.tsx:1577] : `Подан: ${statusDate}`}
+[/app/applet/src/components/DonorSection.tsx:1807] { id: 'push', title: 'Push-уведомления', desc: 'Всплывающие окна в браузере или приложении', enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
+[/app/applet/src/components/DonorSection.tsx:1808] { id: 'email', title: 'Email-рассылки', desc: 'Письма с приглашениями и результатами', enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
+[/app/applet/src/components/DonorSection.tsx:1826] >{isSaving ? 'Сохранение...' : 'Сохранить изменения'}</button>
+[/app/applet/src/components/DonorSection.tsx:1953] {isSaving ? 'Обновление...' : 'Обновить пароль'}
+[/app/applet/src/components/DonorSection.tsx:2016] <label className="block text-sm font-bold text-slate-700 mb-1">Дата *</label>
+[/app/applet/src/components/GuestSection.tsx:112] if (pwd.length < 6) return 'Пароль должен быть не менее 6 символов';
+[/app/applet/src/components/GuestSection.tsx:113] const hasLetters = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(pwd);
+[/app/applet/src/components/GuestSection.tsx:117] return 'пароль ненадёжный должен содержать буквы и цифры';
+[/app/applet/src/components/GuestSection.tsx:124] if (pwd.length < 6) return 'Пароль должен быть не менее 6 символов';
+[/app/applet/src/components/GuestSection.tsx:125] const hasLetters = /[a-zA-Zа-яА-ЯёЁіІўЎ]/.test(pwd);
+[/app/applet/src/components/GuestSection.tsx:128] return 'пароль не надёжный должны присутствовать цифры и буквы';
+[/app/applet/src/components/GuestSection.tsx:197] const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\s\-]/g, '');
+[/app/applet/src/components/GuestSection.tsx:244] throw new Error(data.error || 'Ошибка входа');
+[/app/applet/src/components/GuestSection.tsx:258] setLoginError('Введите ваш e-mail');
+[/app/applet/src/components/GuestSection.tsx:272] throw new Error(data.error || 'Ошибка при запросе сброса пароля');
+[/app/applet/src/components/GuestSection.tsx:274] alert(data.message || 'Письмо отправлено');
+[/app/applet/src/components/GuestSection.tsx:290] setLoginError('Введите ваш e-mail');
+[/app/applet/src/components/GuestSection.tsx:304] throw new Error(data.error || 'Ошибка при запросе сброса пароля');
+[/app/applet/src/components/GuestSection.tsx:318] setLoginError('Введите код из письма');
+[/app/applet/src/components/GuestSection.tsx:327] setLoginError('Пароли не совпадают');
+[/app/applet/src/components/GuestSection.tsx:341] throw new Error(data.error || 'Ошибка при сохранении пароля');
+[/app/applet/src/components/GuestSection.tsx:343] alert(data.message || 'Пароль изменён');
+[/app/applet/src/components/GuestSection.tsx:360] setRegError('Пожалуйста, заполните необходимые личные данные');
+[/app/applet/src/components/GuestSection.tsx:364] setRegError('Введите корректный e-mail');
+[/app/applet/src/components/GuestSection.tsx:368] setRegError('Пароль должен быть длиной не менее 6 символов');
+[/app/applet/src/components/GuestSection.tsx:372] setRegError('Пароли не совпадают');
+[/app/applet/src/components/GuestSection.tsx:379] setRegError('Возраст донора должен быть от 18 до 65 лет');
+[/app/applet/src/components/GuestSection.tsx:388] setRegError('К донорству допускаются лица с массой тела не менее 55 кг');
+[/app/applet/src/components/GuestSection.tsx:392] setRegError('Пожалуйста, выберите ваш основной центр крови из списка');
+[/app/applet/src/components/GuestSection.tsx:396] setRegError('Необходимо подтвердить согласие на обработку персональных данных');
+[/app/applet/src/components/GuestSection.tsx:409] throw new Error(data.error || 'Ошибка регистрации');
+[/app/applet/src/components/GuestSection.tsx:412] alert(data.message || 'Регистрация успешна! Теперь вы можете войти в свой личный кабинет.');
+[/app/applet/src/components/GuestSection.tsx:433] if (regionFilter === 'brest') return matchesSearch && (c.address.includes('Брест') || c.name.includes('Брест') || c.id === 3 || (c.id >= 12 && c.id <= 14) || c.id === 41 || c.id === 42);
+[/app/applet/src/components/GuestSection.tsx:434] if (regionFilter === 'vitebsk') return matchesSearch && (c.address.includes('Витебск') || c.name.includes('Витебск') || c.id === 2 || (c.id >= 15 && c.id <= 17));
+[/app/applet/src/components/GuestSection.tsx:435] if (regionFilter === 'gomel') return matchesSearch && (c.address.includes('Гомель') || c.name.includes('Мозырь') || c.name.includes('Рогачев') || c.id === 4 || c.id === 5 || (c.id >= 18 && c.id <= 22) || (c.id >= 37 && c.id <= 40));
+[/app/applet/src/components/GuestSection.tsx:436] if (regionFilter === 'grodno') return matchesSearch && (c.address.includes('Гродно') || c.name.includes('Гродно') || (c.id >= 23 && c.id <= 27));
+[/app/applet/src/components/GuestSection.tsx:437] if (regionFilter === 'mogilev') return matchesSearch && (c.address.includes('Могилев') || c.name.includes('Бобруйск') || c.id === 6 || c.id === 7 || (c.id >= 28 && c.id <= 30));
+[/app/applet/src/components/GuestSection.tsx:450] const centerName = center?.name || 'Центр переливания крови';
+[/app/applet/src/components/GuestSection.tsx:1033] { id: 'all', label: 'Все области' },
+[/app/applet/src/components/GuestSection.tsx:1034] { id: 'minsk', label: 'Минск' },
+[/app/applet/src/components/GuestSection.tsx:1035] { id: 'minsk-region', label: 'Минская область' },
+[/app/applet/src/components/GuestSection.tsx:1036] { id: 'brest', label: 'Брестская область' },
+[/app/applet/src/components/GuestSection.tsx:1037] { id: 'vitebsk', label: 'Витебская область' },
+[/app/applet/src/components/GuestSection.tsx:1038] { id: 'gomel', label: 'Гомельская область' },
+[/app/applet/src/components/GuestSection.tsx:1039] { id: 'grodno', label: 'Гродненская область' },
+[/app/applet/src/components/GuestSection.tsx:1040] { id: 'mogilev', label: 'Могилевская область' },
+[/app/applet/src/components/GuestSection.tsx:1197] let centerName = center?.name || 'Центр переливания крови';
+[/app/applet/src/components/GuestSection.tsx:1199] if (centerName.includes('РНПЦ трансфузиологии')) {
+[/app/applet/src/components/GuestSection.tsx:1200] centerName = 'РНПЦ трансфузиологии';
+[/app/applet/src/components/GuestSection.tsx:1201] } else if (centerName.includes('Оршанская')) {
+[/app/applet/src/components/GuestSection.tsx:1202] centerName = 'Оршанская СПК';
+[/app/applet/src/components/GuestSection.tsx:1203] } else if (centerName.includes('Витебский ОЦТ')) {
+[/app/applet/src/components/GuestSection.tsx:1204] centerName = 'Витебский ОЦТ';
+[/app/applet/src/components/GuestSection.tsx:1214] {item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('ru-RU') : 'Свежая новость'}
+[/app/applet/src/components/GuestSection.tsx:1579] isWeightInvalid() || regError.includes('масс') ? 'border-red-500 bg-red-50 focus:border-red-600' : 'border-slate-200 focus:border-red-500'
+[/app/applet/src/components/GuestSection.tsx:1582] {(isWeightInvalid() || regError.includes('масс')) && (
+[/app/applet/src/components/GuestSection.tsx:1871] {t(centers.find(c => c.id === selectedNews.centerId)?.name || 'Центр переливания')}
+[/app/applet/src/components/GuestSection.tsx:1874] {selectedNews.publishedAt ? new Date(selectedNews.publishedAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Свежая новость'}
+[/app/applet/src/components/PrivacyPolicy.tsx:22] {isRu ? 'Политика конфиденциальности' : 'Палітыка канфідэнцыяльнасці'}
+[/app/applet/src/components/PrivacyPolicy.tsx:25] {isRu ? 'Республика Беларусь' : 'Рэспубліка Беларусь'}
+[/app/applet/src/components/PrivacyPolicy.tsx:34] {isRu ? 'Вернуться назад' : 'Вярнуцца назад'}
+[/app/applet/src/components/PrivacyPolicy.tsx:46] Настоящая Политика конфиденциальности (далее – Политика) разработана в строгом соответствии с <strong>Законом Республики Беларусь от 7 мая 2021 г. № 99-З «О защите персональных данных»</strong> (далее – Закон) и иными актами законодательства Республики Беларусь.
+[/app/applet/src/components/PrivacyPolicy.tsx:71] <li>Оповещение доноров о необходимости сдачи крови и её компонентов (двухканальная система: Push-уведомления и Email-рассылки);</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:85] <li>Контактный номер телефона и адрес электронной почты (E-mail);</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:94] В соответствии со статьями 10–13 Закона № 99-З Субъект персональных данных Республики Беларусь имеет следующие права:
+[/app/applet/src/components/PrivacyPolicy.tsx:119] Вы имеете право требовать прекращения обработки и полного удаления Ваших персональных данных («право на забвение») при отсутствии законных оснований для их дальнейшей обработки. Срок рассмотрения – <strong>15 календарных дней</strong>.
+[/app/applet/src/components/PrivacyPolicy.tsx:152] <span className="text-red-500 font-mono">1.</span> Агульныя палажэнні
+[/app/applet/src/components/PrivacyPolicy.tsx:155] Дадзеная Палітыка канфідэнцыяльнасці (далей – Палітыка) распрацавана ў строгай адпаведнасці з <strong>Законам Рэспублікі Беларусь ад 7 мая 2021 г. № 99-З «Аб абароне персанальных дадзеных»</strong> (далей – Закон) і іншымі актамі заканадаўства Рэспублікі Беларусь.
+[/app/applet/src/components/PrivacyPolicy.tsx:161] У адпаведнасці з патрабаваннямі <strong>Указа Прэзідэнта Рэспублікі Беларусь ад 1 лютага 2010 г. № 60</strong>, базы дадзеных Платформы, якія змяшчаюць персанальныя дадзеныя грамадзян Рэспублікі Беларусь, фізічна размешчаны і апрацоўваюцца на серверах, размешчаных на тэрыторыі Рэспублікі Беларусь.
+[/app/applet/src/components/PrivacyPolicy.tsx:167] <span className="text-red-500 font-mono">2.</span> Тэрміны, якія выкарыстоўваюцца
+[/app/applet/src/components/PrivacyPolicy.tsx:171] <li><strong>Суб'ект персанальных дадзеных</strong> – фізічная асоба, у дачыненні да якой ажыццяўляецца апрацоўка персанальных дадзеных (у межах Платформы – Карыстальнік, Донар).</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:172] <li><strong>Упаўнаважаная асоба</strong> – дзяржаўны орган, юрыдычная асоба Рэспублікі Беларусь, фізічная асоба, якая ў адпаведнасці з заканадаўствам або дамовай ажыццяўляе апрацоўку персанальных дадзеных ад імя Аператара (напрыклад, медыцынскія ўстановы / цэнтры крыві Рэспублікі Беларусь).</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:179] <span className="text-red-500 font-mono">3.</span> Мэты апрацоўкі персанальных дадзеных
+[/app/applet/src/components/PrivacyPolicy.tsx:181] <p>Аператар апрацоўвае персанальныя дадзеныя ў наступных мэтах:</p>
+[/app/applet/src/components/PrivacyPolicy.tsx:183] <li>Апавяшчэнне донараў аб неабходнасці здачы крыві і яе кампанентаў (двухканальная сістэма: Push-апавяшчэнні і Email-рассылкі);</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:184] <li>Каардынацыя ўзаемадзеяння карыстальнікаў з дзяржаўнымі цэнтрамі трансфузіялогіі (цэнтрамі крыві) Рэспублікі Беларусь;</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:185] <li>Прылада карыстальніку доступу да асабістага кабінета донара, вядзенне электроннай карты донара і гісторыі данацый;</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:186] <li>Інфармаванне аб навінах і мерапрыемствах у сферы донарства ў Рэспубліцы Беларусь.</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:192] <span className="text-red-500 font-mono">4.</span> Пералік дадзеных, якія апрацоўваюцца
+[/app/applet/src/components/PrivacyPolicy.tsx:194] <p>У межах Платформы апрацоўваюцца наступныя персанальныя дадзеныя:</p>
+[/app/applet/src/components/PrivacyPolicy.tsx:196] <li>Прозвішча, Імя, Імя па бацьку (пры наяўнасці);</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:197] <li>Дата нараджэння і пол;</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:198] <li>Кантактны нумар тэлефона і адрас электроннай пошты (E-mail);</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:199] <li>Медыцынскія звесткі: група крыві, рэзус-фактар, наяўнасць часовых або пастаянных медыцынскіх супрацьпаказанняў (медадводаў), гісторыя данацый.</li>
+[/app/applet/src/components/PrivacyPolicy.tsx:205] <span className="text-red-650 text-red-600 font-mono">5.</span> Правы суб'екта персанальных дадзеных і механізм іх рэалізацыі
+[/app/applet/src/components/PrivacyPolicy.tsx:208] У адпаведнасці з артыкуламі 10–13 Закона № 99-З Суб'ект персанальных дадзеных Рэспублікі Беларусь мае наступныя правы:
+[/app/applet/src/components/PrivacyPolicy.tsx:215] Вы маеце права ў любы час без тлумачэння прычын адклікаць сваю згоду на апрацоўку дадзеных. Водгук ажыццяўляецца ў той жа форме, у якой згода была дадзена, альбо шляхам накіравання заявы.
+[/app/applet/src/components/PrivacyPolicy.tsx:222] Права на атрыманне інфармацыі
+[/app/applet/src/components/PrivacyPolicy.tsx:238] Права на выдаленне і спыненне
+[/app/applet/src/components/PrivacyPolicy.tsx:241] Вы маеце права патрабаваць спынення апрацоўкі і поўнага выдалення Вашых персанальных дадзеных («права на забыццё») пры адсутнасці законных падстаў для іх далейшай апрацоўкі. Тэрмін разгляду – <strong>15 каляндарных дзён</strong>.
+[/app/applet/src/components/PrivacyPolicy.tsx:258] <span className="text-red-500 font-mono">6.</span> Трансгранічная перадача і ўпаўнаважаныя асобы
+[/app/applet/src/components/PrivacyPolicy.tsx:261] Трансгранічная перадача персанальных дадзеных карыстальнікаў на тэрыторыю замежных дзяржаў не ажыццяўляецца без Вашай папярэдняй згоды.
+[/app/applet/src/components/PrivacyPolicy.tsx:264] Аператар мае права даручыць апрацоўку персанальных дадзеных <strong>Упаўнаважаным асобам</strong> – дзяржаўным установам аховы здароўя (Рэгіянальным цэнтрам трансфузіялогіі, РНПЦ трансфузіялогіі і медыцынскіх біятэхналогій) выключна для вядзення медыцынскага ўліку донараў, верыфікацыі адводаў ад донарства і планавання працэдур забору крыві.
+[/app/applet/src/components/PrivacyPolicy.tsx:270] <span className="text-red-500 font-mono">7.</span> Заключныя палажэнні
+[/app/applet/src/components/PrivacyPolicy.tsx:273] Дадзеная Палітыка ўступае ў сілу з моманту яе публікацыі на Платформе. Аператар мае права ўносіць змены ў гэтую Палітыку ў аднабаковым парадку. Новая рэдакцыя Палітыкі ўступае ў сілу з моманту яе размяшчэння на Сайце, калі іншае не прадугледжана новай рэдакцыяй Палітыкі.
+[/app/applet/src/components/TermsOfService.tsx:22] {isRu ? 'Правила пользования' : 'Правілы карыстання'}
+[/app/applet/src/components/TermsOfService.tsx:25] {isRu ? 'Пользовательское соглашение • Публичная оферта' : 'Карыстальніцкае пагадненне • Публічная аферта'}
+[/app/applet/src/components/TermsOfService.tsx:34] {isRu ? 'Вернуться назад' : 'Вярнуцца назад'}
+[/app/applet/src/components/TermsOfService.tsx:55] В настоящем Пользовательском соглашении (далее – Соглашение) используются следующие термины:
+[/app/applet/src/components/TermsOfService.tsx:89] <li>Соблюдать конфиденциальность персональных данных в соответствии с Законом Республики Беларусь № 99-З «О защите персональных данных».</li>
+[/app/applet/src/components/TermsOfService.tsx:128] <span className="text-red-500 font-mono">1.</span> Тэрміны і азначэнні
+[/app/applet/src/components/TermsOfService.tsx:131] У гэтым Карыстальніцкім пагадненні (далей – Пагадненне) выкарыстоўваюцца наступныя тэрміны:
+[/app/applet/src/components/TermsOfService.tsx:134] <li><strong>Сервіс «Донар-Алерт» (Платформа)</strong> – праграмны комплекс, які ўключае вэб-сайт, базу дадзеных і сумежныя каналы апавяшчэння (push, email), прызначаны для каардынацыі донараў крыві і ўстаноў аховы здароўя ў Рэспубліцы Беларусь.</li>
+[/app/applet/src/components/TermsOfService.tsx:135] <li><strong>Карыстальнік (Донар)</strong> – дзеяздольная фізічная асоба, грамадзянін Рэспублікі Беларусь або замежны грамадзянін, які пастаянна пражывае ў Рэспубліцы Беларусь, які прайшоў працэдуру рэгістрацыі на Платформе.</li>
+[/app/applet/src/components/TermsOfService.tsx:136] <li><strong>Медыцынскі цэнтр (Цэнтр крыві)</strong> – дзяржаўная ўстанова аховы здароўя Рэспублікі Беларусь, зарэгістраваная на Платформе ў мэтах размяшчэння інфармацыі аб патрэбах у крыві і каардынацыі данацый.</li>
+[/app/applet/src/components/TermsOfService.tsx:144] Поўным і безумоўным акцэптам (прыняццем) умоў гэтай публічнай аферты ў адпаведнасці з п. 3 арт. 407 Грамадзянскага кодэкса Рэспублікі Беларусь лічыцца здзяйсненне Карыстальнікам любога з наступных дзеянняў:
+[/app/applet/src/components/TermsOfService.tsx:147] <li>Запаўненне формы рэгістрацыі і націск кнопкі «Зарэгістравацца»;</li>
+[/app/applet/src/components/TermsOfService.tsx:148] <li>Аўтарызацыя ў Асабістым кабінеце;</li>
+[/app/applet/src/components/TermsOfService.tsx:149] <li>Запаўненне і адпраўка любой вэб-формы зваротнай сувязі, анкеты або заяўкі на Платформе.</li>
+[/app/applet/src/components/TermsOfService.tsx:152] Калі Вы не згодныя з умовамі гэтага Пагаднення, Вы абавязаны неадкладна спыніць любое выкарыстанне Платформы.
+[/app/applet/src/components/TermsOfService.tsx:158] <span className="text-red-500 font-mono">3.</span> Правы і абавязкі бакоў
+[/app/applet/src/components/TermsOfService.tsx:160] <p><strong>Карыстальнік абавязваецца:</strong></p>
+[/app/applet/src/components/TermsOfService.tsx:162] <li>Прадстаўляць дакладныя і актуальныя дадзеныя пры рэгістрацыі і запаўненні карты донара;</li>
+[/app/applet/src/components/TermsOfService.tsx:163] <li>Своечасова інфармаваць Платформу і Цэнтры крыві аб зменах у стане здароўя, наяўнасці медыцынскіх адводаў і супрацьпаказанняў;</li>
+[/app/applet/src/components/TermsOfService.tsx:164] <li>Захоўваць інтэрвалы паміж данацыямі ў адпаведнасці з заканадаўствам Рэспублікі Беларусь аб ахове здароўя;</li>
+[/app/applet/src/components/TermsOfService.tsx:165] <li>Не выкарыстоўваць праграмнае забеспячэнне для парушэння працаздольнасці Платформы.</li>
+[/app/applet/src/components/TermsOfService.tsx:169] <li>Забяспечваць тэхнічнае функцыянаванне Сервісу і своечасовую адпраўку апавяшчэнняў;</li>
+[/app/applet/src/components/TermsOfService.tsx:170] <li>Захоўваць канфідэнцыяльнасць персанальных дадзеных у адпаведнасці з Законам Рэспублікі Беларусь № 99-З «Аб абароне персанальных дадзеных».</li>
+[/app/applet/src/components/TermsOfService.tsx:177] Адмова ад адказнасці ў медыцынскай сферы
+[/app/applet/src/components/TermsOfService.tsx:182] Канчатковае рашэнне аб допуску канкрэтнага грамадзяніна да данацыі крыві і яе кампанентаў прымае выключна ўпаўнаважаны ўрач-трансфузіёлаг медыцынскай установы (Цэнтра крыві) непасрэдна перад працэдурай на падставе медыцынскага агляду і лабараторных тэстаў. Аператар не нясе адказнасці за любыя наступствы, звязаныя з няправільным прадстаўленнем дадзеных з боку Карыстальніка або рашэннямі медыцынскага персаналу.
+[/app/applet/src/components/TermsOfService.tsx:188] <span className="text-red-500 font-mono">4.</span> Інтэлектуальная ўласнасць
+[/app/applet/src/components/TermsOfService.tsx:191] Усе графічныя матэрыялы, тэксты, дызайн, праграмны код і іншыя аб'екты інтэлектуальнай уласнасці Платформы «Донар-Алерт» абаронены заканадаўствам Рэспублікі Беларусь аб аўтарскім праве і сумежных правах. Любое капіраванне або выкарыстанне матэрыялаў Платформы дапускаецца толькі з пісьмовага дазволу Аператара.
+[/app/applet/src/components/TermsOfService.tsx:197] <span className="text-red-500 font-mono">5.</span> Вырашэнне спрэчак і дастасавальнае права
+[/app/applet/src/components/TermsOfService.tsx:202] У выпадку немагчымасці дасягнення згоды спрэчка падлягае разгляду ў судовых органах па месцы знаходжання Аператара ў Рэспубліцы Беларусь.
+[/app/applet/src/types.ts:205] if (points === 0) return { title: 'НОВЫЙ', currentPoints: 0, nextAt: 4, color: 'text-slate-500 bg-slate-50 border-slate-200' };
+[/app/applet/src/types.ts:206] if (points < 12) return { title: 'НАЧИНАЮЩИЙ', currentPoints: points, nextAt: 12, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
+[/app/applet/src/types.ts:207] if (points < 24) return { title: 'АКТИВНЫЙ', currentPoints: points, nextAt: 24, color: 'text-blue-600 bg-blue-50 border-blue-200' };
+[/app/applet/src/types.ts:208] if (points < 40) return { title: 'ОПЫТНЫЙ', currentPoints: points, nextAt: 40, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
+[/app/applet/src/types.ts:209] if (points < 80) return { title: 'СЕРЕБРЯНЫЙ', currentPoints: points, nextAt: 80, color: 'text-amber-600 bg-amber-50 border-amber-200' };
+[/app/applet/src/types.ts:211] return { title: 'ПОЧЁТНЫЙ', currentPoints: points, nextAt: 80, color: 'text-rose-600 bg-rose-50 border-rose-300 animate-pulse' };
+[/app/applet/src/utils/intervals.ts:83] return { ready: false, reason: 'Аккаунт отключен' };
+[/app/applet/src/utils/intervals.ts:88] return { ready: false, reason: 'Нет подтвержденной связи ни с одним центром крови', pendingConfirmation: true };
+[/app/applet/src/utils/intervals.ts:93] return { ready: false, reason: 'Вес меньше 55 кг (противопоказано)' };
+[/app/applet/src/utils/intervals.ts:104] return { ready: false, reason: 'Возраст находится вне допустимого интервала (18-65)' };
+[/app/applet/src/utils/intervals.ts:125] return { ready: false, reason: 'Действует медицинский отвод' };
+[/app/applet/src/utils/intervals.ts:131] return { ready: false, reason: 'Установлена личная пауза' };
+[/app/applet/src/utils/intervals.ts:135] return { ready: false, reason: 'Установлена личная пауза' };
+[/app/applet/src/utils/intervals.ts:143] return { ready: false, reason: 'Слишком мало времени прошло с последней донации' };
