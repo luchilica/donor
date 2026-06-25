@@ -580,7 +580,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       {/* Mini Guest Navigation Tabs */}
       <div className="relative mb-8">
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-50 to-transparent pointer-events-none z-10 md:hidden pb-1" />
-        <div className="flex border-b border-slate-200 overflow-x-auto whitespace-nowrap gap-1 pb-1">
+        <div className="flex border-b border-slate-200 overflow-x-auto whitespace-nowrap gap-1 pb-1 scrollbar-hide scroll-fade-edge pr-8 md:pr-0">
           <button 
           onClick={() => setActiveTab('home')}
           className={`px-5 py-4 md:py-3 min-h-[48px] md:min-h-0 font-medium transition-colors border-b-2 text-base md:text-sm ${activeTab === 'home' ? 'border-red-600 text-red-600' : 'border-transparent text-slate-600 hover:text-slate-900'}`}

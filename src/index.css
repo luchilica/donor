@@ -12,12 +12,12 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 
 /* Custom dark theme root variables */
 .dark {
-  --background: #140d0d; /* slate-900 override: deep, warm, dark burgundy-grey */
-  --foreground: #fdf5f5; /* slate-50 override: warm cream with soft rose-pink hue */
-  --card: #1f1414; /* slate-800 override: 1-2 tones lighter than background (warm burgundy-chocolate card) */
-  --border: #3d2626; /* slate-700 override: subtle warm-rose outline */
-  --muted: #8c7373; /* slate-500 override: warm rose-grey secondary */
-  --muted-foreground: #d2bfbf; /* slate-300 override: light cream-rose text */
+  --background: #0d0808; /* clean deep slate-black with noble warm ruby glow */
+  --foreground: #f5efef; /* soft warm cream-white for perfect reading contrast */
+  --card: #1a1111; /* warm burgundy chocolate card (1-2 tones lighter for beautiful elevation depth) */
+  --border: #2f1d1d; /* thin warm elegant burgundy outline border */
+  --muted: #8c7777; /* warm rose-grey secondary text */
+  --muted-foreground: #a69999; /* приглушенный теплый серый для подписей, дат и деталей */
 }
 
 /* Base Dark Mode classes */
@@ -39,17 +39,17 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 }
 
 .dark .bg-slate-100 {
-  background-color: #271919 !important; /* warm brown-burgundy deep grey */
-  color: #fdf5f5 !important;
+  background-color: #221616 !important; /* slightly lighter than card for nested containers */
+  color: #f5efef !important;
 }
 
 .dark .bg-slate-200 {
-  background-color: #3b2525 !important; /* medium-dark burgundy chocolate */
-  color: #fdf5f5 !important;
+  background-color: #2e1d1d !important; /* medium burgundy chocolate for visible blocks */
+  color: #f5efef !important;
 }
 
 .dark .bg-slate-900 {
-  background-color: #0d0808 !important; /* ultra deep burgundy black */
+  background-color: #090505 !important; /* ultra deep black-ruby */
 }
 
 /* Navigation items hover overrides in dark mode */
@@ -57,32 +57,28 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 .dark .hover\:bg-slate-50\/50:hover, 
 .dark .hover\:bg-slate-50:hover,
 .dark .hover\:bg-slate-200:hover {
-  background-color: #2c1b1b !important; /* hover over deep burgundy slate alternative */
+  background-color: #271a1a !important; /* clean warm hover block */
 }
 
-/* Text color overrides */
+/* Text color overrides to ensure high contrast WCAG AA/AAA */
 .dark .text-slate-800, 
 .dark .text-slate-900, 
-.dark .text-slate-950 {
-  color: #fdf5f5 !important; /* slate-100 */
+.dark .text-slate-950,
+.dark .text-slate-100,
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #f5efef !important; /* soft creamy-white titles */
 }
 
-.dark .text-slate-700 {
-  color: #ebdcdc !important; /* slate-200 */
-}
-
+.dark .text-slate-700,
 .dark .text-slate-600 {
-  color: #d8c4c4 !important; /* slate-300 */
+  color: #d6cbcb !important; /* elegant warm gray-rose body text */
 }
 
 .dark .text-slate-500, 
-.dark .text-slate-400 {
-  color: #ab9393 !important; /* slate-400 */
-}
-
+.dark .text-slate-400,
 .dark .text-slate-350,
 .dark .text-slate-300 {
-  color: #d8c4c4 !important;
+  color: #a69999 !important; /* приглушенный теплый серый для подписей, адресов и дат */
 }
 
 /* Header & Footer Custom overrides */
@@ -103,16 +99,28 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
   border-color: var(--border) !important;
 }
 
-/* Forms (inputs, select, textarea, etc.) */
+/* Forms (inputs, select, textarea, etc.) with explicit boundaries */
 .dark input[type="text"], 
 .dark input[type="date"], 
 .dark input[type="number"], 
 .dark input[type="password"],
 .dark select, 
 .dark textarea {
-  background-color: #1a1010 !important; /* deep field dark background */
-  color: #fdf5f5 !important;
-  border-color: #3d2626 !important;
+  background-color: #150c0c !important; /* deep rich field background */
+  color: #f5efef !important;
+  border-color: #422a2a !important; /* warm subtle burgundy border for high interactive visibility */
+  border-width: 1px !important;
+}
+
+.dark input[type="text"]:focus, 
+.dark input[type="date"]:focus, 
+.dark input[type="number"]:focus, 
+.dark input[type="password"]:focus,
+.dark select:focus, 
+.dark textarea:focus {
+  border-color: #c92a2a !important; /* premium brand ruby red focus */
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(201, 42, 42, 0.25) !important;
 }
 
 .dark input::placeholder, 
@@ -120,17 +128,20 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
   color: #8c7373 !important;
 }
 
-/* Brand Primary Ruby-Red CTA/Indicators (Noble Carmine/Ruby) */
+/* Brand Primary Ruby-Red CTA/Indicators (Noble Crimson/Garnet) */
 .dark .bg-red-600,
 .dark .bg-rose-600,
-.dark .bg-rose-500 {
-  background-color: #c92a3b !important; /* noble crimson-ruby primary color */
+.dark .bg-rose-500,
+.dark .bg-red-650 {
+  background-color: #c92a2a !important; /* noble garnet/ruby primary color */
   color: #ffffff !important;
 }
 
 .dark .hover\:bg-red-700:hover,
-.dark .hover\:bg-rose-700:hover {
-  background-color: #dc3545 !important; /* brighter warm ruby hover */
+.dark .hover\:bg-rose-700:hover,
+.dark .hover\:bg-red-650:hover {
+  background-color: #b01e1e !important; /* classic rich dark-red hover */
+  color: #ffffff !important;
 }
 
 .dark .text-red-600,
@@ -138,35 +149,35 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 .dark .text-rose-500,
 .dark .text-red-650,
 .dark .text-rose-650 {
-  color: #f15c6d !important; /* warm, soft, legible coral-ruby accent */
+  color: #f17c86 !important; /* highly legible coral-ruby accent on dark bg */
 }
 
 .dark .border-red-600,
 .dark .border-rose-500,
 .dark .border-rose-600 {
-  border-color: #c92a3b !important;
+  border-color: #c92a2a !important;
 }
 
 /* Accordion Gradient Overrides for Open States in Dark Mode */
 .dark .bg-gradient-to-r.from-rose-800.to-red-600 {
-  background-image: linear-gradient(to right, #4c1a24, #1f0f12) !important;
+  background-image: linear-gradient(to right, #4c1a24, #1a1111) !important;
   border: 1px solid #632a35 !important;
 }
 
 .dark .bg-gradient-to-r.from-red-50.to-white,
 .dark .bg-gradient-to-r.from-red-50\/20.to-white {
-  background-image: linear-gradient(to right, rgba(201, 42, 59, 0.12), var(--card)) !important;
+  background-image: linear-gradient(to right, rgba(201, 42, 42, 0.15), var(--card)) !important;
 }
 
-/* Special Badges and Banners handling to ensure readability */
+/* Special Badges and Banners handling to ensure high contrast & WCAG compliance */
 .dark .bg-rose-50, 
 .dark .bg-rose-50\/50, 
 .dark .bg-rose-50\/30, 
 .dark .bg-rose-50\/20,
 .dark .bg-red-50, 
 .dark .bg-red-50\/50 {
-  background-color: rgba(201, 42, 59, 0.12) !important; /* warm soft burgundy highlight */
-  border-color: rgba(201, 42, 59, 0.25) !important;
+  background-color: rgba(201, 42, 42, 0.12) !important; /* warm soft burgundy highlight */
+  border: 1px solid rgba(201, 42, 42, 0.25) !important;
 }
 
 .dark .text-red-700, 
@@ -175,61 +186,71 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 .dark .text-rose-700, 
 .dark .text-rose-800, 
 .dark .text-rose-900 {
-  color: #f18c99 !important; /* soft pinkish-red */
+  color: #f18c99 !important; /* soft, high-contrast pinkish-red */
 }
 
-/* System Alerts / Warnings / Errors (Brighter, more aggressive orange-leaning red to stand out) */
+/* System Alerts / Warnings / Errors (Brighter, more aggressive warning-scarlet to stand out from branding) */
 .dark .text-red-500 {
-  color: #ff453a !important; /* vivid warning scarlet */
+  color: #ff453a !important; /* vivid system warning scarlet */
 }
 
 .dark .bg-red-100 {
   background-color: rgba(255, 69, 58, 0.15) !important;
-  border-color: rgba(255, 69, 58, 0.3) !important;
+  border: 1px solid rgba(255, 69, 58, 0.3) !important;
 }
 
+/* Success status: soft warm green */
 .dark .bg-emerald-50, 
 .dark .bg-emerald-50\/30, 
-.dark .bg-emerald-50\/20 {
+.dark .bg-emerald-50\/20,
+.dark .bg-emerald-100 {
   background-color: rgba(16, 185, 129, 0.12) !important; /* translucent warm green */
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
 }
 
 .dark .text-emerald-800, 
 .dark .text-emerald-900, 
 .dark .text-emerald-750, 
 .dark .text-emerald-700 {
-  color: #4ade80 !important; /* mint green */
+  color: #4ade80 !important; /* highly readable fresh mint green status */
 }
 
+/* Informational status: soft warm indigo */
 .dark .bg-indigo-50, 
 .dark .bg-indigo-50\/50, 
-.dark .bg-indigo-50\/30 {
+.dark .bg-indigo-50\/30,
+.dark .bg-indigo-100 {
   background-color: rgba(99, 102, 241, 0.12) !important; /* translucent dark indigo */
+  border: 1px solid rgba(99, 102, 241, 0.25) !important;
 }
 
 .dark .text-indigo-800, 
 .dark .text-indigo-900, 
 .dark .text-indigo-950 {
-  color: #a5b4fc !important; /* light sky blue */
+  color: #a5b4fc !important; /* high-contrast light blue-indigo */
 }
 
+/* Pending / Review status: saturated warm amber/yellow for perfect readability */
 .dark .bg-amber-50, 
 .dark .bg-amber-50\/50, 
-.dark .bg-amber-50\/20 {
-  background-color: rgba(245, 158, 11, 0.12) !important; /* translucent dark orange-amber */
+.dark .bg-amber-50\/20,
+.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.15) !important; /* rich, non-muddy warm amber pod background */
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
 }
 
 .dark .text-amber-800, 
 .dark .text-amber-900, 
-.dark .text-amber-950 {
-  color: #fcd34d !important; /* light golden-yellow */
+.dark .text-amber-950,
+.dark .text-amber-650 {
+  color: #fbbf24 !important; /* saturated, bright, high-contrast golden-yellow status (WCAG AA) */
 }
 
 /* Modals overlays background dimming */
 .dark .bg-slate-900\/50,
 .dark .bg-black\/50,
 .dark .bg-slate-900\/60 {
-  background-color: rgba(13, 8, 8, 0.8) !important;
+  background-color: rgba(9, 5, 5, 0.85) !important;
 }
 
 /* Shadows enhancement */
@@ -237,25 +258,21 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 .dark .shadow-sm, 
 .dark .shadow-md, 
 .dark .shadow-lg {
-  box-shadow: 0 4px 6px -1px rgba(13, 8, 8, 0.6), 0 2px 4px -2px rgba(13, 8, 8, 0.6) !important;
-}
-
-.dark .text-amber-650 {
-  color: #fbbf24 !important;
+  box-shadow: 0 4px 12px rgba(5, 3, 3, 0.75), 0 2px 6px rgba(5, 3, 3, 0.6) !important;
 }
 
 /* Custom polished scrollbar utilities override for warm theme */
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4a3434 !important; /* warm burgundy slate */
+  background: #3a2222 !important; /* warm burgundy slate */
 }
 
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6e4e4e !important;
+  background: #543131 !important;
 }
 
 /* Leaflet Map Dark Theme Overrides */
 .dark .leaflet-container {
-  background: #140d0d !important;
+  background: #0d0808 !important;
 }
 
 .dark .leaflet-tile {
@@ -276,7 +293,7 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
 }
 
 .dark .leaflet-bar a:hover {
-  background-color: #2c1b1b !important;
+  background-color: #271a1a !important;
 }
 
 /* Safe area inset utilities for mobile */
@@ -300,3 +317,28 @@ html, body, div, header, footer, main, section, nav, p, span, h1, h2, h3, h4, in
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
   }
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none !important;  /* IE and Edge */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+/* Scroll fading effect on horizontal overflow lists */
+.scroll-fade-edge {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+/* Ensure desktop doesn't fade if we have no overflow */
+@media (min-width: 768px) {
+  .scroll-fade-edge {
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+  }
+}
+

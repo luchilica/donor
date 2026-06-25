@@ -921,7 +921,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           <p className="text-xs text-slate-500 mt-0.5">{t("Тел")}: {center.phone}</p>
         </div>
 
-        <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1 overflow-x-auto max-w-full scrollbar-hide flex-nowrap md:flex-wrap">
+        <div className="flex border border-slate-200 bg-white p-1 rounded-xl self-start gap-1 overflow-x-auto max-w-full scrollbar-hide flex-nowrap md:flex-wrap scroll-fade-edge pr-8 md:pr-1">
           {[
             { id: 'stats', label: 'Показатели', icon: Activity },
             { id: 'donors', label: 'Доноры', icon: Users },
@@ -1724,22 +1724,22 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       </div>
                     </div>
 
-                    <div className="flex gap-2 shrink-0">
+                    <div className="flex flex-col md:flex-row gap-2 shrink-0 w-full md:w-auto">
                       <button 
                         onClick={() => handleViewPendingProfile(item.donor.id, item.link.id)}
-                        className="bg-red-50 hover:bg-red-150 border border-red-200 text-red-700 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1 transition-all cursor-pointer"
+                        className="w-full md:w-auto bg-red-50 hover:bg-red-150 border border-red-200 text-red-700 text-xs font-bold px-4 py-3 md:py-2 rounded-xl flex items-center justify-center gap-1 transition-all cursor-pointer min-h-[44px] md:min-h-0"
                       >
                         <Eye className="w-4 h-4" /> Посмотреть анкету
                       </button>
                       <button 
                         onClick={() => handleConfirmPending(item.link.id)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs"
+                        className="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-3 md:py-2 rounded-xl flex items-center justify-center shadow-xs min-h-[44px] md:min-h-0"
                       >
                         <Check className="w-4 h-4 mr-1" /> Одобрить анкету
                       </button>
                       <button 
                         onClick={() => { setRejectionModalLinkId(item.link.id); setRejectionReason(''); }}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4 py-2 rounded-xl flex items-center"
+                        className="w-full md:w-auto bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4 py-3 md:py-2 rounded-xl flex items-center justify-center min-h-[44px] md:min-h-0"
                       >
                         <X className="w-4 h-4 mr-1" /> Отклонить
                       </button>
@@ -1807,7 +1807,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         </div>
                       </div>
 
-                      <div className="flex gap-2 shrink-0">
+                      <div className="flex flex-col md:flex-row gap-2 shrink-0 w-full md:w-auto">
                         {a.status === 'pending' && (
                           <button 
                             onClick={async () => {
@@ -1816,7 +1816,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                 });
                                 loadAppointments();
                             }}
-                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
+                            className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                           >
                             Подтвердить
                           </button>
@@ -1840,7 +1840,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                       }
                                   });
                               }}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
+                              className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >
                               <Check className="w-4 h-4 mr-1" /> Завершена
                             </button>
@@ -1860,7 +1860,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                                       }
                                   });
                               }}
-                              className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
+                              className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >
                               Отклонить
                             </button>

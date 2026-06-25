@@ -388,7 +388,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
       )}
 
       {/* Tabs list (Sleek counters, Swiss style) */}
-      <div className="flex overflow-x-auto whitespace-nowrap md:flex-wrap items-center gap-2 p-1.5 bg-slate-50/50 rounded-2xl mb-8 border border-slate-100 scrollbar-hide flex-nowrap">
+      <div className="flex overflow-x-auto whitespace-nowrap md:flex-wrap items-center gap-2 p-1.5 bg-slate-50/50 rounded-2xl mb-8 border border-slate-100 scrollbar-hide flex-nowrap scroll-fade-edge pr-8 md:pr-1.5">
         {[
           { tabId: 'users', label: t('Пользователи'), count: users.length, icon: Users },
           { tabId: 'centers', label: t('Центры крови'), count: centers.length, icon: MapPin },

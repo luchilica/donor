@@ -719,29 +719,29 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             </div>
           </div>
 
-          <div className="space-y-3 text-sm text-left">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">{t("Вес:")}</span>
-              <span className="text-slate-700 font-medium">{donor.weight || '—'} кг</span>
+          <div className="space-y-3.5 text-sm text-left">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 pb-1.5 sm:pb-0 sm:border-0">
+              <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Вес:")}</span>
+              <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{donor.weight || '—'} кг</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">{t("Возраст:")}</span>
-              <span className="text-slate-700 font-medium">{calcAge(donor.birthDate)} лет</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 pb-1.5 sm:pb-0 sm:border-0">
+              <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Возраст:")}</span>
+              <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{calcAge(donor.birthDate)} лет</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">{t("Донаций:")}</span>
-              <span className="text-slate-700 font-medium">{totalDonations}</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-50 pb-1.5 sm:pb-0 sm:border-0">
+              <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Донаций:")}</span>
+              <span className="text-slate-700 font-semibold sm:font-medium text-base sm:text-sm">{totalDonations}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 font-bold">{t("Статус:")}</span>
-              <span className={readiness.ready ? 'text-emerald-500 font-bold' : readiness.pendingConfirmation ? 'text-amber-500 font-bold' : 'text-red-700 font-bold'}>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-1 sm:pb-0">
+              <span className="text-slate-400 sm:text-slate-500 font-bold text-xs sm:text-sm">{t("Статус:")}</span>
+              <span className={`text-base sm:text-sm ${readiness.ready ? 'text-emerald-500 font-bold' : readiness.pendingConfirmation ? 'text-amber-500 font-bold' : 'text-red-700 font-bold'}`}>
                 {readiness.ready ? 'Готов к сдаче' : readiness.pendingConfirmation ? 'На подтверждении' : 'Отвод'}
               </span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-row md:flex-col overflow-x-auto gap-2 md:gap-1 scrollbar-hide">
+        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex flex-row md:flex-col overflow-x-auto gap-2 md:gap-1 scrollbar-hide scroll-fade-edge pr-8 md:pr-3">
           {[
             { id: 'dashboard', label: 'Рабочий стол', icon: Home },
             { id: 'profile', label: 'Профиль', icon: User },
@@ -963,51 +963,51 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   </div>
                 </form>
               ) : (
-                <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90">
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
-                    <span className="font-bold text-slate-800 text-right">{donor.lastName} {donor.firstName} {donor.middleName || ''}</span>
+                <div className="divide-y divide-slate-100/80 text-sm sm:text-xs text-slate-700/90">
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("ФИО")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.lastName} {donor.firstName} {donor.middleName || ''}</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
-                    <span className="font-bold text-slate-800 text-right">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Дата рождения")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{new Date(donor.birthDate).toLocaleDateString('ru-RU')} ({calcAge(donor.birthDate)} лет)</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
-                    <span className="font-bold text-slate-800 text-right">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Пол")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.gender === 'male' ? 'Мужской' : 'Женский'}</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("Телефон")}</span>
-                    <span className="font-bold text-slate-800 text-right">{donor.phone}</span>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Телефон")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.phone}</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">E-mail</span>
-                    <span className="font-bold text-slate-800 text-right">{donor.email}</span>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">E-mail</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.email}</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
-                    <span className="font-bold text-slate-800 text-right">{donor.weight} кг</span>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Вес")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.weight} кг</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row items-center justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("Группа / Резус")}</span>
-                    <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-3 gap-1.5 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Группа / Резус")}</span>
+                    <div className="flex gap-2 text-left sm:text-right">
                       <span className="bg-slate-100 text-red-600 font-bold px-2.5 py-0.5 rounded-full text-[10px]">{formatBloodGroup(donor.bloodGroup)}</span>
                       <span className="text-slate-800 font-bold px-1 py-0.5 text-xs">{formatRhFactor(donor.rhFactor)}</span>
                     </div>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("Всего донаций")}</span>
-                    <span className="font-bold text-slate-800 text-right">{totalDonations}</span>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Всего донаций")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{totalDonations}</span>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("Последняя сдача")}</span>
-                    <span className="font-bold text-slate-800 text-right font-mono">
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Последняя сдача")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto font-mono">
                       {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
                     </span>
                   </div>
-                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
-                    <span className="text-slate-500 font-medium font-sans">{t("В системе с")}</span>
-                    <span className="font-bold text-slate-800 text-right font-mono">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
+                  <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
+                    <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("В системе с")}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto font-mono">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
                   </div>
                 </div>
               )}

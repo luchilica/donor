@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, LogOut, HelpCircle, User, Bell, Activity, Layers, Sun, Moon, Send, ArrowUp, ChevronUp } from 'lucide-react';
+import { Heart, LogOut, HelpCircle, User, Bell, Activity, Layers, Sun, Moon, Send, ArrowUp, ChevronUp, Menu, X } from 'lucide-react';
 import { BloodCenter, News, Donor, DonorCenter, MedicalNote, Donation } from './types.ts';
 import GuestSection from './components/GuestSection.tsx';
 import DonorSection from './components/DonorSection.tsx';
 import CenterSection from './components/CenterSection.tsx';
 import AdminSection from './components/AdminSection.tsx';
+import PrivacyPolicy from './components/PrivacyPolicy.tsx';
+import TermsOfService from './components/TermsOfService.tsx';
 import { BY_DICT } from './i18n.ts';
 import { LanguageProvider } from './LanguageContext.tsx';
 
@@ -107,14 +109,23 @@ export default function App() {
 
   useEffect(() => {
     const handleGoToDashboard = () => setView('dashboard');
+    const handleOpenPrivacy = () => { setView('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    const handleOpenTerms = () => { setView('terms'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     window.addEventListener('goToDashboard', handleGoToDashboard);
-    return () => window.removeEventListener('goToDashboard', handleGoToDashboard);
+    window.addEventListener('openPrivacy', handleOpenPrivacy);
+    window.addEventListener('openTerms', handleOpenTerms);
+    return () => {
+      window.removeEventListener('goToDashboard', handleGoToDashboard);
+      window.removeEventListener('openPrivacy', handleOpenPrivacy);
+      window.removeEventListener('openTerms', handleOpenTerms);
+    };
   }, []);
 
-  const [view, setView] = useState<'home' | 'dashboard'>('home');
+  const [view, setView] = useState<'home' | 'dashboard' | 'privacy' | 'terms'>('home');
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [language, setLanguage] = useState<'RU' | 'BY'>('RU');
   const [showSwitcher, setShowSwitcher] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const t = (key: string) => {
     if (language === 'RU') return key;
@@ -293,67 +304,158 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Language Switcher */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl shadow-xs dark:bg-slate-800">
+            {/* Desktop Toolbar - hidden on mobile */}
+            <div className="hidden md:flex items-center gap-4">
+              {/* Language Switcher */}
+              <div className="flex items-center bg-slate-100 p-1 rounded-xl shadow-xs dark:bg-slate-800">
+                <button
+                  onClick={() => setLanguage('RU')}
+                  className={`px-3 py-3 md:px-2 md:py-1 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'RU' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                >
+                  RU
+                </button>
+                <button
+                  onClick={() => setLanguage('BY')}
+                  className={`px-3 py-3 md:px-2 md:py-1 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'BY' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                >
+                  BY
+                </button>
+              </div>
+
+              {/* Theme Toggle Button */}
               <button
-                onClick={() => setLanguage('RU')}
-                className={`px-3 py-3 md:px-2 md:py-1 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'RU' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
+                onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+                id="theme-toggle-btn"
+                className="p-3 md:p-2 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition duration-150 flex items-center justify-center shadow-xs cursor-pointer dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                title={theme === 'light' ? t("Включить ночной режим") : t("Включить дневной режим")}
               >
-                RU
+                {theme === 'light' ? (
+                  <Moon className="w-4 h-4 text-slate-700" />
+                ) : (
+                  <Sun className="w-4 h-4 text-amber-400 fill-amber-400" />
+                )}
               </button>
-              <button
-                onClick={() => setLanguage('BY')}
-                className={`px-3 py-3 md:px-2 md:py-1 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-xs font-bold rounded-lg transition-colors duration-200 ${language === 'BY' ? 'bg-white text-slate-800 shadow-sm dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
-              >
-                BY
-              </button>
+
+              {session ? (
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={() => setView('dashboard')}
+                    className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors cursor-pointer border border-red-200"
+                    title={t("Личный кабинет")}
+                  >
+                    <User className="w-5 h-5" />
+                  </button>
+                  <div className="hidden sm:block text-right">
+                    <span className="text-xs text-slate-700 font-semibold">{session.user.email}</span>
+                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="bg-slate-100 hover:bg-slate-200 hover:text-red-700 text-slate-700 font-bold text-xs px-4 py-3 md:py-2 rounded-xl transition duration-150 flex items-center shadow-xs min-h-[44px] md:min-h-0"
+                  >
+                    <LogOut className="w-4 h-4 mr-1.5" />
+                    {t("Выйти")}
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => window.dispatchEvent(new Event('openAuth'))}
+                  className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200"
+                  title={t("Войти в кабинет")}
+                >
+                  <User className="w-5 h-5 md:w-5 md:h-5" />
+                </button>
+              )}
             </div>
 
-            {/* Theme Toggle Button */}
-            <button
-              onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-              id="theme-toggle-btn"
-              className="p-3 md:p-2 min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition duration-150 flex items-center justify-center shadow-xs cursor-pointer dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-              title={theme === 'light' ? t("Включить ночной режим") : t("Включить дневной режим")}
-            >
-              {theme === 'light' ? (
-                <Moon className="w-4 h-4 text-slate-700" />
-              ) : (
-                <Sun className="w-4 h-4 text-amber-400 fill-amber-400" />
-              )}
-            </button>
-
-            {session ? (
-              <div className="flex items-center gap-3">
+            {/* Mobile Toolbar - visible only on mobile */}
+            <div className="flex md:hidden items-center gap-3">
+              {session ? (
                 <button 
                   onClick={() => setView('dashboard')}
-                  className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors cursor-pointer border border-red-200"
+                  className="w-11 h-11 rounded-full bg-red-100 text-red-600 flex items-center justify-center border border-red-200"
                   title={t("Личный кабинет")}
                 >
                   <User className="w-5 h-5" />
                 </button>
-                <div className="hidden sm:block text-right">
-                  <span className="text-xs text-slate-700 font-semibold">{session.user.email}</span>
-                </div>
+              ) : (
                 <button 
-                  onClick={handleLogout}
-                  className="bg-slate-100 hover:bg-slate-200 hover:text-red-700 text-slate-700 font-bold text-xs px-4 py-3 md:py-2 rounded-xl transition duration-150 flex items-center shadow-xs min-h-[44px] md:min-h-0"
+                  onClick={() => window.dispatchEvent(new Event('openAuth'))}
+                  className="w-11 h-11 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200"
+                  title={t("Войти в кабинет")}
                 >
-                  <LogOut className="w-4 h-4 mr-1.5" />
-                  {t("Выйти")}
+                  <User className="w-5 h-5" />
                 </button>
-              </div>
-            ) : (
-              <button 
-                onClick={() => window.dispatchEvent(new Event('openAuth'))}
-                className="w-11 h-11 md:w-9 md:h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer border border-slate-200"
-                title={t("Войти в кабинет")}
+              )}
+
+              <button
+                onClick={() => setMobileMenuOpen(prev => !prev)}
+                className="w-11 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center border border-slate-200 transition-colors"
+                aria-label={t("Меню")}
               >
-                <User className="w-5 h-5 md:w-5 md:h-5" />
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
-            )}
+            </div>
           </div>
         </div>
+
+        {/* Mobile menu dropdown with smooth layout entry */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden overflow-hidden bg-white border-t border-slate-100"
+            >
+              <div className="px-6 py-4 flex flex-col gap-4">
+                {/* Mobile Language Switcher */}
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("Язык / Мова")}</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => { setLanguage('RU'); setMobileMenuOpen(false); }}
+                      className={`h-11 flex items-center justify-center text-sm font-bold rounded-xl transition duration-150 ${language === 'RU' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-slate-50 text-slate-600 border border-transparent'}`}
+                    >
+                      Русский (RU)
+                    </button>
+                    <button
+                      onClick={() => { setLanguage('BY'); setMobileMenuOpen(false); }}
+                      className={`h-11 flex items-center justify-center text-sm font-bold rounded-xl transition duration-150 ${language === 'BY' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-slate-50 text-slate-600 border border-transparent'}`}
+                    >
+                      Беларуская (BY)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mobile Theme Switcher */}
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t("Оформление")}</span>
+                  <button
+                    onClick={() => { setTheme(theme === 'light' ? 'dark' : 'light'); setMobileMenuOpen(false); }}
+                    className="h-11 px-4 flex items-center justify-between text-sm font-medium rounded-xl bg-slate-50 text-slate-700 border border-transparent"
+                  >
+                    <span>{theme === 'light' ? t("Включить темную тему") : t("Включить светлую тему")}</span>
+                    {theme === 'light' ? <Moon className="w-5 h-5 text-slate-600" /> : <Sun className="w-5 h-5 text-amber-500" />}
+                  </button>
+                </div>
+
+                {/* Log Out button if logged in */}
+                {session && (
+                  <div className="flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                    <button
+                      onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                      className="h-11 w-full px-4 flex items-center justify-center gap-2 text-sm font-bold rounded-xl bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition duration-150"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      {t("Выйти из аккаунта")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Primary Context Section area */}
@@ -365,13 +467,27 @@ export default function App() {
         className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8"
       >
         <LanguageProvider language={language} setLanguage={setLanguage}>
-          {(view === 'home' || !session) && (
+          {view === 'home' && (
             <GuestSection 
               centers={centers}
               news={news}
               onLoginSuccess={handleLoginSuccess}
               apiBase={API_BASE}
               session={session}
+            />
+          )}
+
+          {view === 'privacy' && (
+            <PrivacyPolicy 
+              language={language}
+              onBack={() => setView(session ? 'dashboard' : 'home')}
+            />
+          )}
+
+          {view === 'terms' && (
+            <TermsOfService 
+              language={language}
+              onBack={() => setView(session ? 'dashboard' : 'home')}
             />
           )}
 
@@ -569,8 +685,18 @@ export default function App() {
             >
               <p>{t("© 2026 Донор-Алерт. Республика Беларусь.")}</p>
               <div className="flex items-center gap-4">
-                <a href="#" className="hover:text-slate-600 transition-colors">{t("Политика конфиденциальности")}</a>
-                <a href="#" className="hover:text-slate-600 transition-colors">{t("Правила пользования")}</a>
+                <button 
+                  onClick={(e) => { e.preventDefault(); setView('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                  className="hover:text-slate-600 transition-colors cursor-pointer"
+                >
+                  {t("Политика конфиденциальности")}
+                </button>
+                <button 
+                  onClick={(e) => { e.preventDefault(); setView('terms'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                  className="hover:text-slate-600 transition-colors cursor-pointer"
+                >
+                  {t("Правила пользования")}
+                </button>
               </div>
             </motion.div>
           </div>
