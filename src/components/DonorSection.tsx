@@ -759,11 +759,13 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 onClick={() => { setActiveMenu(it.id as any); }}
                 className={`w-auto min-w-max md:w-full flex items-center px-4 py-3 rounded-xl text-left transition duration-150 relative min-h-[48px] md:min-h-0 ${isActive ? 'bg-red-50 text-red-600 font-bold' : 'text-slate-500 font-bold hover:bg-slate-50'}`}
               >
-                <Icon className={`w-4 h-4 mr-3 md:mr-3 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+                <div className="relative mr-3 md:mr-3 flex items-center justify-center">
+                  <Icon className={`w-4 h-4 ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+                  {it.id === 'notifications' && unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border border-white shadow-sm" />
+                  )}
+                </div>
                 <span className="text-sm leading-none">{it.label}</span>
-                {it.id === 'notifications' && unreadCount > 0 && (
-                  <span className="absolute right-4 md:right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full border-2 border-white shadow-sm" />
-                )}
               </button>
             );
           })}
@@ -1372,33 +1374,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               </div>
             </div>
 
-            {/* List of active medical notes (медотводы) if any */}
-            {medicalNotes.some(m => m.isActive) && (
-              <div className="bg-red-50 p-6 md:p-8 rounded-2xl border border-red-200/60 space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                    <ShieldAlert className="w-6 h-6 text-red-600" />
-                  </div>
-                  <h4 className="font-bold text-red-800 text-lg tracking-tight">{t("Важные ограничения")}</h4>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {medicalNotes.filter(m => m.isActive).map(note => (
-                    <div key={note.id} className="p-5 bg-white border border-red-200/50 rounded-2xl shadow-sm flex flex-col justify-between">
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] uppercase font-bold text-red-700 tracking-widest block">{t("Медотвод")}</span>
-                        <p className="text-sm text-slate-800 font-bold leading-tight">{note.reason}</p>
-                      </div>
-                      <div className="mt-4 pt-4 border-t border-slate-50">
-                        <p className="text-xs text-red-700 font-bold flex items-center gap-2">
-                          <Clock className="w-3.5 h-3.5" />
-                          До {note.endDate ? new Date(note.endDate).toLocaleDateString('ru-RU') : 'бессрочно'}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+
           </motion.div>
         )}
 
@@ -1754,7 +1730,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             className="grid grid-cols-1 lg:grid-cols-3 gap-6"
           >
             {/* LEFT / MAIN COLUMN: INBOX (HISTORY) */}
-            <div className="lg:col-span-2 bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm space-y-4">
+            <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6">
               <div className="space-y-0.5">
                 <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">
                   Входящие уведомления и вызовы
@@ -1775,48 +1751,60 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 </div>
               ) : (
                 <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
-                  {notificationsHistory.map((notif: any) => (
-                    <div 
-                      key={notif.id} 
-                      className={`p-3 rounded-xl border transition-all space-y-1.5 shadow-sm relative ${
-                        !notif.isRead 
-                          ? 'border-red-100 bg-red-50/20 hover:bg-red-50/40' 
-                          : 'border-slate-100 bg-slate-50/40 hover:bg-slate-50/85'
-                      }`}
-                    >
-                      {!notif.isRead && (
-                        <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full shadow-sm" />
-                      )}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-0.5">
-                          <span className="inline-block px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-extrabold bg-rose-50 text-rose-600 border border-rose-100">
-                            Вызов донора
+                  {notificationsHistory.map((notif: any) => {
+                    const isUnread = !notif.isRead;
+                    return (
+                      <div 
+                        key={notif.id} 
+                        className={`p-3 rounded-xl border transition-all space-y-1.5 shadow-sm relative ${
+                          isUnread 
+                            ? 'border-red-600 bg-red-600 text-white hover:bg-red-700' 
+                            : 'border-slate-100 bg-slate-50/40 hover:bg-slate-50/85'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-0.5">
+                            <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-extrabold border ${
+                              isUnread 
+                                ? 'bg-white/20 text-white border-white/25' 
+                                : 'bg-rose-50 text-rose-600 border-rose-100'
+                            }`}>
+                              Вызов донора
+                            </span>
+                            <h4 className={`font-bold text-xs md:text-sm leading-tight ${
+                              isUnread ? 'text-white' : 'text-slate-800'
+                            }`}>
+                              {notif.centerName}
+                            </h4>
+                          </div>
+                          <span className={`text-[10px] font-medium font-sans shrink-0 ${
+                            isUnread ? 'text-red-100' : 'text-slate-400'
+                          }`}>
+                            {new Date(notif.sentAt).toLocaleString('ru-RU', { 
+                              day: 'numeric', 
+                              month: 'short', 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
                           </span>
-                          <h4 className="font-bold text-slate-800 text-xs md:text-sm leading-tight">
-                            {notif.centerName}
-                          </h4>
                         </div>
-                        <span className="text-[10px] text-slate-400 font-medium font-sans shrink-0">
-                          {new Date(notif.sentAt).toLocaleString('ru-RU', { 
-                            day: 'numeric', 
-                            month: 'short', 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </span>
+                        
+                        <p className={`text-xs font-medium leading-relaxed p-2 rounded-lg shadow-inner border ${
+                          isUnread 
+                            ? 'bg-white text-slate-950 border-red-700/10' 
+                            : 'bg-white text-slate-600 border-slate-100'
+                        }`}>
+                          {notif.messageText}
+                        </p>
                       </div>
-                      
-                      <p className="text-xs text-slate-600 font-medium leading-relaxed bg-white p-2 rounded-lg border border-slate-100 shadow-inner">
-                        {notif.messageText}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
 
             {/* RIGHT SIDEBAR COLUMN: NOTIFICATION SETTINGS */}
-            <div className="bg-white p-4 md:p-5 rounded-xl border border-slate-100 shadow-sm space-y-4 h-fit">
+            <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm space-y-6 h-fit">
               <div className="space-y-0.5">
                 <h3 className="font-bold text-slate-800 text-base md:text-lg tracking-tight leading-tight">{t("Каналы связи")}</h3>
                 <p className="text-xs text-slate-500 font-medium">{t("Отметьте удобные каналы вызова")}</p>
