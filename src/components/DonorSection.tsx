@@ -1805,8 +1805,8 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
               <form onSubmit={handleNotifSubmit} className="space-y-4">
                 <div className="space-y-2.5">
                   {[
-                    { id: 'push', title: 'Push-уведомления', desc: t('Всплывающие окна в браузере или приложении'), enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
-                    { id: 'email', title: 'Email-рассылки', desc: t('Письма с приглашениями и результатами'), enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
+                    { id: 'push', title: t('Push-уведомления'), desc: t('Всплывающие окна в браузере или приложении'), enabled: notifForm.pushEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, pushEnabled: val}) },
+                    { id: 'email', title: t('Email-рассылки'), desc: t('Письма с приглашениями и результатами'), enabled: notifForm.emailNotificationsEnabled, toggle: (val: boolean) => setNotifForm({...notifForm, emailNotificationsEnabled: val}) }
                   ].map((notif, idx) => (
                     <div key={notif.id} className="flex items-center justify-between p-3.5 md:p-4 bg-slate-50/50 rounded-xl border border-slate-100 transition-hover hover:border-slate-200">
                       <div className="space-y-1 pr-2">
