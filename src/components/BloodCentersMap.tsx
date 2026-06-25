@@ -375,7 +375,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
       <div ref={mapContainerRef} className="w-full h-full" id="centers-leaflet-map" />
       
       {/* Search Panel */}
-      <div ref={searchContainerRef} className="absolute top-3 left-3 w-64 md:w-80 z-[1000]">
+      <div ref={searchContainerRef} className="absolute top-3 left-3 right-3 md:right-auto w-auto md:w-80 z-[1000]">
         <div className="relative flex items-center bg-white/95 backdrop-blur-md rounded-xl border border-slate-200/80 shadow-md px-3 py-2 transition-all focus-within:shadow-lg focus-within:border-red-300">
           <Search size={16} className="text-slate-400 mr-2 flex-shrink-0" />
           <input
@@ -430,7 +430,7 @@ export default function BloodCentersMap({ centers, selectedCenter, onSelectCente
         )}
       </div>
 
-      <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm text-[10px] font-bold text-slate-700 uppercase tracking-widest z-[1000] flex items-center select-none pointer-events-none">
+      <div className="absolute bottom-3 left-3 md:bottom-auto md:left-auto md:top-3 md:right-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm text-[10px] font-bold text-slate-700 uppercase tracking-widest z-[1000] flex items-center select-none pointer-events-none">
         <span className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse" />
         Карта центров крови РБ
       </div>

@@ -1151,13 +1151,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90 rounded-2xl p-4.5 bg-slate-50/40 border border-slate-100">
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {donorCard.donor.lastName} {donorCard.donor.firstName} {donorCard.donor.middleName || ''}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {formatDateHuman(donorCard.donor.birthDate)} ({
                           (() => {
                             const birthDate = new Date(donorCard.donor.birthDate);
@@ -1172,19 +1172,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {donorCard.donor.gender === 'male' ? 'Мужской' : 'Женский'}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {donorCard.donor.weight} кг
                       </span>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-center justify-between py-2.5 gap-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Группа и Резус-фактор")}</span>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 text-left sm:text-right w-full sm:w-auto justify-start sm:justify-end">
                         <span className="bg-red-50 border border-red-100 text-red-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
                           {formatBloodGroup(donorCard.donor.bloodGroup)}
                         </span>
@@ -1195,11 +1195,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Телефон")}</span>
-                      <span className="font-bold text-slate-800 text-right">{donorCard.donor.phone}</span>
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donorCard.donor.phone}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("E-mail / Личный ID")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {donorCard.donor.email || donorCard.donor.onesignalPlayerId || 'Не указан'}
                       </span>
                     </div>
@@ -1545,13 +1545,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90 rounded-2xl border border-slate-150 p-4.5 bg-slate-50/40">
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {formatDateHuman(pendingDonorProfile.card.donor.birthDate)} ({
                           (() => {
                             const birthDate = new Date(pendingDonorProfile.card.donor.birthDate);
@@ -1566,27 +1566,27 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Телефон")}</span>
-                      <span className="font-bold text-slate-800 text-right">{pendingDonorProfile.card.donor.phone}</span>
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{pendingDonorProfile.card.donor.phone}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("E-mail / Личный идентификатор")}</span>
-                      <span className="font-bold text-slate-800 text-right">
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                         {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
-                      <span className="font-bold text-slate-800 text-right">{pendingDonorProfile.card.donor.weight} кг</span>
+                      <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{pendingDonorProfile.card.donor.weight} кг</span>
                     </div>
-                    <div className="flex flex-col sm:flex-row items-center justify-between py-3 gap-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Группа / Резус")}</span>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 text-left sm:text-right w-full sm:w-auto justify-start sm:justify-end">
                         <span className="bg-white border border-slate-150 text-red-600 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
                           {formatBloodGroup(pendingDonorProfile.card.donor.bloodGroup)}
                         </span>
@@ -1597,14 +1597,14 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("Уведомления")}</span>
-                      <span className="font-semibold text-slate-650 text-right text-xs">
+                      <span className="font-semibold text-slate-650 text-left sm:text-right text-xs w-full sm:w-auto">
                         {pendingDonorProfile.card.donor.pushEnabled ? 'Push' : ''} {pendingDonorProfile.card.donor.emailNotificationsEnabled ? 'Email' : ''} 
                         {!pendingDonorProfile.card.donor.pushEnabled && !pendingDonorProfile.card.donor.emailNotificationsEnabled ? 'Отключены' : ''}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("В системе с")}</span>
-                      <span className="font-bold text-slate-800 text-right font-mono">{formatDateHuman(pendingDonorProfile.card.donor.createdAt)}</span>
+                      <span className="font-bold text-slate-800 text-left sm:text-right font-mono w-full sm:w-auto">{formatDateHuman(pendingDonorProfile.card.donor.createdAt)}</span>
                     </div>
                   </div>
                 </div>
@@ -2328,7 +2328,16 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       <button 
                         type="submit" disabled={isSaving}
                         className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition duration-150 flex items-center justify-center gap-2.5 shadow-sm text-base min-h-[44px] md:min-h-0"
-                      >{isSaving ? 'Подождите...' : '<Send className="w-5.5 h-5.5" /> ОТПРАВИТЬ РАССЫЛКУ'}</button>
+                      >
+                        {isSaving ? (
+                          t("Подождите...")
+                        ) : (
+                          <>
+                            <Send className="w-5 h-5" />
+                            {t("ОТПРАВИТЬ РАССЫЛКУ")}
+                          </>
+                        )}
+                      </button>
 
                     </form>
                   </div>
@@ -3223,13 +3232,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90 rounded-2xl p-4.5 bg-slate-50/40">
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
-                  <span className="font-bold text-slate-800 text-right">
+                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                     {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
-                  <span className="font-bold text-slate-800 text-right">
+                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                     {formatDateHuman(pendingDonorProfile.card.donor.birthDate)} ({
                       (() => {
                         const birthDate = new Date(pendingDonorProfile.card.donor.birthDate);
@@ -3244,19 +3253,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
-                  <span className="font-bold text-slate-800 text-right">
+                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                     {pendingDonorProfile.card.donor.gender === 'male' ? 'Мужской' : 'Женский'}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
-                  <span className="font-bold text-slate-800 text-right">
+                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                     {pendingDonorProfile.card.donor.weight} кг
                   </span>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center justify-between py-2.5 gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Группа и Резус-фактор")}</span>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 text-left sm:text-right w-full sm:w-auto justify-start sm:justify-end">
                     <span className="bg-red-50 border border-red-100 text-red-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
                       {formatBloodGroup(pendingDonorProfile.card.donor.bloodGroup)}
                     </span>
@@ -3267,11 +3276,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("Телефон")}</span>
-                  <span className="font-bold text-slate-800 text-right">{pendingDonorProfile.card.donor.phone}</span>
+                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{pendingDonorProfile.card.donor.phone}</span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("E-mail / Личный ID")}</span>
-                  <span className="font-bold text-slate-800 text-right">
+                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
                     {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || 'Не указан'}
                   </span>
                 </div>

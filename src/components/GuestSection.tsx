@@ -324,7 +324,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
       return;
     }
     if (resetPassword !== resetConfirmPassword) {
-      setLoginError('неверный пароль');
+      setLoginError('Пароли не совпадают');
       return;
     }
     setLoginError('');
@@ -1637,18 +1637,18 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       <span>{t("Я даю согласие на безопасную обработку медицинских и персональных данных для нужд Минздрава РБ и центров крови.")}</span>
                     </label>
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                       <button 
                         type="button" 
                         onClick={() => setRegStep(1)}
-                        className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-3 rounded-xl transition duration-150"
+                        className="w-full sm:w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-3 rounded-xl transition duration-150 min-h-[44px] md:min-h-0"
                       >
                         Назад
                       </button>
                       <button 
                         type="submit"
                         disabled={regLoading}
-                        className="w-2/3 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-3 rounded-xl transition duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
+                        className="w-full sm:w-2/3 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold py-3 rounded-xl transition duration-150 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] md:min-h-0"
                       >
                         {regLoading ? 'Отправка...' : 'Отправить анкету'}
                       </button>

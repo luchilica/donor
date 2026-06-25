@@ -931,17 +931,17 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                   <div className="divide-y divide-slate-100/80 text-sm mt-6 pt-4 border-t border-slate-100">
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                       <span className="text-slate-400 font-medium font-sans">{t("Всего донаций (накапливается автоматически)")}</span>
-                      <span className="font-bold text-slate-500 text-right">{totalDonations}</span>
+                      <span className="font-bold text-slate-500 text-left sm:text-right w-full sm:w-auto">{totalDonations}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                       <span className="text-slate-400 font-medium font-sans">{t("Последняя сдача (вносится автоматически)")}</span>
-                      <span className="font-bold text-slate-500 text-right font-mono">
+                      <span className="font-bold text-slate-500 text-left sm:text-right font-mono w-full sm:w-auto">
                         {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString('ru-RU') : 'Нет данных'}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-4 gap-2">
                       <span className="text-slate-400 font-medium font-sans">{t("В системе с")}</span>
-                      <span className="font-bold text-slate-500 text-right font-mono">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
+                      <span className="font-bold text-slate-500 text-left sm:text-right font-mono w-full sm:w-auto">{new Date(donor.createdAt).toLocaleDateString('ru-RU')}</span>
                     </div>
                   </div>
 

@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@theme {
+  --color-red-650: #be123c;
+  --color-rose-650: #e11d48;
+}
+
 @variant dark (&:where(.dark, .dark *));
 
 /* Smooth transition for theme toggle */
