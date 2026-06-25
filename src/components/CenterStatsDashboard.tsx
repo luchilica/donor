@@ -146,14 +146,14 @@ export const CenterStatsDashboard = ({ center, stats, isLoading }: CenterStatsDa
         <div className="grid grid-cols-7 gap-1 mb-3">
           {(stats?.weeklyLoad || []).map((day, i) => (
             <div key={i} className="flex flex-col items-center gap-1">
-              <span className="text-[11px] text-slate-400 font-semibold uppercase">{day.day}</span>
+              <span className="text-[11px] text-slate-400 font-semibold uppercase">{t(day.day)}</span>
               <div className={`w-full text-center text-[11px] font-bold p-1 rounded ${day.color}`}>{day.load} {t('чел.')}</div>
             </div>
           ))}
         </div>
         <div className="mt-auto p-2 bg-slate-50 text-slate-600 text-xs rounded-lg border border-slate-100 flex gap-2 items-center">
           <AlertCircle className="w-3 h-3 shrink-0 text-red-500" />
-          <span>{stats?.tip || t("Данные обновляются")}</span>
+          <span>{t(stats?.tip || "Данные обновляются")}</span>
         </div>
       </motion.div>
     </div>

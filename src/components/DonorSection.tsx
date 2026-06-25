@@ -704,7 +704,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
             {donor.firstName[0]}{donor.lastName[0]}
           </div>
           <h2 className="font-bold text-slate-800 text-lg leading-tight tracking-tight">
-            {donor.lastName} {donor.firstName}
+            {t(donor.lastName)} {t(donor.firstName)}
           </h2>
           <p className="text-xs text-slate-400 mt-1 font-medium">{t("Донор с")} {new Date(donor.createdAt).toLocaleDateString('ru-RU')}</p>
 
@@ -964,7 +964,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                 <div className="divide-y divide-slate-100/80 text-sm sm:text-xs text-slate-700/90">
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("ФИО")}</span>
-                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{donor.lastName} {donor.firstName} {donor.middleName || ''}</span>
+                    <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{t(donor.lastName)} {t(donor.firstName)} {t(donor.middleName || '')}</span>
                   </div>
                   <div className="flex flex-col sm:flex-row justify-between py-3 gap-1 sm:gap-2">
                     <span className="text-slate-400 sm:text-slate-500 font-bold sm:font-medium font-sans text-xs sm:text-xs">{t("Дата рождения")}</span>

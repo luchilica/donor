@@ -581,7 +581,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
                   .map(donor => (
                     <tr key={donor.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-4 py-4 text-slate-400 align-middle">#{donor.id}</td>
-                      <td className="px-4 py-4 font-medium text-slate-900 align-middle">{donor.lastName} {donor.firstName}</td>
+                      <td className="px-4 py-4 font-medium text-slate-900 align-middle">{t(donor.lastName)} {t(donor.firstName)}</td>
                       <td className="px-4 py-4 align-middle">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200">
                           {donor.bloodGroup.replace('I_O', 'O(I)').replace('II_A', 'A(II)').replace('III_B', 'B(III)').replace('IV_AB', 'AB(IV)')} {donor.rhFactor === 'positive' ? 'Rh+' : 'Rh-'}

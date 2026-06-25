@@ -1442,7 +1442,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   <tbody className="divide-y divide-slate-100 text-slate-650 text-slate-600 dark:divide-slate-800">
                     {sortedDonorList.map(item => (
                       <tr key={item.id} className="hover:bg-slate-50/50">
-                        <td className="p-3 text-slate-900 font-semibold">{item.lastName} {item.firstName} {item.middleName}</td>
+                        <td className="p-3 text-slate-900 font-semibold">{t(item.lastName)} {t(item.firstName)} {t(item.middleName || '')}</td>
                         <td className="p-3">
                           <span className="font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-100 text-[10px] tracking-wide inline-block uppercase">
                             {formatBloodGroup(item.bloodGroup)} {formatRhFactor(item.rhFactor)}
@@ -1529,7 +1529,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
                       <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
                       <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                        {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
+                        {t(pendingDonorProfile.card.donor.lastName)} {t(pendingDonorProfile.card.donor.firstName)} {t(pendingDonorProfile.card.donor.middleName || '')}
                       </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between py-3 gap-2">
@@ -3185,7 +3185,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
                   <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
                   <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
+                    {t(pendingDonorProfile.card.donor.lastName)} {t(pendingDonorProfile.card.donor.firstName)} {t(pendingDonorProfile.card.donor.middleName || '')}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
