@@ -33,6 +33,11 @@ function escapeDatabaseUrl(url: string): string {
 let dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
 if (dbUrl) {
+  // Auto-correct IPv6-only direct Supabase host to IPv4 pooler host (fixes Railway connection issues)
+  if (dbUrl.includes('db.jahumhpchldaagzldkuw.supabase.co:5432')) {
+    dbUrl = dbUrl.replace('db.jahumhpchldaagzldkuw.supabase.co:5432', 'aws-1-eu-central-1.pooler.supabase.com:6543');
+  }
+  
   dbUrl = escapeDatabaseUrl(dbUrl);
   if (dbUrl.includes(':6543') && !dbUrl.includes('pgbouncer=true')) {
     dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'pgbouncer=true';
