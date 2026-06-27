@@ -11,7 +11,7 @@ import TermsOfService from './components/TermsOfService.tsx';
 import { BY_DICT } from './i18n.ts';
 import { LanguageProvider } from './LanguageContext.tsx';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://donor-production.up.railway.app/api';
 
 export default function App() {
   const [session, setSession] = useState<{
@@ -518,6 +518,7 @@ export default function App() {
             <AdminSection 
               token={session.token}
               t={t}
+              apiBase={API_BASE}
             />
           )}
         </LanguageProvider>

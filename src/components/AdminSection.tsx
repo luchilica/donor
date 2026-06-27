@@ -25,11 +25,12 @@ import { useLanguage } from '../LanguageContext';
 interface AdminSectionProps {
   token: string;
   t: (key: string) => string;
+  apiBase: string;
 }
 
 type AdminTab = 'users' | 'centers' | 'donors' | 'donations' | 'news' | 'holds' | 'appointments';
 
-export default function AdminSection({ token, t }: AdminSectionProps) {
+export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
   const { language, setLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState<AdminTab>('users');
   const [searchQuery, setSearchQuery] = useState('');
@@ -150,7 +151,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/admin/all-data', {
+      const res = await fetch(`${apiBase}/admin/all-data`, {
         headers: { 'Authorization': token }
       });
       if (!res.ok) {
@@ -191,7 +192,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
       onConfirm: async () => {
         setIsSaving(true);
         try {
-          const res = await fetch('/api/admin/delete-entity', {
+          const res = await fetch(`${apiBase}/admin/delete-entity`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -218,7 +219,7 @@ export default function AdminSection({ token, t }: AdminSectionProps) {
   const handleUpdateEntity = async (entityName: string, entity: any) => {
     setIsSaving(true);
     try {
-      const res = await fetch('/api/admin/update-entity', {
+      const res = await fetch(`${apiBase}/admin/update-entity`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

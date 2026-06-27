@@ -877,7 +877,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     <li>{t("След от венепункции в локтевом сгибе без документа – 7 суток.")}</li>
                 </ul>
                 <div className="mt-4 pt-4 border-t border-red-100">
-                    <a href="/api/download/contraindications" target="_blank" download className="text-sm text-red-600 font-semibold hover:underline flex items-center">
+                    <a href={`${apiBase}/download/contraindications`} target="_blank" download className="text-sm text-red-600 font-semibold hover:underline flex items-center">
                         <FileText className="w-4 h-4 mr-2" />
                         {t("Скачать полный перечень всех противопоказаний (PDF)")}
                     </a>

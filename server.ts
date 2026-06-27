@@ -1,5 +1,6 @@
 import 'express-async-errors';
 import express from 'express';
+import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
@@ -104,6 +105,7 @@ async function recalculateDonorStats(donorId: number) {
 }
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // Предотвращаем кэширование API запросов (решает проблему с устаревшими данными при кэшировании Vercel)
