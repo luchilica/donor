@@ -12,7 +12,9 @@ import TermsOfService from './components/TermsOfService.tsx';
 import { BY_DICT } from './i18n.ts';
 import { LanguageProvider } from './LanguageContext.tsx';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+// Always use relative '/api' path so that Vercel routes through our proxy (/api/index.js)
+// and local development routes through the local Express server, preventing CORS and cross-domain issues.
+const API_BASE = '/api';
 
 export default function App() {
   const [session, setSession] = useState<{
