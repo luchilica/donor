@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Heart, LogOut, HelpCircle, User, Bell, Activity, Layers, Sun, Moon, Send, ArrowUp, ChevronUp, Menu, X } from 'lucide-react';
@@ -11,7 +12,7 @@ import TermsOfService from './components/TermsOfService.tsx';
 import { BY_DICT } from './i18n.ts';
 import { LanguageProvider } from './LanguageContext.tsx';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function App() {
   const [session, setSession] = useState<{

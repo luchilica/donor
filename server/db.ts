@@ -1433,7 +1433,7 @@ export async function getDb(): Promise<DatabaseState> {
   }
 }
 
-export function saveDb(state: DatabaseState): Promise<void> {
+export async function saveDb(state: DatabaseState): Promise<void> {
   // Update memory cache instantly so all subsequent reads are lightning fast!
   const oldDb = cachedDb;
   cachedDb = JSON.parse(JSON.stringify(state));
@@ -1445,360 +1445,469 @@ export function saveDb(state: DatabaseState): Promise<void> {
     Promise.resolve().then(async () => {
       try {
         // 0. Sync Centers table
+        try {
+          const centerIds = state.centers.map(c => c.id);
+          await prisma.bloodCenter.deleteMany({
+            where: { id: { notIn: centerIds } }
+          });
+        } catch (err: any) {
+          console.warn("Failed to delete centers during background sync:", err.message);
+        }
+
         await Promise.all(state.centers.map(async center => {
-        const prev = oldDb && oldDb.centers && oldDb.centers.find((x: any) => x.id === center.id);
-        if (prev && JSON.stringify(prev) === JSON.stringify(center)) return;
-        return prisma.bloodCenter.upsert({
-          where: { id: center.id },
-          update: {
-            bloodNeeds: center.bloodNeeds ? (center.bloodNeeds as any) : null,
-          },
-          create: {
-            id: center.id,
-            name: center.name,
-            address: center.address,
-            phone: center.phone,
-            email: center.email || null,
-            workingHours: center.workingHours || null,
-            mapLink: center.mapLink || null,
-            eRegistrationLink: center.eRegistrationLink || null,
-            bloodNeeds: center.bloodNeeds ? (center.bloodNeeds as any) : null,
-            createdAt: center.createdAt ? new Date(center.createdAt) : new Date(),
+          const prev = oldDb && oldDb.centers && oldDb.centers.find((x: any) => x.id === center.id);
+          if (prev && JSON.stringify(prev) === JSON.stringify(center)) return;
+          try {
+            await prisma.bloodCenter.upsert({
+              where: { id: center.id },
+              update: {
+                bloodNeeds: center.bloodNeeds ? (center.bloodNeeds as any) : null,
+              },
+              create: {
+                id: center.id,
+                name: center.name,
+                address: center.address,
+                phone: center.phone,
+                email: center.email || null,
+                workingHours: center.workingHours || null,
+                mapLink: center.mapLink || null,
+                eRegistrationLink: center.eRegistrationLink || null,
+                bloodNeeds: center.bloodNeeds ? (center.bloodNeeds as any) : null,
+                createdAt: center.createdAt ? new Date(center.createdAt) : new Date(),
+              }
+            });
+          } catch (e: any) {
+            console.error(`Failed to upsert center ${center.id}:`, e.message);
           }
-        });
-      }));
+        }));
 
       // 1. Sync User table
+      try {
+        const userIds = state.users.map(u => u.id);
+        await prisma.user.deleteMany({
+          where: { id: { notIn: userIds } }
+        });
+      } catch (err: any) {
+        console.warn("Failed to delete users during background sync:", err.message);
+      }
+
       await Promise.all(state.users.map(async user => {
         const prev = oldDb && oldDb.users && oldDb.users.find(x => x.id === user.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(user)) return;
-        return prisma.user.upsert({
-          where: { id: user.id },
-          update: {
-            email: user.email,
-            passwordHash: user.passwordHash,
-            role: user.role as any,
-            centerId: user.centerId,
-            isActive: user.isActive,
-            resetCode: user.resetCode || null,
-            lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
-          },
-          create: {
-            id: user.id,
-            email: user.email,
-            passwordHash: user.passwordHash,
-            role: user.role as any,
-            centerId: user.centerId,
-            isActive: user.isActive,
-            resetCode: user.resetCode || null,
-            createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
-            lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
-          }
-        })
-      
+        try {
+          await prisma.user.upsert({
+            where: { id: user.id },
+            update: {
+              email: user.email,
+              passwordHash: user.passwordHash,
+              role: user.role as any,
+              centerId: user.centerId,
+              isActive: user.isActive,
+              resetCode: user.resetCode || null,
+              lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
+            },
+            create: {
+              id: user.id,
+              email: user.email,
+              passwordHash: user.passwordHash,
+              role: user.role as any,
+              centerId: user.centerId,
+              isActive: user.isActive,
+              resetCode: user.resetCode || null,
+              createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+              lastLogin: user.lastLogin ? new Date(user.lastLogin) : null,
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert user ${user.id}:`, e.message);
+        }
       }));
 
       // 2. Sync Donor table
+      try {
+        const donorIds = state.donors.map(d => d.id);
+        await prisma.donor.deleteMany({
+          where: { id: { notIn: donorIds } }
+        });
+      } catch (err: any) {
+        console.warn("Failed to delete donors during background sync:", err.message);
+      }
       for (const donor of state.donors) {
         const prev = oldDb && oldDb.donors && oldDb.donors.find(x => x.id === donor.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(donor)) continue;
 
-        await prisma.donor.upsert({
-          where: { id: donor.id },
-          update: {
-            userId: donor.userId,
-            lastName: donor.lastName,
-            firstName: donor.firstName,
-            middleName: donor.middleName,
-            birthDate: new Date(donor.birthDate),
-            gender: donor.gender as any,
-            bloodGroup: donor.bloodGroup as any,
-            rhFactor: donor.rhFactor as any,
-            weight: donor.weight,
-            phone: donor.phone,
-            status: donor.status as any,
-            pushEnabled: donor.pushEnabled,
-            emailNotificationsEnabled: donor.emailNotificationsEnabled,
-            onesignalPlayerId: donor.onesignalPlayerId,
-            personalPause: donor.personalPause,
-            personalPauseUntil: donor.personalPauseUntil ? new Date(donor.personalPauseUntil) : null,
-            personalPauseNote: donor.personalPauseNote,
-            donationsCount: donor.donationsCount,
-            bloodDonationsCount: donor.bloodDonationsCount,
-            plasmaDonationsCount: donor.plasmaDonationsCount,
-            plateletsDonationsCount: donor.plateletsDonationsCount,
-            bloodFreeCount: donor.bloodFreeCount,
-            bloodPaidCount: donor.bloodPaidCount,
-            compFreeCount: donor.compFreeCount,
-            compPaidCount: donor.compPaidCount,
-            lastDonationDate: donor.lastDonationDate ? new Date(donor.lastDonationDate) : null,
-            lastDonationType: donor.lastDonationType as any,
-            nextAvailableDate: donor.nextAvailableDate ? new Date(donor.nextAvailableDate) : null,
-          },
-          create: {
-            id: donor.id,
-            userId: donor.userId,
-            lastName: donor.lastName,
-            firstName: donor.firstName,
-            middleName: donor.middleName,
-            birthDate: new Date(donor.birthDate),
-            gender: donor.gender as any,
-            bloodGroup: donor.bloodGroup as any,
-            rhFactor: donor.rhFactor as any,
-            weight: donor.weight,
-            phone: donor.phone,
-            status: donor.status as any,
-            pushEnabled: donor.pushEnabled,
-            emailNotificationsEnabled: donor.emailNotificationsEnabled,
-            onesignalPlayerId: donor.onesignalPlayerId,
-            personalPause: donor.personalPause,
-            personalPauseUntil: donor.personalPauseUntil ? new Date(donor.personalPauseUntil) : null,
-            personalPauseNote: donor.personalPauseNote,
-            donationsCount: donor.donationsCount,
-            bloodDonationsCount: donor.bloodDonationsCount,
-            plasmaDonationsCount: donor.plasmaDonationsCount,
-            plateletsDonationsCount: donor.plateletsDonationsCount,
-            bloodFreeCount: donor.bloodFreeCount,
-            bloodPaidCount: donor.bloodPaidCount,
-            compFreeCount: donor.compFreeCount,
-            compPaidCount: donor.compPaidCount,
-            lastDonationDate: donor.lastDonationDate ? new Date(donor.lastDonationDate) : null,
-            lastDonationType: donor.lastDonationType as any,
-            nextAvailableDate: donor.nextAvailableDate ? new Date(donor.nextAvailableDate) : null,
-            createdAt: donor.createdAt ? new Date(donor.createdAt) : new Date(),
-          }
-        });
+        try {
+          await prisma.donor.upsert({
+            where: { id: donor.id },
+            update: {
+              userId: donor.userId,
+              lastName: donor.lastName,
+              firstName: donor.firstName,
+              middleName: donor.middleName,
+              birthDate: new Date(donor.birthDate),
+              gender: donor.gender as any,
+              bloodGroup: donor.bloodGroup as any,
+              rhFactor: donor.rhFactor as any,
+              weight: donor.weight,
+              phone: donor.phone,
+              status: donor.status as any,
+              pushEnabled: donor.pushEnabled,
+              emailNotificationsEnabled: donor.emailNotificationsEnabled,
+              onesignalPlayerId: donor.onesignalPlayerId,
+              personalPause: donor.personalPause,
+              personalPauseUntil: donor.personalPauseUntil ? new Date(donor.personalPauseUntil) : null,
+              personalPauseNote: donor.personalPauseNote,
+              donationsCount: donor.donationsCount,
+              bloodDonationsCount: donor.bloodDonationsCount,
+              plasmaDonationsCount: donor.plasmaDonationsCount,
+              plateletsDonationsCount: donor.plateletsDonationsCount,
+              bloodFreeCount: donor.bloodFreeCount,
+              bloodPaidCount: donor.bloodPaidCount,
+              compFreeCount: donor.compFreeCount,
+              compPaidCount: donor.compPaidCount,
+              lastDonationDate: donor.lastDonationDate ? new Date(donor.lastDonationDate) : null,
+              lastDonationType: donor.lastDonationType as any,
+              nextAvailableDate: donor.nextAvailableDate ? new Date(donor.nextAvailableDate) : null,
+            },
+            create: {
+              id: donor.id,
+              userId: donor.userId,
+              lastName: donor.lastName,
+              firstName: donor.firstName,
+              middleName: donor.middleName,
+              birthDate: new Date(donor.birthDate),
+              gender: donor.gender as any,
+              bloodGroup: donor.bloodGroup as any,
+              rhFactor: donor.rhFactor as any,
+              weight: donor.weight,
+              phone: donor.phone,
+              status: donor.status as any,
+              pushEnabled: donor.pushEnabled,
+              emailNotificationsEnabled: donor.emailNotificationsEnabled,
+              onesignalPlayerId: donor.onesignalPlayerId,
+              personalPause: donor.personalPause,
+              personalPauseUntil: donor.personalPauseUntil ? new Date(donor.personalPauseUntil) : null,
+              personalPauseNote: donor.personalPauseNote,
+              donationsCount: donor.donationsCount,
+              bloodDonationsCount: donor.bloodDonationsCount,
+              plasmaDonationsCount: donor.plasmaDonationsCount,
+              plateletsDonationsCount: donor.plateletsDonationsCount,
+              bloodFreeCount: donor.bloodFreeCount,
+              bloodPaidCount: donor.bloodPaidCount,
+              compFreeCount: donor.compFreeCount,
+              compPaidCount: donor.compPaidCount,
+              lastDonationDate: donor.lastDonationDate ? new Date(donor.lastDonationDate) : null,
+              lastDonationType: donor.lastDonationType as any,
+              nextAvailableDate: donor.nextAvailableDate ? new Date(donor.nextAvailableDate) : null,
+              createdAt: donor.createdAt ? new Date(donor.createdAt) : new Date(),
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert donor ${donor.id}:`, e.message);
+        }
       }
 
       // 3. Sync DonorCenter connections
+      try {
+        const donorCenterIds = state.donorCenters.map(dc => dc.id);
+        await prisma.donorCenter.deleteMany({
+          where: { id: { notIn: donorCenterIds } }
+        });
+      } catch (err: any) {
+        console.warn("Failed to delete donorCenters during background sync:", err.message);
+      }
       for (const dc of state.donorCenters) {
         const prev = oldDb && oldDb.donorCenters && oldDb.donorCenters.find(x => x.id === dc.id || (x.donorId === dc.donorId && x.centerId === dc.centerId));
         if (prev && JSON.stringify(prev) === JSON.stringify(dc)) continue;
 
-        await prisma.donorCenter.upsert({
-          where: { donorId_centerId: { donorId: dc.donorId, centerId: dc.centerId } },
-          update: {
-            status: dc.status as any,
-            isPrimary: dc.isPrimary,
-            rejectionReason: dc.rejectionReason ?? null,
-            resubmissionCount: dc.resubmissionCount,
-            resubmittedAt: dc.resubmittedAt ? new Date(dc.resubmittedAt) : null,
-            confirmedAt: dc.confirmedAt ? new Date(dc.confirmedAt) : null,
-            confirmedById: dc.confirmedById ?? null,
-          },
-          create: {
-            id: dc.id,
-            donorId: dc.donorId,
-            centerId: dc.centerId,
-            status: dc.status as any,
-            isPrimary: dc.isPrimary,
-            rejectionReason: dc.rejectionReason,
-            resubmissionCount: dc.resubmissionCount,
-            resubmittedAt: dc.resubmittedAt ? new Date(dc.resubmittedAt) : null,
-            confirmedAt: dc.confirmedAt ? new Date(dc.confirmedAt) : null,
-            confirmedById: dc.confirmedById,
-            createdAt: dc.createdAt ? new Date(dc.createdAt) : new Date(),
-          }
-        });
+        try {
+          await prisma.donorCenter.upsert({
+            where: { donorId_centerId: { donorId: dc.donorId, centerId: dc.centerId } },
+            update: {
+              status: dc.status as any,
+              isPrimary: dc.isPrimary,
+              rejectionReason: dc.rejectionReason ?? null,
+              resubmissionCount: dc.resubmissionCount,
+              resubmittedAt: dc.resubmittedAt ? new Date(dc.resubmittedAt) : null,
+              confirmedAt: dc.confirmedAt ? new Date(dc.confirmedAt) : null,
+              confirmedById: dc.confirmedById ?? null,
+            },
+            create: {
+              id: dc.id,
+              donorId: dc.donorId,
+              centerId: dc.centerId,
+              status: dc.status as any,
+              isPrimary: dc.isPrimary,
+              rejectionReason: dc.rejectionReason,
+              resubmissionCount: dc.resubmissionCount,
+              resubmittedAt: dc.resubmittedAt ? new Date(dc.resubmittedAt) : null,
+              confirmedAt: dc.confirmedAt ? new Date(dc.confirmedAt) : null,
+              confirmedById: dc.confirmedById,
+              createdAt: dc.createdAt ? new Date(dc.createdAt) : new Date(),
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert donorCenter ${dc.id}:`, e.message);
+        }
       }
 
       // 4. Create and Delete Donations
-      const donationIds = state.donations.map(d => d.id);
-      await prisma.donation.deleteMany({
-        where: { id: { notIn: donationIds } }
-      });
+      try {
+        const donationIds = state.donations.map(d => d.id);
+        await prisma.donation.deleteMany({
+          where: { id: { notIn: donationIds } }
+        });
+      } catch (err: any) {
+        console.warn("Failed to delete donations during background sync:", err.message);
+      }
       for (const don of state.donations) {
         const prev = oldDb && oldDb.donations && oldDb.donations.find(x => x.id === don.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(don)) continue;
 
-        await prisma.donation.upsert({
-          where: { id: don.id },
-          update: {
-            donorId: don.donorId,
-            centerId: don.centerId,
-            donationDate: new Date(don.donationDate),
-            donationType: don.donationType as any,
-            isPaid: don.isPaid,
-            volumeMl: don.volumeMl,
-            note: don.note,
-            addedById: don.addedBy,
-          },
-          create: {
-            id: don.id,
-            donorId: don.donorId,
-            centerId: don.centerId,
-            donationDate: new Date(don.donationDate),
-            donationType: don.donationType as any,
-            isPaid: don.isPaid,
-            volumeMl: don.volumeMl,
-            note: don.note,
-            addedById: don.addedBy,
-            createdAt: don.createdAt ? new Date(don.createdAt) : new Date(),
-          }
-        });
+        try {
+          await prisma.donation.upsert({
+            where: { id: don.id },
+            update: {
+              donorId: don.donorId,
+              centerId: don.centerId,
+              donationDate: new Date(don.donationDate),
+              donationType: don.donationType as any,
+              isPaid: don.isPaid,
+              volumeMl: don.volumeMl,
+              note: don.note,
+              addedById: don.addedBy,
+            },
+            create: {
+              id: don.id,
+              donorId: don.donorId,
+              centerId: don.centerId,
+              donationDate: new Date(don.donationDate),
+              donationType: don.donationType as any,
+              isPaid: don.isPaid,
+              volumeMl: don.volumeMl,
+              note: don.note,
+              addedById: don.addedBy,
+              createdAt: don.createdAt ? new Date(don.createdAt) : new Date(),
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert donation ${don.id}:`, e.message);
+        }
       }
 
       // 5. Create and Delete Medical Notes
-      const noteIds = state.medicalNotes.map(n => n.id);
-      await prisma.medicalNote.deleteMany({
-        where: { id: { notIn: noteIds } }
-      });
+      try {
+        const noteIds = state.medicalNotes.map(n => n.id);
+        await prisma.medicalNote.deleteMany({
+          where: { id: { notIn: noteIds } }
+        });
+      } catch (err: any) {
+        console.warn("Failed to delete medicalNotes during background sync:", err.message);
+      }
       for (const note of state.medicalNotes) {
         const prev = oldDb && oldDb.medicalNotes && oldDb.medicalNotes.find(x => x.id === note.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(note)) continue;
 
-        await prisma.medicalNote.upsert({
-          where: { id: note.id },
-          update: {
-            donorId: note.donorId,
-            centerId: note.centerId,
-            createdById: note.createdBy,
-            reason: note.reason,
-            startDate: new Date(note.startDate),
-            endDate: note.endDate ? new Date(note.endDate) : null,
-            isActive: note.isActive,
-            liftedAt: note.liftedAt ? new Date(note.liftedAt) : null,
-            liftedById: note.liftedBy,
-            liftNote: note.liftNote,
-          },
-          create: {
-            id: note.id,
-            donorId: note.donorId,
-            centerId: note.centerId,
-            createdById: note.createdBy,
-            reason: note.reason,
-            startDate: new Date(note.startDate),
-            endDate: note.endDate ? new Date(note.endDate) : null,
-            isActive: note.isActive,
-            liftedAt: note.liftedAt ? new Date(note.liftedAt) : null,
-            liftedById: note.liftedBy,
-            liftNote: note.liftNote,
-            createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
-          }
-        });
+        try {
+          await prisma.medicalNote.upsert({
+            where: { id: note.id },
+            update: {
+              donorId: note.donorId,
+              centerId: note.centerId,
+              createdById: note.createdBy,
+              reason: note.reason,
+              startDate: new Date(note.startDate),
+              endDate: note.endDate ? new Date(note.endDate) : null,
+              isActive: note.isActive,
+              liftedAt: note.liftedAt ? new Date(note.liftedAt) : null,
+              liftedById: note.liftedBy,
+              liftNote: note.liftNote,
+            },
+            create: {
+              id: note.id,
+              donorId: note.donorId,
+              centerId: note.centerId,
+              createdById: note.createdBy,
+              reason: note.reason,
+              startDate: new Date(note.startDate),
+              endDate: note.endDate ? new Date(note.endDate) : null,
+              isActive: note.isActive,
+              liftedAt: note.liftedAt ? new Date(note.liftedAt) : null,
+              liftedById: note.liftedBy,
+              liftNote: note.liftNote,
+              createdAt: note.createdAt ? new Date(note.createdAt) : new Date(),
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert medicalNote ${note.id}:`, e.message);
+        }
       }
 
       // 6. Sync News and Delete if removed
-      const newsIds = state.news.map(n => n.id);
-      await prisma.news.deleteMany({
-        where: { id: { notIn: newsIds } }
-      });
-      for (const post of state.news) {
-        await prisma.news.upsert({
-          where: { id: post.id },
-          update: {
-            centerId: post.centerId,
-            title: post.title,
-            content: post.content,
-            isPublished: post.isPublished,
-            publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
-            createdById: post.createdBy
-          },
-          create: {
-            id: post.id,
-            centerId: post.centerId,
-            title: post.title,
-            content: post.content,
-            isPublished: post.isPublished,
-            publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
-            createdById: post.createdBy,
-            createdAt: post.createdAt ? new Date(post.createdAt) : new Date()
-          }
+      try {
+        const newsIds = state.news.map(n => n.id);
+        await prisma.news.deleteMany({
+          where: { id: { notIn: newsIds } }
         });
+      } catch (err: any) {
+        console.warn("Failed to delete news during background sync:", err.message);
+      }
+      for (const post of state.news) {
+        try {
+          await prisma.news.upsert({
+            where: { id: post.id },
+            update: {
+              centerId: post.centerId,
+              title: post.title,
+              content: post.content,
+              isPublished: post.isPublished,
+              publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
+              createdById: post.createdBy
+            },
+            create: {
+              id: post.id,
+              centerId: post.centerId,
+              title: post.title,
+              content: post.content,
+              isPublished: post.isPublished,
+              publishedAt: post.publishedAt ? new Date(post.publishedAt) : null,
+              createdById: post.createdBy,
+              createdAt: post.createdAt ? new Date(post.createdAt) : new Date()
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert news ${post.id}:`, e.message);
+        }
       }
 
       // 7. Sync Notifications
-      for (const n of state.notifications) {
-        await prisma.notification.upsert({
-          where: { id: n.id },
-          update: {
-            centerId: n.centerId,
-            sentById: n.sentBy,
-            bloodGroups: JSON.stringify(n.bloodGroups),
-            rhFactor: n.rhFactor as any,
-            donationType: n.donationType as any,
-            minDaysSinceDonation: n.minDaysSinceDonation,
-            excludeMedical: n.excludeMedical,
-            excludePause: n.excludePause,
-            channel: n.channel as any,
-            messageText: n.messageText,
-            recipientsCount: n.recipientsCount,
-            pushSent: n.pushSent,
-            emailSent: n.emailSent,
-            status: n.status as any,
-          },
-          create: {
-            id: n.id,
-            centerId: n.centerId,
-            sentById: n.sentBy,
-            bloodGroups: JSON.stringify(n.bloodGroups),
-            rhFactor: n.rhFactor as any,
-            donationType: n.donationType as any,
-            minDaysSinceDonation: n.minDaysSinceDonation,
-            excludeMedical: n.excludeMedical,
-            excludePause: n.excludePause,
-            channel: n.channel as any,
-            messageText: n.messageText,
-            recipientsCount: n.recipientsCount,
-            pushSent: n.pushSent,
-            emailSent: n.emailSent,
-            status: n.status as any,
-            createdAt: n.createdAt ? new Date(n.createdAt) : new Date(),
-          }
+      try {
+        const notificationIds = state.notifications.map(n => n.id);
+        await prisma.notification.deleteMany({
+          where: { id: { notIn: notificationIds } }
         });
+      } catch (err: any) {
+        console.warn("Failed to delete notifications during background sync:", err.message);
+      }
+      for (const n of state.notifications) {
+        try {
+          await prisma.notification.upsert({
+            where: { id: n.id },
+            update: {
+              centerId: n.centerId,
+              sentById: n.sentBy,
+              bloodGroups: JSON.stringify(n.bloodGroups),
+              rhFactor: n.rhFactor as any,
+              donationType: n.donationType as any,
+              minDaysSinceDonation: n.minDaysSinceDonation,
+              excludeMedical: n.excludeMedical,
+              excludePause: n.excludePause,
+              channel: n.channel as any,
+              messageText: n.messageText,
+              recipientsCount: n.recipientsCount,
+              pushSent: n.pushSent,
+              emailSent: n.emailSent,
+              status: n.status as any,
+            },
+            create: {
+              id: n.id,
+              centerId: n.centerId,
+              sentById: n.sentBy,
+              bloodGroups: JSON.stringify(n.bloodGroups),
+              rhFactor: n.rhFactor as any,
+              donationType: n.donationType as any,
+              minDaysSinceDonation: n.minDaysSinceDonation,
+              excludeMedical: n.excludeMedical,
+              excludePause: n.excludePause,
+              channel: n.channel as any,
+              messageText: n.messageText,
+              recipientsCount: n.recipientsCount,
+              pushSent: n.pushSent,
+              emailSent: n.emailSent,
+              status: n.status as any,
+              createdAt: n.createdAt ? new Date(n.createdAt) : new Date(),
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert notification ${n.id}:`, e.message);
+        }
       }
 
       // 8. Sync Recipients
+      try {
+        const recipientIds = state.notificationRecipients.map(r => r.id);
+        await prisma.notificationRecipient.deleteMany({
+          where: { id: { notIn: recipientIds } }
+        });
+      } catch (err: any) {
+        console.warn("Failed to delete recipients during background sync:", err.message);
+      }
       for (const rec of state.notificationRecipients) {
         const prev = oldDb && oldDb.notificationRecipients && oldDb.notificationRecipients.find(x => x.id === rec.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(rec)) continue;
 
-        await prisma.notificationRecipient.upsert({
-          where: { id: rec.id },
-          update: {
-            notificationId: rec.notificationId,
-            donorId: rec.donorId,
-            pushStatus: rec.pushStatus as any,
-            emailStatus: rec.emailStatus as any,
-          },
-          create: {
-            id: rec.id,
-            notificationId: rec.notificationId,
-            donorId: rec.donorId,
-            pushStatus: rec.pushStatus as any,
-            emailStatus: rec.emailStatus as any,
-            sentAt: rec.sentAt ? new Date(rec.sentAt) : new Date(),
-          }
-        });
+        try {
+          await prisma.notificationRecipient.upsert({
+            where: { id: rec.id },
+            update: {
+              notificationId: rec.notificationId,
+              donorId: rec.donorId,
+              pushStatus: rec.pushStatus as any,
+              emailStatus: rec.emailStatus as any,
+            },
+            create: {
+              id: rec.id,
+              notificationId: rec.notificationId,
+              donorId: rec.donorId,
+              pushStatus: rec.pushStatus as any,
+              emailStatus: rec.emailStatus as any,
+              sentAt: rec.sentAt ? new Date(rec.sentAt) : new Date(),
+            }
+          });
+        } catch (e: any) {
+          console.error(`Failed to upsert recipient ${rec.id}:`, e.message);
+        }
       }
 
       // 9. Sync Appointments
       if (state.donationAppointments) {
+        try {
+          const appointmentIds = state.donationAppointments.map(a => a.id);
+          await prisma.donationAppointment.deleteMany({
+            where: { id: { notIn: appointmentIds } }
+          });
+        } catch (err: any) {
+          console.warn("Failed to delete appointments during background sync:", err.message);
+        }
         for (const appt of state.donationAppointments) {
           const prev = oldDb && oldDb.donationAppointments && oldDb.donationAppointments.find(x => x.id === appt.id );
           if (prev && JSON.stringify(prev) === JSON.stringify(appt)) continue;
 
-          await prisma.donationAppointment.upsert({
-            where: { id: appt.id },
-            update: {
-              donorId: appt.donorId,
-              centerId: appt.centerId,
-              appointmentDate: new Date(appt.appointmentDate),
-              appointmentTime: appt.appointmentTime,
-              donationType: appt.donationType as any,
-              status: appt.status as any,
-            },
-            create: {
-              id: appt.id,
-              donorId: appt.donorId,
-              centerId: appt.centerId,
-              appointmentDate: new Date(appt.appointmentDate),
-              appointmentTime: appt.appointmentTime,
-              donationType: appt.donationType as any,
-              status: appt.status as any,
-              createdAt: appt.createdAt ? new Date(appt.createdAt) : new Date(),
-            }
-          });
+          try {
+            await prisma.donationAppointment.upsert({
+              where: { id: appt.id },
+              update: {
+                donorId: appt.donorId,
+                centerId: appt.centerId,
+                appointmentDate: new Date(appt.appointmentDate),
+                appointmentTime: appt.appointmentTime,
+                donationType: appt.donationType as any,
+                status: appt.status as any,
+              },
+              create: {
+                id: appt.id,
+                donorId: appt.donorId,
+                centerId: appt.centerId,
+                appointmentDate: new Date(appt.appointmentDate),
+                appointmentTime: appt.appointmentTime,
+                donationType: appt.donationType as any,
+                status: appt.status as any,
+                createdAt: appt.createdAt ? new Date(appt.createdAt) : new Date(),
+              }
+            });
+          } catch (e: any) {
+            console.error(`Failed to upsert appointment ${appt.id}:`, e.message);
+          }
         }
       }
 
@@ -1811,7 +1920,6 @@ export function saveDb(state: DatabaseState): Promise<void> {
 
   // Always write locally as secondary fallback / dual sync
   saveState(state);
-  return Promise.resolve();
 }
 
 export function ensureMedicalNotesForNotReadyDonors(state: DatabaseState): boolean {
