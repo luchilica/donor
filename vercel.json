@@ -1,9 +1,13 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build" },
+    { "src": "server.ts", "use": "@vercel/node" }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://donor-production.up.railway.app/api/$1"
+      "destination": "/server.ts"
     },
     {
       "source": "/(.*)",

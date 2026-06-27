@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
-import { Resend } from 'resend';
+
 import * as OneSignal from 'onesignal-node';
 import { getDb, saveDb } from './server/db.js';
 import { calculateNextDates, isDonorReady } from './src/utils/intervals.js';
@@ -24,15 +24,7 @@ import {
 import { dispatchNotifications, sendTransactionalEmail } from './server/notifications.js';
 
 // Lazy initialized clients
-let resendClient: Resend | null = null;
 let oneSignalClient: OneSignal.Client | null = null;
-
-function getResend(): Resend | null {
-    if (!resendClient && process.env.RESEND_API_KEY) {
-        resendClient = new Resend(process.env.RESEND_API_KEY);
-    }
-    return resendClient;
-}
 
 function getOneSignal(): OneSignal.Client | null {
     if (!oneSignalClient && process.env.ONESIGNAL_REST_API_KEY && process.env.VITE_ONESIGNAL_APP_ID) {
