@@ -33,20 +33,140 @@ function getOneSignal(): OneSignal.Client | null {
     return oneSignalClient;
 }
 
+// Legacy seed hash that does NOT actually verify against bcrypt. Accounts created
+// before real hashing carry it; we transparently upgrade them on first login.
+const LEGACY_SEED_HASH = "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC";
+
 // Password verify helper
 function verifyPassword(password: string, hash: string): boolean {
-  if (hash === "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC" && password === "password123") {
-    return true;
-  }
+  if (!hash) return false;
   if (hash.startsWith('$2')) {
     return bcrypt.compareSync(password, hash);
   }
+  // Backwards-compat for any non-bcrypt legacy values still in the store
   const sha = crypto.createHash('sha256').update(password).digest('hex');
   return hash === sha || hash === password;
 }
 
 function hashPassword(password: string): string {
   return bcrypt.hashSync(password, 12);
+}
+
+// ---------------------------------------------------------------------------
+// Sessions: signed, tamper-proof tokens (HMAC-SHA256) — no external JWT dep.
+// Token format: base64url(payloadJSON).base64url(HMAC). The server only trusts a
+// token whose signature it can reproduce, so client-side ids can't be forged.
+// ---------------------------------------------------------------------------
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+const SESSION_SECRET: string = (() => {
+  const s = process.env.SESSION_SECRET || process.env.JWT_SECRET;
+  if (s && s.length >= 16) return s;
+  // Dev fallback: ephemeral secret (tokens invalidate on restart). Warn loudly.
+  console.warn('[Donor-Alert] SESSION_SECRET is not set (or too short). Using an ephemeral secret — set SESSION_SECRET in production so sessions survive restarts.');
+  return crypto.randomBytes(48).toString('hex');
+})();
+
+interface SessionPayload {
+  uid: number;
+  role: 'donor' | 'center' | 'admin';
+  centerId?: number | null;
+  exp: number;
+}
+
+function base64url(buf: Buffer | string): string {
+  return Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function signSession(payload: SessionPayload): string {
+  const body = base64url(JSON.stringify(payload));
+  const sig = base64url(crypto.createHmac('sha256', SESSION_SECRET).update(body).digest());
+  return `${body}.${sig}`;
+}
+
+function createSession(user: { id: number; role: 'donor' | 'center' | 'admin'; centerId?: number | null }): string {
+  return signSession({ uid: user.id, role: user.role, centerId: user.centerId ?? null, exp: Date.now() + SESSION_TTL_MS });
+}
+
+// Returns the verified session payload, or null if the token is missing/forged/expired.
+function verifySession(token?: string): SessionPayload | null {
+  if (!token) return null;
+  const raw = token.startsWith('Bearer ') ? token.slice(7) : token;
+  const dot = raw.indexOf('.');
+  if (dot === -1) return null;
+  const body = raw.slice(0, dot);
+  const sig = raw.slice(dot + 1);
+  const expected = base64url(crypto.createHmac('sha256', SESSION_SECRET).update(body).digest());
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(body.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')) as SessionPayload;
+    if (!payload || typeof payload.uid !== 'number' || !payload.exp || payload.exp < Date.now()) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// Requires any authenticated session. Returns it, or writes 401 and returns null.
+function requireAuth(req: express.Request, res: express.Response): SessionPayload | null {
+  const session = verifySession(req.headers.authorization);
+  if (!session) {
+    res.status(401).json({ error: 'Требуется авторизация' });
+    return null;
+  }
+  return session;
+}
+
+// Guard for admin-only routes.
+function requireAdmin(req: express.Request, res: express.Response): SessionPayload | null {
+  const session = requireAuth(req, res);
+  if (!session) return null;
+  if (session.role !== 'admin') {
+    res.status(403).json({ error: 'Доступ прерван' });
+    return null;
+  }
+  return session;
+}
+
+// Guard for center-staff routes acting on a specific center. Admins may act on any
+// center. Returns the session, or writes 401/403 and returns null.
+function requireCenter(req: express.Request, res: express.Response, centerId: number): SessionPayload | null {
+  const session = requireAuth(req, res);
+  if (!session) return null;
+  if (session.role === 'admin') return session;
+  if (session.role !== 'center' || !centerId || session.centerId !== centerId) {
+    res.status(403).json({ error: 'Нет доступа' });
+    return null;
+  }
+  return session;
+}
+
+// Guard for donor routes. Resolves the donor owned by the session user and, when a
+// donorId is supplied, verifies it matches. Admins are allowed through for support.
+async function requireDonor(req: express.Request, res: express.Response, donorId?: number): Promise<{ session: SessionPayload; donor: Donor | null } | null> {
+  const session = requireAuth(req, res);
+  if (!session) return null;
+  const db = await getDb();
+  if (session.role === 'admin') {
+    const donor = donorId != null ? db.donors.find(d => d.id === donorId) || null : null;
+    return { session, donor };
+  }
+  if (session.role !== 'donor') {
+    res.status(403).json({ error: 'Нет доступа' });
+    return null;
+  }
+  const donor = db.donors.find(d => d.userId === session.uid) || null;
+  if (!donor) {
+    res.status(404).json({ error: 'Профиль донора не найден' });
+    return null;
+  }
+  if (donorId != null && donor.id !== donorId) {
+    res.status(403).json({ error: 'Нет доступа' });
+    return null;
+  }
+  return { session, donor };
 }
 
 // Recalculates stats for a single donor based on their donations
@@ -97,10 +217,22 @@ async function recalculateDonorStats(donorId: number) {
 }
 
 const app = express();
+
+// CORS: if ALLOWED_ORIGINS is configured (comma-separated), only those origins may
+// send credentialed requests. Otherwise fall back to reflecting the origin — needed
+// because the production browser talks to same-origin /api (the Vercel proxy then
+// calls this server server-to-server, so locking it down further adds no protection).
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow all origins to support requests from Vercel dynamically with credentials
-    callback(null, true);
+    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Origin not allowed by CORS'));
   },
   credentials: true
 }));
@@ -150,7 +282,12 @@ app.get('/api/download/contraindications', (req, res) => {
       return res.status(401).json({ error: 'Пользователя с такой почтой не существует' });
     }
 
-    if (!verifyPassword(password, user.passwordHash || '')) {
+    // Legacy seed accounts carry a placeholder hash that can't be verified by bcrypt.
+    // Transparently upgrade such an account to a real hash on a correct login.
+    if (user.passwordHash === LEGACY_SEED_HASH && password === 'password123') {
+      user.passwordHash = hashPassword(password);
+      await saveDb(db);
+    } else if (!verifyPassword(password, user.passwordHash || '')) {
       return res.status(401).json({ error: 'Неверный пароль' });
     }
 
@@ -165,7 +302,7 @@ app.get('/api/download/contraindications', (req, res) => {
     }
 
     res.json({
-      token: `mock-session-token-${user.id}-${Date.now()}`,
+      token: createSession(user),
       user: {
         id: user.id,
         email: user.email,
@@ -338,18 +475,10 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // ADMIN ALL DATA
   app.get('/api/admin/all-data', async (req, res) => {
-    const token = req.headers.authorization;
-    if (!token) return res.status(401).json({ error: 'Требуется авторизация' });
-
-    const userIdStr = token.split('-')[3]; 
-    const userId = parseInt(userIdStr);
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
 
     const db = await getDb();
-    const user = db.users.find(u => u.id === userId);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ прерван' });
-    }
-
     res.json({
       users: db.users,
       centers: db.centers,
@@ -365,18 +494,10 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // ADMIN UPDATE ENTITY
   app.post('/api/admin/update-entity', async (req, res) => {
-    const token = req.headers.authorization;
-    if (!token) return res.status(401).json({ error: 'Требуется авторизация' });
-
-    const userIdStr = token.split('-')[3]; 
-    const userId = parseInt(userIdStr);
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
 
     const db = await getDb();
-    const user = db.users.find(u => u.id === userId);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ прерван' });
-    }
-
     const { entityName, entity } = req.body;
     if (!entityName || !entity) {
       return res.status(400).json({ error: 'Неверные параметры запроса' });
@@ -443,18 +564,10 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // ADMIN DELETE ENTITY
   app.post('/api/admin/delete-entity', async (req, res) => {
-    const token = req.headers.authorization;
-    if (!token) return res.status(401).json({ error: 'Требуется авторизация' });
-
-    const userIdStr = token.split('-')[3]; 
-    const userId = parseInt(userIdStr);
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
 
     const db = await getDb();
-    const user = db.users.find(u => u.id === userId);
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Доступ прерван' });
-    }
-
     const { entityName, id } = req.body;
     if (!entityName || id === undefined) {
       return res.status(400).json({ error: 'Неверные параметры запроса' });
@@ -467,8 +580,48 @@ app.get('/api/download/contraindications', (req, res) => {
 
     const targetId = parseInt(id);
     const idx = collection.findIndex((item: any) => item.id === targetId);
+    const removedItem = idx !== -1 ? collection[idx] : null;
     if (idx !== -1) {
       collection.splice(idx, 1);
+    }
+
+    // Cascade-remove dependent records so the JSON state stays referentially
+    // consistent. Without this, deleting a donor/center/user leaves orphan rows
+    // that later trigger PostgreSQL foreign-key errors during background sync.
+    const removeDonorCascade = (donorId: number) => {
+      db.donorCenters = db.donorCenters.filter(dc => dc.donorId !== donorId);
+      db.donations = db.donations.filter(d => d.donorId !== donorId);
+      db.medicalNotes = db.medicalNotes.filter(m => m.donorId !== donorId);
+      db.notificationRecipients = db.notificationRecipients.filter(r => r.donorId !== donorId);
+      if (db.donationAppointments) {
+        db.donationAppointments = db.donationAppointments.filter(a => a.donorId !== donorId);
+      }
+    };
+
+    if (entityName === 'donors' && removedItem) {
+      removeDonorCascade(targetId);
+      // Also remove the linked user account
+      if (removedItem.userId) {
+        db.users = db.users.filter(u => u.id !== removedItem.userId);
+      }
+    } else if (entityName === 'users' && removedItem) {
+      // Removing a user should remove its donor profile (and that donor's deps)
+      const orphanDonor = db.donors.find(d => d.userId === targetId);
+      if (orphanDonor) {
+        removeDonorCascade(orphanDonor.id);
+        db.donors = db.donors.filter(d => d.id !== orphanDonor.id);
+      }
+    } else if (entityName === 'centers') {
+      db.donorCenters = db.donorCenters.filter(dc => dc.centerId !== targetId);
+      db.donations = db.donations.filter(d => d.centerId !== targetId);
+      db.medicalNotes = db.medicalNotes.filter(m => m.centerId !== targetId);
+      db.news = db.news.filter(n => n.centerId !== targetId);
+      db.notifications = db.notifications.filter(n => n.centerId !== targetId);
+      if (db.donationAppointments) {
+        db.donationAppointments = db.donationAppointments.filter(a => a.centerId !== targetId);
+      }
+      // Detach center-staff users from the removed center
+      db.users.forEach(u => { if (u.centerId === targetId) u.centerId = null; });
     }
 
     await saveDb(db);
@@ -483,20 +636,10 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // UPDATE CENTER NEEDS
   app.patch('/api/centers/:id/needs', async (req, res) => {
-    const token = req.headers.authorization;
-    if (!token) return res.status(401).json({ error: 'Требуется авторизация' });
-
-    const userIdStr = token.split('-')[3]; 
-    const userId = parseInt(userIdStr);
+    const centerId = parseInt(req.params.id);
+    if (!requireCenter(req, res, centerId)) return;
 
     const db = await getDb();
-    const user = db.users.find(u => u.id === userId);
-    const centerId = parseInt(req.params.id);
-
-    if (!user || user.role !== 'center' || user.centerId !== centerId) {
-      return res.status(403).json({ error: 'Нет доступа' });
-    }
-
     const index = db.centers.findIndex(c => c.id === centerId);
     if (index === -1) {
       return res.status(404).json({ error: 'Центр не найден' });
@@ -570,6 +713,7 @@ app.get('/api/download/contraindications', (req, res) => {
     if (!title || !content || !centerId) {
       return res.status(400).json({ error: 'Заголовок и текст обязательны' });
     }
+    if (!requireCenter(req, res, parseInt(centerId))) return;
 
     const db = await getDb();
     const newId = db.news.length > 0 ? Math.max(...db.news.map(n => n.id)) + 1 : 1;
@@ -595,6 +739,7 @@ app.get('/api/download/contraindications', (req, res) => {
     const db = await getDb();
     const newsIdx = db.news.findIndex(n => n.id === id);
     if (newsIdx === -1) return res.status(404).json({ error: 'Новость не найдена' });
+    if (!requireCenter(req, res, db.news[newsIdx].centerId)) return;
 
     db.news[newsIdx].title = title || db.news[newsIdx].title;
     db.news[newsIdx].content = content || db.news[newsIdx].content;
@@ -613,6 +758,7 @@ app.get('/api/download/contraindications', (req, res) => {
     const db = await getDb();
     const index = db.news.findIndex(n => n.id === id);
     if (index === -1) return res.status(404).json({ error: 'Новость не найдена' });
+    if (!requireCenter(req, res, db.news[index].centerId)) return;
     db.news.splice(index, 1);
     await saveDb(db);
     res.json({ success: true });
@@ -620,12 +766,9 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // GET DONOR PROFILE INFO
   app.get('/api/donor/profile', async (req, res) => {
-    // Basic session decoding from Header token
-    const token = req.headers.authorization;
-    if (!token) return res.status(401).json({ error: 'Требуется авторизация' });
-
-    const userIdStr = token.split('-')[3]; // Extract user ID mock from e.g. mock-session-token-1-12312
-    const userId = parseInt(userIdStr);
+    const session = requireAuth(req, res);
+    if (!session) return;
+    const userId = session.uid;
 
     const db = await getDb();
     const donor = db.donors.find(d => d.userId === userId);
@@ -662,6 +805,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.put('/api/donor/profile', async (req, res) => {
     const { donorId, lastName, firstName, middleName, weight, phone, birthDate, gender, bloodGroup, rhFactor, email } = req.body;
     if (!donorId) return res.status(400).json({ error: 'Не указан ID донора' });
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
 
     const db = await getDb();
     const donor = db.donors.find(d => d.id === parseInt(donorId));
@@ -710,6 +854,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.post('/api/donor/link-center', async (req, res) => {
     const { donorId, centerId } = req.body;
     if (!donorId || !centerId) return res.status(400).json({ error: 'ID донора и центра обязательны' });
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
 
     const db = await getDb();
     const existing = db.donorCenters.find(dc => dc.donorId === parseInt(donorId) && dc.centerId === parseInt(centerId));
@@ -747,6 +892,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.post('/api/donor/set-primary-center', async (req, res) => {
     const { donorId, centerId } = req.body;
     if (!donorId || !centerId) return res.status(400).json({ error: 'ID донора и центра обязательны' });
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
 
     const db = await getDb();
     const parseDonorId = parseInt(donorId);
@@ -770,6 +916,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.post('/api/donor/resubmit/:centerId', async (req, res) => {
     const centerId = parseInt(req.params.centerId);
     const { donorId } = req.body;
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
 
     const db = await getDb();
     const link = db.donorCenters.find(l => l.donorId === parseInt(donorId) && l.centerId === centerId);
@@ -789,6 +936,7 @@ app.get('/api/download/contraindications', (req, res) => {
   // UPDATE DONOR PAUSE
   app.put('/api/donor/pause', async (req, res) => {
     const { donorId, personalPause, personalPauseUntil, personalPauseNote } = req.body;
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
     const db = await getDb();
     const donor = db.donors.find(d => d.id === parseInt(donorId));
     if (!donor) return res.status(404).json({ error: 'Профиль не найден' });
@@ -852,6 +1000,7 @@ app.get('/api/download/contraindications', (req, res) => {
   // UPDATE NOTIFICATION ENABLED CHANNELS
   app.put('/api/donor/notifications', async (req, res) => {
     const { donorId, pushEnabled, emailNotificationsEnabled, onesignalPlayerId } = req.body;
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
     const db = await getDb();
     const donor = db.donors.find(d => d.id === parseInt(donorId));
     if (!donor) return res.status(404).json({ error: 'Профиль не найден' });
@@ -868,9 +1017,10 @@ app.get('/api/download/contraindications', (req, res) => {
   app.get('/api/donor/notifications/:donorId', async (req, res) => {
     const donorId = parseInt(req.params.donorId);
     if (!donorId) return res.status(400).json({ error: 'Не указан ID донора' });
+    if (!(await requireDonor(req, res, donorId))) return;
 
     const db = await getDb();
-    
+
     // Find all recipient entries for this donor
     const recs = db.notificationRecipients.filter(r => r.donorId === donorId);
     
@@ -896,6 +1046,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.post('/api/donor/notifications/read-all', async (req, res) => {
     const { donorId } = req.body;
     if (!donorId) return res.status(400).json({ error: 'Не указан ID донора' });
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
 
     const db = await getDb();
     let changed = false;
@@ -915,6 +1066,7 @@ app.get('/api/download/contraindications', (req, res) => {
   // CENTER DASHBOARD DATA
   app.get('/api/center/stats/:centerId', async (req, res) => {
     const centerId = parseInt(req.params.centerId);
+    if (!requireCenter(req, res, centerId)) return;
     const db = await getDb();
 
     // confirmed donors connected with this center
@@ -1080,6 +1232,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.get('/api/center/donors', async (req, res) => {
     const centerId = parseInt(req.query.centerId as string);
     if (!centerId) return res.status(400).json({ error: 'Не указан ID центра' });
+    if (!requireCenter(req, res, centerId)) return;
 
     const db = await getDb();
     const ties = db.donorCenters.filter(dc => dc.centerId === centerId && dc.status === 'confirmed');
@@ -1143,6 +1296,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.get('/api/center/donors/:id', async (req, res) => {
     const id = parseInt(req.params.id);
     const centerId = parseInt(req.query.centerId as string);
+    if (!requireCenter(req, res, centerId)) return;
 
     const db = await getDb();
     const donor = db.donors.find(d => d.id === id);
@@ -1186,6 +1340,7 @@ app.get('/api/download/contraindications', (req, res) => {
     if (!lastName || !firstName || !birthDate || !gender || !bloodGroup || !rhFactor || !weight || !phone || !email || !password || !centerId) {
       return res.status(400).json({ error: 'Все обязательные поля должны быть заполнены' });
     }
+    if (!requireCenter(req, res, parseInt(centerId))) return;
 
     const cleanEmail = email.toLowerCase().trim();
     const db = await getDb();
@@ -1256,9 +1411,19 @@ app.get('/api/download/contraindications', (req, res) => {
     const id = parseInt(req.params.id);
     const { lastName, firstName, middleName, weight, phone, email, birthDate, gender, bloodGroup, rhFactor, status } = req.body;
 
+    const session = requireAuth(req, res);
+    if (!session) return;
+
     const db = await getDb();
     const donor = db.donors.find(d => d.id === id);
     if (!donor) return res.status(404).json({ error: 'Донор не найден' });
+
+    // A center may only edit donors linked to it; admins may edit anyone.
+    if (session.role !== 'admin') {
+      const linked = session.role === 'center' &&
+        db.donorCenters.some(dc => dc.donorId === id && dc.centerId === session.centerId);
+      if (!linked) return res.status(403).json({ error: 'Нет доступа' });
+    }
 
     donor.lastName = lastName || donor.lastName;
     donor.firstName = firstName || donor.firstName;
@@ -1294,6 +1459,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.post('/api/center/donors/:id/donations', async (req, res) => {
     const donorId = parseInt(req.params.id);
     const { centerId, donationDate, donationType, volumeMl, note, addedBy, isPaid } = req.body;
+    if (!requireCenter(req, res, parseInt(centerId))) return;
 
     if (!donationDate || !donationType) {
       return res.status(400).json({ error: 'Дата и тип донации обязательны' });
@@ -1334,6 +1500,7 @@ app.get('/api/download/contraindications', (req, res) => {
     const db = await getDb();
     const donationIdx = db.donations.findIndex(d => d.id === id);
     if (donationIdx === -1) return res.status(404).json({ error: 'Донация не найдена' });
+    if (!requireCenter(req, res, db.donations[donationIdx].centerId)) return;
 
     const donorId = db.donations[donationIdx].donorId;
     db.donations.splice(donationIdx, 1);
@@ -1347,6 +1514,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.post('/api/center/donors/:id/medical-notes', async (req, res) => {
     const donorId = parseInt(req.params.id);
     const { centerId, reason, startDate, endDate, createdBy } = req.body;
+    if (!requireCenter(req, res, parseInt(centerId))) return;
 
     if (!reason || !startDate) {
       return res.status(400).json({ error: 'Причина медотвода и дата начала обязательны' });
@@ -1378,6 +1546,7 @@ app.get('/api/download/contraindications', (req, res) => {
     const db = await getDb();
     const note = db.medicalNotes.find(m => m.id === id);
     if (!note) return res.status(404).json({ error: 'Медотвод не найден' });
+    if (!requireCenter(req, res, note.centerId)) return;
 
     note.isActive = false;
     note.liftedAt = new Date().toISOString();
@@ -1392,6 +1561,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.get('/api/center/pending', async (req, res) => {
     const centerId = parseInt(req.query.centerId as string);
     if (!centerId) return res.status(400).json({ error: 'Не указан ID центра' });
+    if (!requireCenter(req, res, centerId)) return;
 
     const db = await getDb();
     const pendingTies = db.donorCenters.filter(dc => dc.centerId === centerId && dc.status === 'pending');
@@ -1420,6 +1590,7 @@ app.get('/api/download/contraindications', (req, res) => {
     const db = await getDb();
     const link = db.donorCenters.find(dc => dc.id === linkId);
     if (!link) return res.status(404).json({ error: 'Заявка не найдена' });
+    if (!requireCenter(req, res, link.centerId)) return;
 
     link.status = status as DonorCenterStatus;
     if (status === 'confirmed') {
@@ -1525,6 +1696,7 @@ app.get('/api/download/contraindications', (req, res) => {
 
   // PREVIEW COUNT OF TARGET RECIPIENTS
   app.post('/api/center/notify/preview', async (req, res) => {
+    if (!requireCenter(req, res, parseInt(req.body?.centerId))) return;
     const db = await getDb();
     const list = getRecipientsForFilter(db, req.body);
     res.json({ count: list.donors.length });
@@ -1548,6 +1720,7 @@ app.get('/api/download/contraindications', (req, res) => {
     if (!messageText || !centerId) {
       return res.status(400).json({ error: 'Текст уведомления обязателен' });
     }
+    if (!requireCenter(req, res, parseInt(centerId))) return;
 
     const db = await getDb();
 
@@ -1636,6 +1809,12 @@ app.get('/api/download/contraindications', (req, res) => {
 
   app.get('/api/appointments', async (req, res) => {
     const { donorId, centerId } = req.query;
+    if (centerId) {
+      if (!requireCenter(req, res, parseInt(centerId as string))) return;
+    } else {
+      const guard = await requireDonor(req, res, donorId ? parseInt(donorId as string) : undefined);
+      if (!guard) return;
+    }
     const db = await getDb();
     let result = db.donationAppointments || [];
     if (donorId) result = result.filter(a => a.donorId === parseInt(donorId as string));
@@ -1655,9 +1834,10 @@ app.get('/api/download/contraindications', (req, res) => {
   });
 
   app.post('/api/appointments', async (req, res) => {
-    const db = await getDb();
     const { donorId, centerId, appointmentDate, appointmentTime, donationType } = req.body;
-    
+    if (!(await requireDonor(req, res, parseInt(donorId)))) return;
+    const db = await getDb();
+
     const donor = db.donors.find(d => d.id === parseInt(donorId));
     if (!donor) return res.status(404).json({ error: 'Донор не найден' });
 
@@ -1702,21 +1882,30 @@ app.get('/api/download/contraindications', (req, res) => {
     if (!db.donationAppointments) db.donationAppointments = [];
     const appt = db.donationAppointments.find(a => a.id === id);
     if (!appt) return res.status(404).json({ error: 'Not found' });
-    
+    if (!requireCenter(req, res, appt.centerId)) return;
+
     appt.status = status;
-    
-    // If completed, optionally create a donation record (simplification)
+
+    // If completed, create a donation record — but only once. Guard against
+    // duplicates so repeated PUTs (or double-clicks) don't inflate donor stats.
     if (status === 'completed') {
-        const donationId = db.donations.length > 0 ? Math.max(...db.donations.map(d => d.id)) + 1 : 1;
-        db.donations.push({
-            id: donationId,
-            donorId: appt.donorId,
-            centerId: appt.centerId,
-            donationDate: appt.appointmentDate,
-            donationType: appt.donationType,
-            createdAt: new Date().toISOString()
-        });
-        await recalculateDonorStats(appt.donorId);
+        const donationExists = db.donations.some(d =>
+            d.donorId === appt.donorId &&
+            d.centerId === appt.centerId &&
+            d.donationDate === appt.appointmentDate
+        );
+        if (!donationExists) {
+            const donationId = db.donations.length > 0 ? Math.max(...db.donations.map(d => d.id)) + 1 : 1;
+            db.donations.push({
+                id: donationId,
+                donorId: appt.donorId,
+                centerId: appt.centerId,
+                donationDate: appt.appointmentDate,
+                donationType: appt.donationType,
+                createdAt: new Date().toISOString()
+            });
+            await recalculateDonorStats(appt.donorId);
+        }
     }
     
     await saveDb(db);
@@ -1727,6 +1916,7 @@ app.get('/api/download/contraindications', (req, res) => {
   app.get('/api/center/notifications', async (req, res) => {
     const centerId = parseInt(req.query.centerId as string);
     if (!centerId) return res.status(400).json({ error: 'Не указан ID центра' });
+    if (!requireCenter(req, res, centerId)) return;
 
     const db = await getDb();
     const lists = db.notifications.filter(n => n.centerId === centerId).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

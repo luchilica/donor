@@ -553,7 +553,7 @@ const INITIAL_USERS: User[] = [
   {
     id: 1,
     email: "donor@test.by",
-    passwordHash: "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC", // bcrypt for "password123"
+    passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // bcrypt for "password123"
     role: "donor",
     isActive: true,
     createdAt: new Date().toISOString()
@@ -561,7 +561,7 @@ const INITIAL_USERS: User[] = [
   {
     id: 2,
     email: "center@test.by",
-    passwordHash: "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC", // "password123"
+    passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // "password123"
     role: "center",
     centerId: 1, // ГУ «РНПЦ трансфузиологии и медицинских биотехнологий» (Минск)
     isActive: true,
@@ -570,7 +570,7 @@ const INITIAL_USERS: User[] = [
   {
     id: 99,
     email: "admin@test.by",
-    passwordHash: "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC", // "password123"
+    passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // "password123"
     role: "admin",
     isActive: true,
     createdAt: new Date().toISOString()
@@ -711,7 +711,7 @@ for (let i = 0; i < 19; i++) {
   seededState.users.push({
     id: userId,
     email,
-    passwordHash: "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC", // password123
+    passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // password123
     role: "donor",
     isActive: true,
     createdAt: new Date().toISOString()
@@ -1073,7 +1073,8 @@ async function seedPostgresWithSeededState() {
     { name: 'medical_notes', seq: 'medical_notes' },
     { name: 'news', seq: 'news' },
     { name: 'notifications', seq: 'notifications' },
-    { name: 'notification_recipients', seq: 'notification_recipients' }
+    { name: 'notification_recipients', seq: 'notification_recipients' },
+    { name: 'donation_appointments', seq: 'donation_appointments' }
   ];
 
   for (const table of tables) {
@@ -1115,7 +1116,7 @@ export async function getDb(): Promise<DatabaseState> {
       state.users.push({
         id: 99,
         email: "admin@test.by",
-        passwordHash: "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC", // password123
+        passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // password123
         role: "admin",
         isActive: true,
         createdAt: new Date().toISOString()
@@ -1483,16 +1484,35 @@ export async function saveDb(state: DatabaseState): Promise<void> {
     // Run sync in the background so API routes don't block
     Promise.resolve().then(async () => {
       try {
-        // 0. Sync Centers table
-        try {
-          const centerIds = state.centers.map(c => c.id);
-          await prisma.bloodCenter.deleteMany({
-            where: { id: { notIn: centerIds } }
-          });
-        } catch (err: any) {
-          console.warn("Failed to delete centers during background sync:", err.message);
+        // === SAFE DELETION PASS (child → parent order) ===
+        // All removals run FIRST, ordered so dependent rows are deleted before
+        // the rows they reference. This prevents PostgreSQL foreign-key
+        // constraint violations that otherwise occur when a donor/center/etc.
+        // is removed while its children still reference it (the old code deleted
+        // parents before children and silently swallowed the FK error, so the
+        // record "reappeared" on the next read).
+        const deletions: Array<{ label: string; run: () => Promise<unknown> }> = [
+          { label: 'notificationRecipients', run: () => prisma.notificationRecipient.deleteMany({ where: { id: { notIn: state.notificationRecipients.map(r => r.id) } } }) },
+          { label: 'donationAppointments', run: () => prisma.donationAppointment.deleteMany({ where: { id: { notIn: (state.donationAppointments || []).map(a => a.id) } } }) },
+          { label: 'donations', run: () => prisma.donation.deleteMany({ where: { id: { notIn: state.donations.map(d => d.id) } } }) },
+          { label: 'medicalNotes', run: () => prisma.medicalNote.deleteMany({ where: { id: { notIn: state.medicalNotes.map(n => n.id) } } }) },
+          { label: 'news', run: () => prisma.news.deleteMany({ where: { id: { notIn: state.news.map(n => n.id) } } }) },
+          { label: 'notifications', run: () => prisma.notification.deleteMany({ where: { id: { notIn: state.notifications.map(n => n.id) } } }) },
+          { label: 'donorCenters', run: () => prisma.donorCenter.deleteMany({ where: { id: { notIn: state.donorCenters.map(dc => dc.id) } } }) },
+          { label: 'donors', run: () => prisma.donor.deleteMany({ where: { id: { notIn: state.donors.map(d => d.id) } } }) },
+          { label: 'users', run: () => prisma.user.deleteMany({ where: { id: { notIn: state.users.map(u => u.id) } } }) },
+          { label: 'centers', run: () => prisma.bloodCenter.deleteMany({ where: { id: { notIn: state.centers.map(c => c.id) } } }) },
+        ];
+        for (const del of deletions) {
+          try {
+            await del.run();
+          } catch (err: any) {
+            console.warn(`Failed to delete ${del.label} during background sync:`, err.message);
+          }
         }
 
+        // === UPSERT PASS (parent → child order) ===
+        // 0. Sync Centers table
         await Promise.all(state.centers.map(async center => {
           const prev = oldDb && oldDb.centers && oldDb.centers.find((x: any) => x.id === center.id);
           if (prev && JSON.stringify(prev) === JSON.stringify(center)) return;
@@ -1521,15 +1541,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
         }));
 
       // 1. Sync User table
-      try {
-        const userIds = state.users.map(u => u.id);
-        await prisma.user.deleteMany({
-          where: { id: { notIn: userIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete users during background sync:", err.message);
-      }
-
       await Promise.all(state.users.map(async user => {
         const prev = oldDb && oldDb.users && oldDb.users.find(x => x.id === user.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(user)) return;
@@ -1563,14 +1574,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
       }));
 
       // 2. Sync Donor table
-      try {
-        const donorIds = state.donors.map(d => d.id);
-        await prisma.donor.deleteMany({
-          where: { id: { notIn: donorIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete donors during background sync:", err.message);
-      }
       for (const donor of state.donors) {
         const prev = oldDb && oldDb.donors && oldDb.donors.find(x => x.id === donor.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(donor)) continue;
@@ -1647,14 +1650,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
       }
 
       // 3. Sync DonorCenter connections
-      try {
-        const donorCenterIds = state.donorCenters.map(dc => dc.id);
-        await prisma.donorCenter.deleteMany({
-          where: { id: { notIn: donorCenterIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete donorCenters during background sync:", err.message);
-      }
       for (const dc of state.donorCenters) {
         const prev = oldDb && oldDb.donorCenters && oldDb.donorCenters.find(x => x.id === dc.id || (x.donorId === dc.donorId && x.centerId === dc.centerId));
         if (prev && JSON.stringify(prev) === JSON.stringify(dc)) continue;
@@ -1690,15 +1685,7 @@ export async function saveDb(state: DatabaseState): Promise<void> {
         }
       }
 
-      // 4. Create and Delete Donations
-      try {
-        const donationIds = state.donations.map(d => d.id);
-        await prisma.donation.deleteMany({
-          where: { id: { notIn: donationIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete donations during background sync:", err.message);
-      }
+      // 4. Sync Donations
       for (const don of state.donations) {
         const prev = oldDb && oldDb.donations && oldDb.donations.find(x => x.id === don.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(don)) continue;
@@ -1734,15 +1721,7 @@ export async function saveDb(state: DatabaseState): Promise<void> {
         }
       }
 
-      // 5. Create and Delete Medical Notes
-      try {
-        const noteIds = state.medicalNotes.map(n => n.id);
-        await prisma.medicalNote.deleteMany({
-          where: { id: { notIn: noteIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete medicalNotes during background sync:", err.message);
-      }
+      // 5. Sync Medical Notes
       for (const note of state.medicalNotes) {
         const prev = oldDb && oldDb.medicalNotes && oldDb.medicalNotes.find(x => x.id === note.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(note)) continue;
@@ -1782,15 +1761,7 @@ export async function saveDb(state: DatabaseState): Promise<void> {
         }
       }
 
-      // 6. Sync News and Delete if removed
-      try {
-        const newsIds = state.news.map(n => n.id);
-        await prisma.news.deleteMany({
-          where: { id: { notIn: newsIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete news during background sync:", err.message);
-      }
+      // 6. Sync News
       for (const post of state.news) {
         try {
           await prisma.news.upsert({
@@ -1820,14 +1791,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
       }
 
       // 7. Sync Notifications
-      try {
-        const notificationIds = state.notifications.map(n => n.id);
-        await prisma.notification.deleteMany({
-          where: { id: { notIn: notificationIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete notifications during background sync:", err.message);
-      }
       for (const n of state.notifications) {
         try {
           await prisma.notification.upsert({
@@ -1873,14 +1836,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
       }
 
       // 8. Sync Recipients
-      try {
-        const recipientIds = state.notificationRecipients.map(r => r.id);
-        await prisma.notificationRecipient.deleteMany({
-          where: { id: { notIn: recipientIds } }
-        });
-      } catch (err: any) {
-        console.warn("Failed to delete recipients during background sync:", err.message);
-      }
       for (const rec of state.notificationRecipients) {
         const prev = oldDb && oldDb.notificationRecipients && oldDb.notificationRecipients.find(x => x.id === rec.id );
         if (prev && JSON.stringify(prev) === JSON.stringify(rec)) continue;
@@ -1910,14 +1865,6 @@ export async function saveDb(state: DatabaseState): Promise<void> {
 
       // 9. Sync Appointments
       if (state.donationAppointments) {
-        try {
-          const appointmentIds = state.donationAppointments.map(a => a.id);
-          await prisma.donationAppointment.deleteMany({
-            where: { id: { notIn: appointmentIds } }
-          });
-        } catch (err: any) {
-          console.warn("Failed to delete appointments during background sync:", err.message);
-        }
         for (const appt of state.donationAppointments) {
           const prev = oldDb && oldDb.donationAppointments && oldDb.donationAppointments.find(x => x.id === appt.id );
           if (prev && JSON.stringify(prev) === JSON.stringify(appt)) continue;

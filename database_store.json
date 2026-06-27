@@ -9,6 +9,16 @@
       "workingHours": "Пн-Пт: 08:00 - 16:00, Сб: 08:30 - 13:00",
       "mapLink": "https://yandex.by/maps/-/CPdxaM7D",
       "eRegistrationLink": "https://form.blood.by",
+      "bloodNeeds": {
+        "I_neg": 100,
+        "I_pos": 50,
+        "II_neg": 6,
+        "II_pos": 49,
+        "IV_neg": 100,
+        "IV_pos": 100,
+        "III_neg": 100,
+        "III_pos": 100
+      },
       "createdAt": "2026-06-10T06:49:59.171Z"
     },
     {
@@ -467,7 +477,7 @@
     {
       "id": 1,
       "email": "donor@test.by",
-      "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
+      "passwordHash": "$2b$12$JyNA5pN9sKctRp9B5HMcKeoOcTs1bXgFngPJOQk/mC2errSdnCXJS",
       "role": "donor",
       "centerId": null,
       "isActive": true,
@@ -477,7 +487,7 @@
     {
       "id": 2,
       "email": "center@test.by",
-      "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
+      "passwordHash": "$2b$12$hmzGNIczgvDNLDrA95D07.8yc8Uym9n.Qew5nfvlcWMlevAIQwKc.",
       "role": "center",
       "centerId": 1,
       "isActive": true,
@@ -759,7 +769,7 @@
     {
       "id": 99,
       "email": "admin@test.by",
-      "passwordHash": "$2a$12$6/p.R99zLIDa7Z0Xn3V1WOkZ.R4JWhh5K2.S61.27m/zN0SgBqbyC",
+      "passwordHash": "$2b$12$4D3VYE9jPGXBLyCnKpJH1uowkz17CGu/68tw0xZvCYe8EnzivuuGe",
       "role": "admin",
       "centerId": null,
       "isActive": true,
@@ -782,23 +792,23 @@
       "weight": 77,
       "phone": "+375 (29) 111-22-33",
       "status": "active",
-      "pushEnabled": true,
+      "pushEnabled": false,
       "emailNotificationsEnabled": true,
       "onesignalPlayerId": "onesignal-player-donor-1",
       "personalPause": false,
       "personalPauseUntil": null,
       "personalPauseNote": null,
-      "donationsCount": 12,
-      "bloodDonationsCount": 12,
+      "donationsCount": 13,
+      "bloodDonationsCount": 13,
       "plasmaDonationsCount": 0,
       "plateletsDonationsCount": 0,
-      "bloodFreeCount": 6,
+      "bloodFreeCount": 7,
       "bloodPaidCount": 6,
       "compFreeCount": 0,
       "compPaidCount": 0,
-      "lastDonationDate": "2026-06-12",
+      "lastDonationDate": "2026-06-25",
       "lastDonationType": "blood",
-      "nextAvailableDate": "2026-07-12",
+      "nextAvailableDate": "2026-07-25",
       "createdAt": "2026-06-10T06:49:59.171Z"
     },
     {
@@ -1666,12 +1676,12 @@
       "donorId": 1,
       "centerId": 1,
       "isPrimary": true,
-      "status": "confirmed",
+      "status": "pending",
       "rejectionReason": null,
-      "resubmissionCount": 1,
-      "resubmittedAt": "2026-06-16T15:29:02.858Z",
-      "confirmedAt": "2026-06-16T15:38:41.605Z",
-      "confirmedById": 2,
+      "resubmissionCount": 2,
+      "resubmittedAt": "2026-06-27T19:07:02.966Z",
+      "confirmedAt": null,
+      "confirmedById": null,
       "createdAt": "2026-02-20T10:00:00.000Z"
     },
     {
@@ -1679,8 +1689,8 @@
       "donorId": 2,
       "centerId": 1,
       "isPrimary": true,
-      "status": "pending",
-      "rejectionReason": null,
+      "status": "rejected",
+      "rejectionReason": "к",
       "resubmissionCount": 0,
       "resubmittedAt": null,
       "confirmedAt": null,
@@ -1692,11 +1702,11 @@
       "donorId": 3,
       "centerId": 1,
       "isPrimary": true,
-      "status": "pending",
+      "status": "confirmed",
       "rejectionReason": null,
       "resubmissionCount": 0,
       "resubmittedAt": null,
-      "confirmedAt": null,
+      "confirmedAt": "2026-06-27T17:20:58.365Z",
       "confirmedById": 2,
       "createdAt": "2026-06-10T06:49:59.171Z"
     },
@@ -1705,8 +1715,8 @@
       "donorId": 4,
       "centerId": 1,
       "isPrimary": true,
-      "status": "pending",
-      "rejectionReason": null,
+      "status": "rejected",
+      "rejectionReason": "й",
       "resubmissionCount": 0,
       "resubmittedAt": null,
       "confirmedAt": null,
@@ -2019,8 +2029,8 @@
       "isPrimary": false,
       "status": "pending",
       "rejectionReason": null,
-      "resubmissionCount": 1,
-      "resubmittedAt": "2026-06-16T15:29:02.858Z",
+      "resubmissionCount": 2,
+      "resubmittedAt": "2026-06-27T19:07:02.966Z",
       "confirmedAt": null,
       "confirmedById": null,
       "createdAt": "2026-06-16T05:15:47.789Z"
@@ -3298,6 +3308,18 @@
       "note": "Сгенерированная донация для синхронизации истории",
       "addedBy": 2,
       "createdAt": "2026-06-14T17:44:36.911Z"
+    },
+    {
+      "id": 129,
+      "donorId": 1,
+      "centerId": 1,
+      "donationDate": "2026-06-25",
+      "donationType": "blood",
+      "isPaid": false,
+      "volumeMl": null,
+      "note": null,
+      "addedBy": null,
+      "createdAt": "2026-06-24T09:52:32.913Z"
     }
   ],
   "medicalNotes": [
@@ -3356,6 +3378,90 @@
       "liftedBy": 2,
       "liftNote": "Снят досрочно лечащим врачом-трансфузиологом РНПЦ",
       "createdAt": "2026-06-22T11:14:43.521Z"
+    },
+    {
+      "id": 5,
+      "donorId": 17,
+      "centerId": 1,
+      "createdBy": 2,
+      "reason": "ооо",
+      "startDate": "2026-06-24",
+      "endDate": "2026-06-25",
+      "isActive": false,
+      "liftedAt": "2026-06-24T10:34:56.834Z",
+      "liftedBy": 2,
+      "liftNote": "Снят досрочно лечащим врачом-трансфузиологом РНПЦ",
+      "createdAt": "2026-06-24T10:22:51.843Z"
+    },
+    {
+      "id": 6,
+      "donorId": 17,
+      "centerId": 1,
+      "createdBy": 2,
+      "reason": "тест",
+      "startDate": "2026-06-24",
+      "endDate": null,
+      "isActive": false,
+      "liftedAt": "2026-06-24T10:36:19.470Z",
+      "liftedBy": 2,
+      "liftNote": "Снят досрочно лечащим врачом-трансфузиологом РНПЦ",
+      "createdAt": "2026-06-24T10:35:10.225Z"
+    },
+    {
+      "id": 10,
+      "donorId": 24,
+      "centerId": 1,
+      "createdBy": 1,
+      "reason": "Временный медотвод: Личная пауза донора (Хочу домой, пожалуйста пустите)",
+      "startDate": "2026-06-24",
+      "endDate": "2026-06-25",
+      "isActive": false,
+      "liftedAt": "2026-06-24T11:14:40.720Z",
+      "liftedBy": 1,
+      "liftNote": "Личная пауза отключена донором",
+      "createdAt": "2026-06-24T10:57:51.147Z"
+    },
+    {
+      "id": 11,
+      "donorId": 1,
+      "centerId": 1,
+      "createdBy": 1,
+      "reason": "Временный медотвод: Период восстановления после донации",
+      "startDate": "2026-06-12",
+      "endDate": "2026-07-12",
+      "isActive": true,
+      "liftedAt": null,
+      "liftedBy": null,
+      "liftNote": null,
+      "createdAt": "2026-06-27T17:10:34.764Z"
+    },
+    {
+      "id": 12,
+      "donorId": 7,
+      "centerId": 1,
+      "createdBy": 1,
+      "reason": "Временный медотвод: Вес меньше 55 кг",
+      "startDate": "2026-06-27",
+      "endDate": "2026-12-24",
+      "isActive": true,
+      "liftedAt": null,
+      "liftedBy": null,
+      "liftNote": null,
+      "createdAt": "2026-06-27T17:10:34.764Z"
+    },
+    {
+      "id": 13,
+      "donorId": 8,
+      "centerId": 1,
+      "createdBy": 1,
+      "reason": "Временный медотвод: Личная пауза донора (Отпуск у моря)",
+      "startDate": "2026-06-27",
+      "endDate": "2026-08-30",
+      "isActive": true,
+      "liftedAt": null,
+      "liftedBy": null,
+      "liftNote": null,
+      "createdAt": "2026-06-27T17:10:34.764Z"
     }
   ],
   "news": [
@@ -3478,6 +3584,42 @@
       "emailSent": 1,
       "status": "sent",
       "createdAt": "2026-06-24T08:08:33.310Z"
+    },
+    {
+      "id": 6,
+      "centerId": 1,
+      "sentBy": 1,
+      "bloodGroups": [],
+      "rhFactor": "both",
+      "donationType": "any",
+      "minDaysSinceDonation": 0,
+      "excludeMedical": false,
+      "excludePause": false,
+      "channel": "all",
+      "messageText": "Напоминание о записи на завтра (2026-06-25) в 09:00 в ГУ «РНПЦ трансфузиологии и медицинских биотехнологий» (Минск). Ждем вас!",
+      "recipientsCount": 1,
+      "pushSent": 1,
+      "emailSent": 1,
+      "status": "sent",
+      "createdAt": "2026-06-24T08:09:04.280Z"
+    },
+    {
+      "id": 7,
+      "centerId": 1,
+      "sentBy": 1,
+      "bloodGroups": [],
+      "rhFactor": "both",
+      "donationType": "any",
+      "minDaysSinceDonation": 0,
+      "excludeMedical": false,
+      "excludePause": false,
+      "channel": "all",
+      "messageText": "Напоминание о записи на завтра (2026-06-28) в 09:00 в ГУ «РНПЦ трансфузиологии и медицинских биотехнологий» (Минск). Ждем вас!",
+      "recipientsCount": 1,
+      "pushSent": 1,
+      "emailSent": 1,
+      "status": "sent",
+      "createdAt": "2026-06-27T19:09:37.513Z"
     }
   ],
   "notificationRecipients": [
@@ -3609,24 +3751,33 @@
     },
     {
       "id": 15,
-      "notificationId": 5,
+      "notificationId": 6,
       "donorId": 1,
       "pushStatus": "sent",
       "emailStatus": "sent",
-      "sentAt": "2026-06-24T08:08:33.310Z",
+      "sentAt": "2026-06-24T08:09:04.440Z",
+      "isRead": false
+    },
+    {
+      "id": 16,
+      "notificationId": 7,
+      "donorId": 3,
+      "pushStatus": "sent",
+      "emailStatus": "sent",
+      "sentAt": "2026-06-27T19:09:37.513Z",
       "isRead": false
     }
   ],
   "donationAppointments": [
     {
       "id": 1,
-      "donorId": 1,
+      "donorId": 3,
       "centerId": 1,
-      "appointmentDate": "2026-06-25",
+      "appointmentDate": "2026-06-28",
       "appointmentTime": "09:00",
       "donationType": "blood",
       "status": "confirmed",
-      "createdAt": "2026-06-24T08:08:33.307Z"
+      "createdAt": "2026-06-27T19:09:37.511Z"
     }
   ]
 }

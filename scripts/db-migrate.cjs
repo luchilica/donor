@@ -49,7 +49,11 @@ try {
     envOverrides.DIRECT_URL = escapedDirectUrl;
   }
   
-  execSync('npx prisma db push --accept-data-loss', { 
+  // --accept-data-loss can silently DROP columns/tables. Only allow it when the
+  // operator explicitly opts in via ALLOW_DB_DATA_LOSS=true; otherwise let Prisma
+  // refuse destructive changes (the catch below keeps the build from failing).
+  const allowDataLoss = process.env.ALLOW_DB_DATA_LOSS === 'true';
+  execSync('npx prisma db push' + (allowDataLoss ? ' --accept-data-loss' : ''), {
     stdio: 'inherit',
     env: envOverrides
   });
