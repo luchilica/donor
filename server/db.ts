@@ -18,13 +18,15 @@ if (dbUrl) {
   }
 }
 
-export const prisma = new PrismaClient({
-  datasources: {
+const prismaOptions: any = {};
+if (dbUrl) {
+  prismaOptions.datasources = {
     db: {
       url: dbUrl
     }
-  }
-});
+  };
+}
+export const prisma = new PrismaClient(prismaOptions);
 
 // Hardcoded path relative to app root
 const STORE_PATH = path.join(process.cwd(), 'database_store.json');
