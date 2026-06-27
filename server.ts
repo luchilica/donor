@@ -97,8 +97,23 @@ async function recalculateDonorStats(donorId: number) {
 }
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow all origins to support requests from Vercel dynamically with credentials
+    callback(null, true);
+  },
+  credentials: true
+}));
 app.use(express.json());
+
+// Health check endpoints for container orchestration (e.g. Railway, Cloud Run)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
 // Предотвращаем кэширование API запросов (решает проблему с устаревшими данными при кэшировании Vercel)
 app.use('/api', (req, res, next) => {

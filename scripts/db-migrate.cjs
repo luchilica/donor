@@ -14,7 +14,15 @@ function escapeDatabaseUrl(url) {
   if (firstColonIndex === -1) return url;
   const user = credentials.substring(0, firstColonIndex);
   const password = credentials.substring(firstColonIndex + 1);
-  const escapedPassword = encodeURIComponent(decodeURIComponent(password));
+  
+  let decodedPassword = password;
+  try {
+    decodedPassword = decodeURIComponent(password);
+  } catch (e) {
+    // Keep original if decoding fails
+  }
+  
+  const escapedPassword = encodeURIComponent(decodedPassword);
   return proto + user + ':' + escapedPassword + '@' + hostAndDb;
 }
 
