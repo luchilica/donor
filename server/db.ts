@@ -33,6 +33,11 @@ function escapeDatabaseUrl(url: string): string {
 let dbUrl = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
 
 if (dbUrl) {
+  // Warn if direct Supabase URL on 5432 is detected
+  if (dbUrl.includes('.supabase.co:5432') || (dbUrl.includes('.supabase.co') && !dbUrl.includes(':6543'))) {
+    console.warn("\n⚠️ [Donor-Alert DB Warning] WARNING: You are connecting to a direct Supabase host (port 5432). Newer Supabase databases are IPv6-only, which Railway does not support by default. THIS WILL CAUSE REQUESTS TO HANG OR TIMEOUT! Please configure DATABASE_URL in Railway to use the Supabase Pooler (port 6543) with '?pgbouncer=true' (e.g., aws-0-[region].pooler.supabase.com:6543).\n");
+  }
+
   // Auto-correct IPv6-only direct Supabase host to IPv4 pooler host (fixes Railway connection issues)
   if (dbUrl.includes('db.jahumhpchldaagzldkuw.supabase.co:5432')) {
     dbUrl = dbUrl.replace('db.jahumhpchldaagzldkuw.supabase.co:5432', 'aws-1-eu-central-1.pooler.supabase.com:6543');
@@ -41,6 +46,14 @@ if (dbUrl) {
   dbUrl = escapeDatabaseUrl(dbUrl);
   if (dbUrl.includes(':6543') && !dbUrl.includes('pgbouncer=true')) {
     dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'pgbouncer=true';
+  }
+
+  // Add connect_timeout and pool_timeout to ensure Prisma fails fast rather than hanging indefinitely
+  if (!dbUrl.includes('connect_timeout=')) {
+    dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'connect_timeout=3';
+  }
+  if (!dbUrl.includes('pool_timeout=')) {
+    dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'pool_timeout=3';
   }
 }
 
