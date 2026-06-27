@@ -1047,13 +1047,20 @@ async function seedPostgresWithSeededState() {
 }
 
 function checkPostgresActive(): boolean {
-  if (!dbUrl) return false;
+  if (!dbUrl) {
+    console.warn("⚠️ DATABASE_URL is not set! Falling back to ephemeral JSON memory. Data will NOT persist across Vercel requests!");
+    return false;
+  }
   try {
     const url = new URL(dbUrl);
-    if (!['postgres:', 'postgresql:'].includes(url.protocol)) return false;
+    if (!['postgres:', 'postgresql:'].includes(url.protocol)) {
+       console.warn("⚠️ DATABASE_URL is not a postgres URL. Falling back to ephemeral JSON memory.");
+       return false;
+    }
     if (url.port && isNaN(Number(url.port))) return false;
     return true;
-  } catch {
+  } catch (e) {
+    console.warn("⚠️ Error parsing DATABASE_URL. Falling back to ephemeral JSON memory.", e);
     return false;
   }
 }

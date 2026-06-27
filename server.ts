@@ -106,6 +106,14 @@ async function recalculateDonorStats(donorId: number) {
 const app = express();
 app.use(express.json());
 
+// Предотвращаем кэширование API запросов (решает проблему с устаревшими данными при кэшировании Vercel)
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 // --- API ---
 
 // SERVE PDF
