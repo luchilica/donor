@@ -1077,15 +1077,12 @@ export async function getDb(): Promise<DatabaseState> {
     return state;
   };
 
-  if (cachedDb) {
-    return ensureAdmin(JSON.parse(JSON.stringify(cachedDb)));
-  }
-
   const isPostgresActive = checkPostgresActive();
 
   if (isPostgresActive) {
     try {
       // Auto-seeds the database if empty
+
       const centerCount = await prisma.bloodCenter.count();
       if (centerCount === 0) {
         console.log('PostgreSQL database is empty. Auto-seeding from memory template...');
