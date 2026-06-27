@@ -1431,7 +1431,7 @@ export async function getDb(): Promise<DatabaseState> {
   }
 }
 
-export async function saveDb(state: DatabaseState): Promise<void> {
+export function saveDb(state: DatabaseState): Promise<void> {
   // Update memory cache instantly so all subsequent reads are lightning fast!
   const oldDb = cachedDb;
   cachedDb = JSON.parse(JSON.stringify(state));
@@ -1439,9 +1439,11 @@ export async function saveDb(state: DatabaseState): Promise<void> {
   const isPostgresActive = checkPostgresActive();
 
   if (isPostgresActive) {
-    try {
-      // 0. Sync Centers table
-      await Promise.all(state.centers.map(async center => {
+    // Run sync in the background so API routes don't block
+    Promise.resolve().then(async () => {
+      try {
+        // 0. Sync Centers table
+        await Promise.all(state.centers.map(async center => {
         const prev = oldDb && oldDb.centers && oldDb.centers.find((x: any) => x.id === center.id);
         if (prev && JSON.stringify(prev) === JSON.stringify(center)) return;
         return prisma.bloodCenter.upsert({
@@ -1798,14 +1800,16 @@ export async function saveDb(state: DatabaseState): Promise<void> {
         }
       }
 
-      console.log('PostgreSQL state fully synchronized.');
-    } catch (e) {
-      console.error('Failed to sync state to PostgreSQL database:', e);
-    }
+      console.log('PostgreSQL state fully synchronized in background.');
+      } catch (e) {
+        console.error('Failed to sync state to PostgreSQL database:', e);
+      }
+    });
   }
 
   // Always write locally as secondary fallback / dual sync
   saveState(state);
+  return Promise.resolve();
 }
 
 export function ensureMedicalNotesForNotReadyDonors(state: DatabaseState): boolean {

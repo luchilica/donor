@@ -1771,9 +1771,9 @@ app.get('/api/download/contraindications', (req, res) => {
       }
     });
 
-    const PORT = 3000;
+    const PORT = Number(process.env.PORT) || 3000;
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`[Donor-Alert] Express back-end running at http://localhost:${PORT}`);
+      console.log(`[Donor-Alert] Express back-end running at http://0.0.0.0:${PORT}`);
     });
   }
 
