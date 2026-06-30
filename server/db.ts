@@ -1118,6 +1118,21 @@ let cachedDb: DatabaseState | null = null;
 let cacheTimestamp = 0;
 const CACHE_TTL_MS = 15_000;
 
+// Donor records carry their own email, but historically it was only ever set on
+// the linked User. The Postgres loader derives donor.email inline; mirror that on
+// the JSON file/seed fallback paths so the donor card, center views and the
+// transactional emails (confirmed/rejected/appointment) all have an address.
+// Idempotent — only fills when missing, so it never clobbers a real value.
+function hydrateDonorEmails(state: DatabaseState | null): void {
+  if (!state || !state.donors || !state.users) return;
+  for (const d of state.donors) {
+    if (!d.email) {
+      const u = state.users.find(usr => usr.id === d.userId);
+      if (u?.email) d.email = u.email;
+    }
+  }
+}
+
 // Load state of store
 export async function getDb(): Promise<DatabaseState> {
   // Fast path: serve the warm in-memory snapshot if it's still fresh.
@@ -1442,6 +1457,7 @@ export async function getDb(): Promise<DatabaseState> {
       cacheTimestamp = Date.now();
       cachedDb = JSON.parse(data);
       if (!cachedDb.donationAppointments) cachedDb.donationAppointments = [];
+      hydrateDonorEmails(cachedDb);
 
       if (cachedDb && cachedDb.centers) {
         cachedDb.centers.forEach((c: any) => {
@@ -1485,12 +1501,14 @@ export async function getDb(): Promise<DatabaseState> {
       saveState(seededState);
       cacheTimestamp = Date.now();
       cachedDb = seededState;
+      hydrateDonorEmails(cachedDb);
       return ensureAdmin(seededState);
     }
   } else {
     saveState(seededState);
     cacheTimestamp = Date.now();
     cachedDb = seededState;
+    hydrateDonorEmails(cachedDb);
     return ensureAdmin(seededState);
   }
 }
