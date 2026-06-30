@@ -504,14 +504,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       setRegConfirmPassword('');
                       setShowAuthModal('register');
                     }}
-                    className="w-full md:w-auto justify-center bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
+                    className="w-full md:w-auto justify-center bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
                   >
                     <Heart className="w-5 h-5 mr-2" />
                     {t("Стать донором")}
                   </button>
                   <button 
                     onClick={() => setShowAuthModal('login')}
-                    className="w-full md:w-auto justify-center bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
+                    className="w-full md:w-auto justify-center bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
                   >
                     <User className="w-5 h-5 mr-2" />
                     {t("Личный кабинет")}
@@ -520,7 +520,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
               ) : (
                 <button 
                   onClick={() => window.dispatchEvent(new Event('goToDashboard'))}
-                  className="w-full md:w-auto justify-center bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-500 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
+                  className="w-full md:w-auto justify-center bg-white text-red-700 hover:bg-rose-50 font-medium px-6 py-4 md:py-3 rounded-xl transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg flex items-center min-h-[48px]"
                 >
                   <User className="w-5 h-5 mr-2" />
                   {t("Перейти в личный кабинет")}
@@ -628,34 +628,34 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
           {/* Main info cards */}
           <div className="w-full space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
               <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center">
                 <Heart className="w-5 h-5 text-red-500 mr-2" />
                 {t("Как это работает?")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">1</div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">{t("Регистрация в базе")}</h3>
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-300 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">1</div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-300 ease-out group-hover:text-red-700">{t("Регистрация в базе")}</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">{t("Вы вносите свои медицинские и контактные данные, выбирая удобный центр переливания.")}</p>
                 </div>
                 <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">2</div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">{t("Мониторинг дефицита")}</h3>
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-300 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">2</div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-300 ease-out group-hover:text-red-700">{t("Мониторинг дефицита")}</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">{t("При острой нехватке конкретной группы крови центр отправляет мгновенный сигнал.")}</p>
                 </div>
                 <div className="space-y-2 group cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-500 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">3</div>
-                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-500 ease-out group-hover:text-red-700">{t("Спасение жизни")}</h3>
+                  <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center font-bold transition-all duration-300 ease-out group-hover:bg-red-600 group-hover:text-white group-hover:scale-110 group-hover:shadow-md">3</div>
+                  <h3 className="font-medium text-slate-800 text-sm transition-colors duration-300 ease-out group-hover:text-red-700">{t("Спасение жизни")}</h3>
                   <p className="text-xs text-slate-500 leading-relaxed">{t("Система отправляет вам Push, SMS или Email. Вы знаете, что нужны именно сейчас, и совершаете донацию!")}</p>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100 group">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100 group">
                 <div>
-                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-500 ease-out group-hover:scale-110">
+                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-300 ease-out group-hover:scale-110">
                     <Activity className="w-6 h-6" />
                   </span>
                   <h3 className="font-semibold text-slate-800 text-base mb-2">{t("Подготовка к донации")}</h3>
@@ -663,14 +663,14 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     {t("Узнайте о противопоказаниях, необходимых интервалах и правилах подготовки, чтобы ваша донация прошла успешно.")}
                   </p>
                 </div>
-                <button onClick={() => { setActiveTab('info'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center transition-transform duration-500 ease-out group-hover:translate-x-1">
+                <button onClick={() => { setActiveTab('info'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center transition-transform duration-300 ease-out group-hover:translate-x-1">
                   {t("Узнать подробнее")} <ChevronRight className="w-4 h-4 ml-1" />
                 </button>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100 group">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100 group">
                 <div>
-                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-500 ease-out group-hover:scale-110">
+                  <span className="p-3 bg-red-50 text-red-600 rounded-xl inline-block mb-4 transition-transform duration-300 ease-out group-hover:scale-110">
                     <FileText className="w-6 h-6" />
                   </span>
                   <h3 className="font-semibold text-slate-800 text-base mb-2">{t("Необходимые документы")}</h3>
@@ -678,7 +678,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     {t("Список документов для первичной и повторной донации крови и её компонентов.")}
                   </p>
                 </div>
-                <button onClick={() => { setActiveTab('docs'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center transition-transform duration-500 ease-out group-hover:translate-x-1">
+                <button onClick={() => { setActiveTab('docs'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-sm font-medium text-red-600 hover:text-red-700 flex items-center transition-transform duration-300 ease-out group-hover:translate-x-1">
                   {t("Список документов")} <ChevronRight className="w-4 h-4 ml-1" />
                 </button>
               </div>
@@ -686,7 +686,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
 
             {/* Blood Shortages Global Widget (Redesigned Minimalistic Staircase) */}
             {Object.keys(averageNeeds).length > 0 && (
-              <div id="blood-shortages-ladder" className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
+              <div id="blood-shortages-ladder" className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 ease-out hover:shadow-md hover:-translate-y-1 hover:border-red-100">
                 <h2 className="text-xl font-semibold text-slate-800 mb-2 flex items-center">
                   <Droplet className="w-5 h-5 text-red-500 mr-2" />
                   {t("Донорский светофор")}
@@ -794,7 +794,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
             )}
 
             {/* FAQ Section */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-500 ease-out hover:shadow-md hover:border-red-100">
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all duration-300 ease-out hover:shadow-md hover:border-red-100">
               <h2 className="text-xl font-semibold text-slate-800 mb-6 flex items-center">
                 <HelpCircle className="w-5 h-5 text-red-500 mr-2" />
                 {t("Частые вопросы")}
