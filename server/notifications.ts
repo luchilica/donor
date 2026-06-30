@@ -19,7 +19,11 @@ function getTransporter(): nodemailer.Transporter | null {
             auth: {
                 user: process.env.SMTP_EMAIL,
                 pass: process.env.SMTP_PASSWORD
-            }
+            },
+            // Fail fast on a bad/slow SMTP config instead of hanging the request.
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 15000
         });
     }
     return transporter;
@@ -32,10 +36,11 @@ function getOneSignal(): OneSignal.Client | null {
     return oneSignalClient;
 }
 
-export async function sendPushNotification(playerIds: string[], messageText: string) {
+export async function sendPushNotification(playerIds: string[], messageText: string, heading?: string) {
     const client = getOneSignal();
     if (!client || playerIds.length === 0) return;
 
+    const title = heading || 'Донор-Алерт: требуется кровь';
     try {
         const notification = {
             contents: {
@@ -43,8 +48,8 @@ export async function sendPushNotification(playerIds: string[], messageText: str
                 'ru': messageText,
             },
             headings: {
-                'en': 'Донор-Алерт: требуется кровь',
-                'ru': 'Донор-Алерт: требуется кровь',
+                'en': title,
+                'ru': title,
             },
             include_player_ids: playerIds,
         };

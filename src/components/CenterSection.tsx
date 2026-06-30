@@ -920,6 +920,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           alert("Ошибка при сохранении дефицитов");
         } finally {
           setNeedsSaving(false);
+          closeConfirm();
         }
       }
     });

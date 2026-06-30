@@ -21,7 +21,7 @@ import {
   Donation
 } from './src/types.js';
 
-import { dispatchNotifications, sendTransactionalEmail } from './server/notifications.js';
+import { dispatchNotifications, sendTransactionalEmail, sendPushNotification } from './server/notifications.js';
 
 // Lazy initialized clients
 let oneSignalClient: OneSignal.Client | null = null;
@@ -421,11 +421,9 @@ app.get('/api/download/contraindications', (req, res) => {
 
     await saveDb(db);
 
-    try {
-      await sendTransactionalEmail(email, 'welcome');
-    } catch (err) {
-      console.error('Failed to send welcome email:', err);
-    }
+    // Fire-and-forget: never block the registration response on the SMTP handshake,
+    // otherwise a slow/misconfigured mail server makes the client spin forever.
+    sendTransactionalEmail(email, 'welcome').catch(err => console.error('Failed to send welcome email:', err));
 
     res.json({ success: true, message: 'Регистрация прошла успешно. Ожидайте подтверждения центра крови!' });
   });
@@ -445,11 +443,8 @@ app.get('/api/download/contraindications', (req, res) => {
     user.resetCode = resetCode;
     await saveDb(db);
     
-    try {
-      await sendTransactionalEmail(email, 'reset', { code: resetCode, email });
-    } catch (err) {
-      console.error('Failed to send reset email:', err);
-    }
+    // Fire-and-forget so the response is instant even if SMTP is slow.
+    sendTransactionalEmail(email, 'reset', { code: resetCode, email }).catch(err => console.error('Failed to send reset email:', err));
 
     res.json({ success: true, message: `Код для восстановления пароля отправлен на ваш e-mail.` });
   });
@@ -1136,7 +1131,8 @@ app.get('/api/download/contraindications', (req, res) => {
     const currentMonth = new Date().getMonth();
     const notificationsThisMonth = db.notifications.filter(n => {
       const sentDate = new Date(n.createdAt);
-      return n.centerId === centerId && sentDate.getMonth() === currentMonth;
+      // sentBy === 1 are system messages (confirmations/reminders), not center broadcasts.
+      return n.centerId === centerId && n.sentBy !== 1 && sentDate.getMonth() === currentMonth;
     }).length;
 
     // Calculate response metrics
@@ -1430,11 +1426,8 @@ app.get('/api/download/contraindications', (req, res) => {
 
     await saveDb(db);
 
-    try {
-      await sendTransactionalEmail(email, 'center_added', { email, password });
-    } catch (err) {
-      console.error('Failed to send center_added email:', err);
-    }
+    // Fire-and-forget so the response is instant even if SMTP is slow.
+    sendTransactionalEmail(email, 'center_added', { email, password }).catch(err => console.error('Failed to send center_added email:', err));
 
     res.json({ success: true, donor });
   });
@@ -1611,6 +1604,49 @@ app.get('/api/download/contraindications', (req, res) => {
     res.json(result);
   });
 
+  // Create a single in-app notification addressed to ONE donor (lifecycle events:
+  // link confirmation/rejection, appointment reminders). Mirrors the broadcast model
+  // so it appears in the donor's bell with an unread badge until they open the list.
+  // sentBy = 1 marks it "system" so it is excluded from a center's broadcast stats.
+  // Caller owns the saveDb().
+  function createDonorNotification(
+    db: Awaited<ReturnType<typeof getDb>>,
+    donorId: number,
+    centerId: number,
+    messageText: string,
+    channel: NotificationChannel = 'all'
+  ) {
+    const notifId = db.notifications.length > 0 ? Math.max(...db.notifications.map(n => n.id)) + 1 : 1;
+    db.notifications.push({
+      id: notifId,
+      centerId,
+      sentBy: 1, // system
+      bloodGroups: [],
+      rhFactor: 'both',
+      donationType: 'any',
+      minDaysSinceDonation: 0,
+      excludeMedical: false,
+      excludePause: false,
+      channel,
+      messageText,
+      recipientsCount: 1,
+      pushSent: 0,
+      emailSent: 0,
+      status: 'sent',
+      createdAt: new Date().toISOString()
+    });
+    const recId = db.notificationRecipients.length > 0 ? Math.max(...db.notificationRecipients.map(nr => nr.id)) + 1 : 1;
+    db.notificationRecipients.push({
+      id: recId,
+      notificationId: notifId,
+      donorId,
+      pushStatus: 'sent',
+      emailStatus: 'skipped',
+      sentAt: new Date().toISOString(),
+      isRead: false
+    });
+  }
+
   // CONFIRM OR REJECT PENDING RELATION
   app.post('/api/center/pending/:id/resolve', async (req, res) => {
     const linkId = parseInt(req.params.id);
@@ -1626,28 +1662,35 @@ app.get('/api/download/contraindications', (req, res) => {
     if (!requireCenter(req, res, link.centerId)) return;
 
     link.status = status as DonorCenterStatus;
+    const center = db.centers.find(c => c.id === link.centerId);
+    const centerName = center?.name || 'центр крови';
+    const donor = db.donors.find(d => d.id === link.donorId);
+
     if (status === 'confirmed') {
       link.confirmedAt = new Date().toISOString();
       link.confirmedById = confirmedById ? parseInt(confirmedById) : 2;
       link.rejectionReason = undefined;
-      
-      const donor = db.donors.find(d => d.id === link.donorId);
-      if (donor && donor.emailNotificationsEnabled) {
-          try {
-              sendTransactionalEmail(donor.email, 'confirmed');
-          } catch(e) {}
-      }
 
+      const msg = `Ваша заявка на привязку к центру «${centerName}» подтверждена. Теперь вы можете записаться на донацию.`;
+      createDonorNotification(db, link.donorId, link.centerId, msg);
+      if (donor && donor.emailNotificationsEnabled) {
+        try { sendTransactionalEmail(donor.email, 'confirmed'); } catch (e) {}
+      }
+      if (donor && donor.pushEnabled && donor.onesignalPlayerId) {
+        sendPushNotification([donor.onesignalPlayerId], msg, 'Донор-Алерт: заявка подтверждена');
+      }
     } else {
       link.rejectionReason = rejectionReason || 'Не указана';
       link.confirmedAt = null;
       link.confirmedById = null;
-      
-      const donor = db.donors.find(d => d.id === link.donorId);
+
+      const msg = `Ваша заявка на привязку к центру «${centerName}» отклонена. Причина: ${link.rejectionReason}. Вы можете исправить данные и отправить заявку повторно.`;
+      createDonorNotification(db, link.donorId, link.centerId, msg);
       if (donor && donor.emailNotificationsEnabled) {
-          try {
-              sendTransactionalEmail(donor.email, 'rejected', { reason: link.rejectionReason });
-          } catch(e) {}
+        try { sendTransactionalEmail(donor.email, 'rejected', { reason: link.rejectionReason }); } catch (e) {}
+      }
+      if (donor && donor.pushEnabled && donor.onesignalPlayerId) {
+        sendPushNotification([donor.onesignalPlayerId], msg, 'Донор-Алерт: заявка отклонена');
       }
     }
 
