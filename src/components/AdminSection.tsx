@@ -1447,7 +1447,9 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
               )}
 
               {/* --- 6. MEDICAL HOLDS DIRECT EDIT --- */}
-              {editingEntity.type === 'holds' && (
+              {/* The Edit button sets type to 'medicalNotes' (the collection name used by the
+                  save/delete paths), so the render guard must match that, not the 'holds' tab id. */}
+              {editingEntity.type === 'medicalNotes' && (
                 <div className="space-y-3 text-xs">
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1.5">{t('Донор')}</label>

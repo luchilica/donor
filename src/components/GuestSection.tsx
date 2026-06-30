@@ -364,6 +364,12 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
         setRegError(t('Введите корректный e-mail'));
         return;
       }
+      // Gate on phone completeness too — the red hint alone never blocked submit,
+      // so a malformed number like "+37529" used to pass straight through.
+      if (regForm.phone.length < 13) {
+        setRegError(t('Номер телефона должен содержать 12 цифр'));
+        return;
+      }
       if (regForm.password.length < 6) {
         setRegError(t('Пароль должен быть длиной не менее 6 символов'));
         return;

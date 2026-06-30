@@ -475,8 +475,30 @@ app.get('/api/download/contraindications', (req, res) => {
     user.passwordHash = hashPassword(newPassword);
     user.resetCode = undefined;
     await saveDb(db);
-    
+
     res.json({ success: true, message: 'Пароль успешно изменён' });
+  });
+
+  // CHANGE PASSWORD (authenticated donor verifies current password)
+  app.post('/api/donor/change-password', async (req, res) => {
+    const auth = await requireDonor(req, res);
+    if (!auth) return;
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Укажите текущий и новый пароль' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Пароль должен быть длиной не менее 6 символов' });
+    }
+    const db = await getDb();
+    const user = db.users.find(u => u.id === auth.session.uid);
+    if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+    if (!verifyPassword(currentPassword, user.passwordHash || '')) {
+      return res.status(400).json({ error: 'Текущий пароль указан неверно' });
+    }
+    user.passwordHash = hashPassword(newPassword);
+    await saveDb(db);
+    res.json({ success: true });
   });
 
   // --- ADMIN SYSTEM CONTROLS ---

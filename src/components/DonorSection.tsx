@@ -172,17 +172,39 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
       return;
     }
 
+    if (!currentPassword) {
+      setPasswordError(t('Введите текущий пароль'));
+      return;
+    }
+
     requestConfirm({
       title: t('Обновить пароль?'),
       message: t('Вы уверены, что хотите изменить пароль вашей учетной записи?'),
       variant: 'warning',
       confirmText: t('Обновить'),
-      onConfirm: () => {
-        setPasswordSuccess(t('Пароль успешно обновлен!'));
-        setCurrentPassword('');
-        setNewPassword('');
-        setRepeatPassword('');
-        closeConfirm();
+      onConfirm: async () => {
+        setIsSaving(true);
+        try {
+          const res = await fetch(`${apiBase}/donor/change-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPassword, newPassword })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            setPasswordSuccess(t('Пароль успешно обновлен!'));
+            setCurrentPassword('');
+            setNewPassword('');
+            setRepeatPassword('');
+          } else {
+            setPasswordError(data.error ? t(data.error) : t('Не удалось обновить пароль'));
+          }
+        } catch {
+          setPasswordError(t('Не удалось обновить пароль'));
+        } finally {
+          setIsSaving(false);
+          closeConfirm();
+        }
       }
     });
   };

@@ -436,6 +436,10 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       setManualError(t('Введите корректный e-mail'));
       return;
     }
+    // Guard against double-submit: this is the one mutation not behind requestConfirm,
+    // so without disabling the button a double-click would create two donor accounts.
+    if (isSaving) return;
+    setIsSaving(true);
     try {
       const res = await fetch(`${apiBase}/center/donors`, {
         method: 'POST',
@@ -451,6 +455,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       refreshDashboard();
     } catch (err: any) {
       setManualError(err.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -618,6 +624,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           if (res.ok) {
             setShowAddMedicalModal(false);
             loadDonorCard(selectedDonorId);
+            // A медотвод flips donor readiness — refresh the dashboard counters/registry too.
+            refreshDashboard();
           }
         } catch {}
         closeConfirm();
@@ -719,6 +727,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             setShowEditDonorModal(false);
             loadDonorCard(selectedDonorId);
             loadDonors();
+            // Editing blood group / Rh / status changes the dashboard charts & totals.
+            refreshDashboard();
           } else {
             const data = await res.json();
             setEditError(data.error || t('Произошла ошибка при сохранении'));
@@ -748,6 +758,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           if (res.ok) {
             // alert('Медотвод снят!');
             loadDonorCard(selectedDonorId);
+            // Lifting a отвод restores readiness — keep the dashboard/registry in sync.
+            refreshDashboard();
           }
         } catch {}
         closeConfirm();
@@ -1156,7 +1168,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
             </div>
           </div>
-          <CenterStatsDashboard center={center} stats={stats} isLoading={false} />
+          <CenterStatsDashboard center={center} />
         </motion.div>
       )}
 
@@ -3309,136 +3321,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         </div>
       )}
 
-      {pendingDonorProfile !== null && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-2xl relative max-h-[90vh] overflow-y-auto space-y-6">
-            <button 
-              onClick={() => setPendingDonorProfile(null)} 
-              className="absolute right-6 top-6 p-1.5 text-slate-400 hover:bg-slate-105 hover:text-slate-700 rounded-full transition-all cursor-pointer"
-            >
-              ✕
-            </button>
+      {/* Candidate profile is shown inline as a master-detail within the «Кандидаты»
+          menu (see the pendingDonorProfile ternary above). A second, duplicate modal
+          overlay used to render here off the same state and stacked on top — removed. */}
 
-            {/* Header section with profile name and status badge */}
-            <div>
-              <span className="inline-block bg-rose-50 text-rose-600 text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full mb-2">{t("Анкета кандидата на подтверждение")}</span>
-              <h3 className="text-xl font-bold text-slate-900 leading-tight">
-                {pendingDonorProfile.card.donor.lastName} {pendingDonorProfile.card.donor.firstName} {pendingDonorProfile.card.donor.middleName || ''}
-              </h3>
-              <p className="text-xs text-slate-500 font-light mt-1">
-                {t('Дата регистрации: ')} {formatDateHuman(pendingDonorProfile.card.donor.createdAt)}
-              </p>
-            </div>
-
-            {/* Styled Personal Information Block */}
-            <div className="space-y-4">
-              <div className="divide-y divide-slate-100/80 text-xs text-slate-700/90 rounded-2xl p-4.5 bg-slate-50/40">
-                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
-                  <span className="text-slate-500 font-medium font-sans">{t("ФИО")}</span>
-                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {t(pendingDonorProfile.card.donor.lastName)} {t(pendingDonorProfile.card.donor.firstName)} {t(pendingDonorProfile.card.donor.middleName || '')}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
-                  <span className="text-slate-500 font-medium font-sans">{t("Дата рождения")}</span>
-                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {formatDateHuman(pendingDonorProfile.card.donor.birthDate)} ({
-                      (() => {
-                        const birthDate = new Date(pendingDonorProfile.card.donor.birthDate);
-                        const today = new Date();
-                        let age = today.getFullYear() - birthDate.getFullYear();
-                        const m = today.getMonth() - birthDate.getMonth();
-                        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-                        return age;
-                      })()
-                     } {t('лет')})
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
-                  <span className="text-slate-500 font-medium font-sans">{t("Пол")}</span>
-                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {pendingDonorProfile.card.donor.gender === 'male' ? t('Мужской') : t('Женский')}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
-                  <span className="text-slate-500 font-medium font-sans">{t("Вес")}</span>
-                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {pendingDonorProfile.card.donor.weight} {t('кг')}
-                  </span>
-                </div>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2.5 gap-2">
-                  <span className="text-slate-500 font-medium font-sans">{t("Группа и Резус-фактор")}</span>
-                  <div className="flex gap-2 text-left sm:text-right w-full sm:w-auto justify-start sm:justify-end">
-                    <span className="bg-red-50 border border-red-100 text-red-700 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
-                      {formatBloodGroup(pendingDonorProfile.card.donor.bloodGroup)}
-                    </span>
-                    <span className="font-bold px-1 py-0.5 text-xs text-slate-800">
-                      {formatRhFactor(pendingDonorProfile.card.donor.rhFactor)}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
-                  <span className="text-slate-500 font-medium font-sans">{t("Телефон")}</span>
-                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">{pendingDonorProfile.card.donor.phone}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row justify-between py-2.5 gap-2">
-                  <span className="text-slate-500 font-medium font-sans">{t("E-mail / Личный ID")}</span>
-                  <span className="font-bold text-slate-800 text-left sm:text-right w-full sm:w-auto">
-                    {pendingDonorProfile.card.donor.email || pendingDonorProfile.card.donor.onesignalPlayerId || t('Не указан')}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Exclusions or Medical limitations */}
-            {pendingDonorProfile.card.medicalNotes && pendingDonorProfile.card.medicalNotes.length > 0 && (
-              <div className="space-y-2.5 border-t border-slate-100 pt-4">
-                <span className="block text-[10px] text-red-500 uppercase tracking-wider font-bold">{t("Медицинские ограничения и медотводы")} ({pendingDonorProfile.card.medicalNotes.length})</span>
-                <div className="space-y-2">
-                  {pendingDonorProfile.card.medicalNotes.map((note: any) => (
-                    <div key={note.id} className="p-3.5 rounded-xl border border-red-150 bg-red-50/30 text-xs text-slate-700">
-                      <p className="font-semibold text-red-800">{t("Причина")}: {note.reason}</p>
-                      <p className="text-[11px] text-slate-500 mt-1">
-                        Период: с {formatDateHuman(note.startDate)} по {note.endDate ? formatDateHuman(note.endDate) : t('бессрочно')}
-                      </p>
-                      {note.isActive && (
-                        <span className="inline-block mt-1 bg-red-150 text-red-900 border border-red-200 text-[9px] font-bold px-2 py-0.5 rounded-full">{t("Действует в настоящий момент")}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Footer controls inside modal */}
-            <div className="border-t border-slate-200/80 pt-4 flex flex-col sm:flex-row justify-end gap-2.5">
-              <button 
-                onClick={() => {
-                  handleConfirmPending(pendingDonorProfile.linkId);
-                  setPendingDonorProfile(null);
-                }}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm cursor-pointer transition-colors"
-              >
-                <Check className="w-4 h-4" />{t("Одобрить анкету")}</button>
-              <button 
-                onClick={() => {
-                  setRejectionModalLinkId(pendingDonorProfile.linkId);
-                  setRejectionReason('');
-                  setPendingDonorProfile(null);
-                }}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold px-4.5 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-              >
-                <X className="w-4 h-4" />{t("Отклонить")}</button>
-              <button 
-                onClick={() => setPendingDonorProfile(null)}
-                className="border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-4.5 py-2.5 rounded-xl cursor-pointer transition-colors"
-              >{t("Закрыть")}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={confirmConfig.isOpen}
         title={confirmConfig.title}
         message={confirmConfig.message}
