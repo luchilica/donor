@@ -1,14 +1,45 @@
 import * as nodemailer from 'nodemailer';
 import * as OneSignal from 'onesignal-node';
+import { Resend } from 'resend';
 import { Donor } from '../src/types.js';
 
 let transporter: nodemailer.Transporter | null = null;
 let oneSignalClient: OneSignal.Client | null = null;
+let resendClient: Resend | null = null;
 
-// Single delivery path over SMTP (nodemailer).
+// Resend sends over HTTPS (port 443), so it works on hosts (like Railway) that block
+// outbound SMTP. Used as the primary channel when RESEND_API_KEY is set; SMTP is fallback.
+function getResend(): Resend | null {
+    if (!resendClient && process.env.RESEND_API_KEY) {
+        resendClient = new Resend(process.env.RESEND_API_KEY);
+    }
+    return resendClient;
+}
+// Must be a Resend-verified domain, or the shared test sender "onboarding@resend.dev"
+// (which only delivers to your own Resend account email until you verify a domain).
+const RESEND_FROM = process.env.RESEND_FROM || 'Донор-Алерт <onboarding@resend.dev>';
+const RESEND_FROM_ADDR = RESEND_FROM.match(/<(.+)>/)?.[1] || RESEND_FROM;
+
+// Unified delivery: Resend (HTTP) when configured, else nodemailer SMTP.
 async function deliverEmail(opts: { to?: string; bcc?: string[]; subject: string; html: string }): Promise<{ ok: boolean; id?: string; error?: string; provider: string }> {
+    const resend = getResend();
+    if (resend) {
+        try {
+            const { data, error } = await resend.emails.send({
+                from: RESEND_FROM,
+                to: opts.to ? [opts.to] : [RESEND_FROM_ADDR],
+                bcc: opts.bcc && opts.bcc.length ? opts.bcc : undefined,
+                subject: opts.subject,
+                html: opts.html,
+            });
+            if (error) return { ok: false, error: (error as any).message || String(error), provider: 'resend' };
+            return { ok: true, id: (data as any)?.id, provider: 'resend' };
+        } catch (e: any) {
+            return { ok: false, error: e?.message || String(e), provider: 'resend' };
+        }
+    }
     const t = getTransporter();
-    if (!t) return { ok: false, error: 'SMTP не настроен: отсутствуют SMTP_EMAIL и/или SMTP_PASSWORD.', provider: 'none' };
+    if (!t) return { ok: false, error: 'Не настроен ни RESEND_API_KEY, ни SMTP_EMAIL/SMTP_PASSWORD.', provider: 'none' };
     try {
         const info = await t.sendMail({
             from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
@@ -74,9 +105,12 @@ export function getEmailDiagnostics() {
     const masked = email ? email.replace(/^(.{2}).*(@.*)$/, '$1***$2') : null;
     const host = resolveSmtpHost(email) || null;
     const cleanPassLen = process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.replace(/\s+/g, '').length : 0;
+    const resendConfigured = !!process.env.RESEND_API_KEY;
     return {
-        provider: (process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD) ? 'SMTP (nodemailer)' : 'нет',
-        configured: !!(process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD),
+        provider: resendConfigured ? 'Resend (HTTP API)' : ((process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD) ? 'SMTP (nodemailer)' : 'нет'),
+        resendConfigured,
+        resendFrom: resendConfigured ? RESEND_FROM : null,
+        configured: resendConfigured || !!(process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD),
         smtpEmailSet: !!process.env.SMTP_EMAIL,
         smtpPasswordSet: !!process.env.SMTP_PASSWORD,
         user: masked,
@@ -87,10 +121,12 @@ export function getEmailDiagnostics() {
     };
 }
 
-// Actively test the SMTP connection + auth (handshake + login), without sending mail.
+// Check that an email channel is available. Resend has no cheap connection test, so
+// key-presence means HTTP delivery is ready (a real send confirms for sure).
 export async function verifyEmailTransport(): Promise<{ ok: boolean; error?: string }> {
+    if (process.env.RESEND_API_KEY) return { ok: true };
     const t = getTransporter();
-    if (!t) return { ok: false, error: 'SMTP не настроен: отсутствуют SMTP_EMAIL и/или SMTP_PASSWORD.' };
+    if (!t) return { ok: false, error: 'Не настроен ни RESEND_API_KEY, ни SMTP (SMTP_EMAIL/SMTP_PASSWORD).' };
     try {
         await t.verify();
         return { ok: true };
