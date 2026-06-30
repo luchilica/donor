@@ -650,6 +650,17 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
 
   const gameStatus = getGamificationStatus(bloodFree, compFree, bloodPaid, compPaid);
 
+  // On narrow screens 12 month labels overlap on the activity chart, so we thin
+  // them out (every other month). Desktop keeps all 12.
+  const [isMobileChart, setIsMobileChart] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    const update = () => setIsMobileChart(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
   const last12MonthsData = React.useMemo(() => {
     const months = [t('Янв'), t('Фев'), t('Мар'), t('Апр'), t('Май'), t('Июн'), t('Июл'), t('Авг'), t('Сен'), t('Окт'), t('Ноя'), t('Дек')];
     const result: { name: string; count: number; volume: number }[] = [];
@@ -1322,9 +1333,9 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                       dataKey="name" 
                       tickLine={false}
                       axisLine={false}
-                      stroke="#94a3b8" 
+                      stroke="#94a3b8"
                       fontSize={11}
-                      interval={0}
+                      interval={isMobileChart ? 1 : 0}
                     />
                     <YAxis 
                       tickLine={false}
