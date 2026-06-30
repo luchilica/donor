@@ -21,7 +21,7 @@ import {
   Donation
 } from './src/types.js';
 
-import { dispatchNotifications, sendTransactionalEmail, sendPushNotification } from './server/notifications.js';
+import { dispatchNotifications, sendTransactionalEmail, sendPushNotification, getEmailDiagnostics, verifyEmailTransport, sendTestEmail } from './server/notifications.js';
 
 // Lazy initialized clients
 let oneSignalClient: OneSignal.Client | null = null;
@@ -253,6 +253,24 @@ app.get('/health', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// EMAIL DIAGNOSTICS (admin only) — точно показывает, настроен ли SMTP и проходит ли
+// соединение/авторизация. Отвечает на вопрос "почему письма не приходят".
+app.get('/api/admin/email-status', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const diagnostics = getEmailDiagnostics();
+  const verify = await verifyEmailTransport();
+  res.json({ ...diagnostics, verify });
+});
+
+// Отправить реальное тестовое письмо и вернуть фактический результат.
+app.post('/api/admin/email-test', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const { to } = req.body || {};
+  if (!to) return res.status(400).json({ error: 'Укажите адрес получателя (to)' });
+  const result = await sendTestEmail(to);
+  res.status(result.ok ? 200 : 502).json(result);
 });
 
 // Предотвращаем кэширование API запросов (решает проблему с устаревшими данными при кэшировании Vercel)

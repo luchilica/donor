@@ -52,6 +52,41 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Email diagnostics
+  const [emailDiag, setEmailDiag] = useState<any>(null);
+  const [emailDiagLoading, setEmailDiagLoading] = useState(false);
+  const [emailTestTo, setEmailTestTo] = useState('');
+  const [emailTestResult, setEmailTestResult] = useState<string | null>(null);
+
+  const checkEmailStatus = async () => {
+    setEmailDiagLoading(true);
+    setEmailTestResult(null);
+    try {
+      const res = await fetch(`${apiBase}/admin/email-status`, { headers: { 'Authorization': token } });
+      setEmailDiag(await res.json());
+    } catch {
+      setEmailDiag({ error: t('Не удалось получить статус') });
+    } finally {
+      setEmailDiagLoading(false);
+    }
+  };
+
+  const sendTestEmail = async () => {
+    if (!emailTestTo) return;
+    setEmailTestResult(t('Отправка...'));
+    try {
+      const res = await fetch(`${apiBase}/admin/email-test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': token },
+        body: JSON.stringify({ to: emailTestTo })
+      });
+      const data = await res.json();
+      setEmailTestResult(data.ok ? `✅ ${t('Отправлено')} (id: ${data.messageId})` : `❌ ${t('Ошибка')}: ${data.error}`);
+    } catch {
+      setEmailTestResult(`❌ ${t('Сетевая ошибка')}`);
+    }
+  };
   const [isSaving, setIsSaving] = useState(false);
 
   // Modal controls
@@ -411,6 +446,61 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
           <span>{successMessage}</span>
         </div>
       )}
+
+      {/* Email diagnostics card */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-slate-800">{t('Диагностика e-mail')}</h3>
+            <p className="text-xs text-slate-500 mt-0.5">{t('Проверка, настроена ли отправка писем и проходит ли соединение с почтовым сервером.')}</p>
+          </div>
+          <button
+            onClick={checkEmailStatus}
+            disabled={emailDiagLoading}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50 min-h-[40px]"
+          >
+            {emailDiagLoading ? t('Проверка...') : t('Проверить статус')}
+          </button>
+        </div>
+
+        {emailDiag && (
+          <div className="mt-4 space-y-2 text-xs">
+            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg font-bold ${emailDiag.verify?.ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+              {emailDiag.verify?.ok ? `✅ ${t('Почта работает')}` : `❌ ${t('Письма не уходят')}`}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-slate-600 font-mono mt-2">
+              <span>SMTP_EMAIL: <strong className={emailDiag.smtpEmailSet ? 'text-emerald-600' : 'text-rose-600'}>{emailDiag.smtpEmailSet ? (emailDiag.user || 'задан') : t('НЕ задан')}</strong></span>
+              <span>SMTP_PASSWORD: <strong className={emailDiag.smtpPasswordSet ? 'text-emerald-600' : 'text-rose-600'}>{emailDiag.smtpPasswordSet ? `${t('задан')} (${emailDiag.passwordLength} ${t('симв.')})` : t('НЕ задан')}</strong></span>
+              <span>{t('Сервер')}: <strong>{emailDiag.host || '—'}</strong></span>
+              <span>{t('Порт')}: <strong>{emailDiag.port}</strong></span>
+            </div>
+            {emailDiag.verify && !emailDiag.verify.ok && emailDiag.verify.error && (
+              <div className="bg-rose-50 border border-rose-100 text-rose-700 rounded-lg px-3 py-2 mt-2 font-mono break-words">
+                {t('Причина')}: {emailDiag.verify.error}
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 mt-3">
+              <input
+                type="email"
+                value={emailTestTo}
+                onChange={e => setEmailTestTo(e.target.value)}
+                placeholder={t('адрес для тестового письма')}
+                className="flex-1 min-w-[200px] px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-red-500"
+              />
+              <button
+                onClick={sendTestEmail}
+                disabled={!emailTestTo}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50 min-h-[40px]"
+              >
+                {t('Отправить тест')}
+              </button>
+            </div>
+            {emailTestResult && (
+              <div className="text-xs font-mono text-slate-700 mt-1 break-words">{emailTestResult}</div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Tabs list (Sleek counters, Swiss style) */}
       <div className="flex overflow-x-auto whitespace-nowrap md:flex-wrap items-center gap-2 p-1.5 bg-slate-50/50 rounded-2xl mb-8 border border-slate-100 scrollbar-hide flex-nowrap scroll-fade-edge pr-8 md:pr-1.5">
