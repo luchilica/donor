@@ -7,7 +7,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 
 import * as OneSignal from 'onesignal-node';
-import { getDb, saveDb } from './server/db.js';
+import { getDb, saveDb, invalidateDbCache } from './server/db.js';
 import { calculateNextDates, isDonorReady } from './src/utils/intervals.js';
 import { 
   BloodGroup, 
@@ -271,6 +271,15 @@ app.post('/api/admin/email-test', async (req, res) => {
   if (!to) return res.status(400).json({ error: 'Укажите адрес получателя (to)' });
   const result = await sendTestEmail(to);
   res.status(result.ok ? 200 : 502).json(result);
+});
+
+// Drop the server's in-memory snapshot and re-read fresh from Supabase. Lets the admin
+// pick up changes made directly in the database without restarting the service.
+app.post('/api/admin/refresh-cache', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  invalidateDbCache();
+  await getDb(); // warm a fresh snapshot straight from Postgres
+  res.json({ success: true });
 });
 
 // Предотвращаем кэширование API запросов (решает проблему с устаревшими данными при кэшировании Vercel)

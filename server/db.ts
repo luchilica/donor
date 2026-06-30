@@ -1148,6 +1148,13 @@ function hydrateDonorEmails(state: DatabaseState | null): void {
   }
 }
 
+// Drop the in-memory snapshot so the next getDb() re-reads fresh from Postgres/Supabase.
+// Used by the admin "Обновить из БД" button to pick up changes made directly in the DB.
+export function invalidateDbCache(): void {
+  cachedDb = null;
+  cacheTimestamp = 0;
+}
+
 // Load state of store
 export async function getDb(): Promise<DatabaseState> {
   // Fast path: serve the warm in-memory snapshot if it's still fresh.

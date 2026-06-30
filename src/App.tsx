@@ -121,13 +121,23 @@ export default function App() {
     const handleGoToDashboard = () => setView('dashboard');
     const handleOpenPrivacy = () => { setView('privacy'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
     const handleOpenTerms = () => { setView('terms'); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    // Fired by the global fetch interceptor when an authenticated request returns 401:
+    // drop the dead session and surface the login screen instead of an empty dashboard.
+    const handleSessionExpired = () => {
+      setSession(null);
+      localStorage.removeItem('donor_alert_session');
+      setView('home');
+      setTimeout(() => window.dispatchEvent(new Event('openAuth')), 80);
+    };
     window.addEventListener('goToDashboard', handleGoToDashboard);
     window.addEventListener('openPrivacy', handleOpenPrivacy);
     window.addEventListener('openTerms', handleOpenTerms);
+    window.addEventListener('sessionExpired', handleSessionExpired);
     return () => {
       window.removeEventListener('goToDashboard', handleGoToDashboard);
       window.removeEventListener('openPrivacy', handleOpenPrivacy);
       window.removeEventListener('openTerms', handleOpenTerms);
+      window.removeEventListener('sessionExpired', handleSessionExpired);
     };
   }, []);
 

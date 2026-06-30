@@ -22,12 +22,14 @@ window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
     input instanceof URL ? input.href :
     input.url;
 
+  let tokenAttached = false;
   if (isApiRequest(url)) {
     try {
       const stored = localStorage.getItem('donor_alert_session');
       if (stored) {
         const token = JSON.parse(stored)?.token;
         if (token) {
+          tokenAttached = true;
           const headers = new Headers(
             init?.headers || (input instanceof Request ? input.headers : undefined)
           );
@@ -42,7 +44,24 @@ window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
     }
   }
 
-  return originalFetch(input, init);
+  const result = originalFetch(input, init);
+
+  // Self-heal expired/invalid sessions: when an AUTHENTICATED API call comes back 401
+  // (e.g. the server restarted with a fresh SESSION_SECRET), the stored token is dead.
+  // Drop it and tell the app to show the login screen instead of an empty dashboard.
+  // Login/registration endpoints are excluded so their own 401s (wrong password etc.)
+  // don't trigger a logout.
+  if (tokenAttached && !url.includes('/auth/')) {
+    return result.then(res => {
+      if (res.status === 401) {
+        try { localStorage.removeItem('donor_alert_session'); } catch {}
+        window.dispatchEvent(new Event('sessionExpired'));
+      }
+      return res;
+    });
+  }
+
+  return result;
 };
 
 createRoot(document.getElementById('root')!).render(
