@@ -1351,7 +1351,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 {regStep === 1 ? (
                   /* STEP 1: PERSONAL DETAILS */
                   <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Фамилия")} <span className="text-red-500">*</span></label>
                         <input 
@@ -1387,7 +1387,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Дата рождения (18-65 лет)")} <span className="text-red-500">*</span></label>
                         <input 
@@ -1544,8 +1544,8 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                 ) : (
                   /* STEP 2: MEDICAL SETTINGS & REGIONAL CLINIC RELATION */
                   <div className="space-y-3">
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="col-span-2 space-y-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="sm:col-span-2 space-y-1">
                         <label className="text-[10px] uppercase font-bold text-slate-600 tracking-wider">{t("Группа крови")} <span className="text-red-500">*</span></label>
                         <select 
                           value={regForm.bloodGroup} 
