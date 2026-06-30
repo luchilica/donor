@@ -800,7 +800,7 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
                         </td>
                         <td className="px-4 py-4 align-middle">
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                            {appt.donationType === 'blood' ? t('Цельная кровь') : appt.donationType === 'plasma' ? t('Плазма') : t('Тромбоциты')}
+                            {appt.donationType === 'blood' ? t('Цельная кровь') : appt.donationType === 'plasma' ? t('Плазма') : appt.donationType === 'granulocytes' ? t('Гранулоциты') : t('Тромбоциты')}
                           </span>
                         </td>
                         <td className="px-4 py-4 align-middle">
@@ -1177,6 +1177,7 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
                     <option value="blood">{t('Цельная кровь')}</option>
                     <option value="plasma">{t('Плазма')}</option>
                     <option value="platelets">{t('Тромбоциты')}</option>
+                    <option value="granulocytes">{t('Гранулоциты')}</option>
                   </select>
                 </div>
                 <div>
@@ -1531,6 +1532,7 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
                       <option value="blood">{t("Цельная кровь")}</option>
                       <option value="plasma">{t("Плазма")}</option>
                       <option value="platelets">{t("Тромбоциты")}</option>
+                      <option value="granulocytes">{t("Гранулоциты")}</option>
                     </select>
                   </div>
                   <div>

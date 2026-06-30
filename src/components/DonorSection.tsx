@@ -2046,6 +2046,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         <option value="blood">{t("Цельная кровь")}</option>
                         <option value="plasma">{t("Плазма")}</option>
                         <option value="platelets">{t("Тромбоциты")}</option>
+                        <option value="granulocytes">{t("Гранулоциты")}</option>
                       </select>
                     </div>
                     <div className="pt-4 flex justify-end">

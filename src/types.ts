@@ -18,6 +18,10 @@ export interface DonationAppointment {
   appointmentTime?: string; // HH:MM
   donationType: DonationType;
   status: AppointmentStatus;
+  volumeMl?: number;          // заполняется центром при завершении
+  isPaid?: boolean;           // платная/безвозмездная — фиксируется при завершении
+  note?: string;              // комментарий центра при завершении
+  rejectionReason?: string;   // причина отклонения записи
   createdAt: string;
 }
 

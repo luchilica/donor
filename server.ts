@@ -546,8 +546,9 @@ app.get('/api/download/contraindications', (req, res) => {
             centerId: appt.centerId,
             donationDate: appt.appointmentDate,
             donationType: appt.donationType,
-            isPaid: false, // Default
-            volumeMl: 450, // Default
+            isPaid: Boolean(appt.isPaid),
+            volumeMl: appt.volumeMl != null ? appt.volumeMl : 450,
+            note: appt.note || undefined,
             createdAt: new Date().toISOString()
           });
           const donorId = parseInt(appt.donorId);
@@ -1863,7 +1864,7 @@ app.get('/api/download/contraindications', (req, res) => {
       donorId: parseInt(donorId),
       centerId: parseInt(centerId),
       appointmentDate,
-      appointmentTime,
+      appointmentTime: apptTime,
       donationType,
       status: 'pending' as const,
       createdAt: new Date().toISOString()
@@ -1877,18 +1878,46 @@ app.get('/api/download/contraindications', (req, res) => {
   app.put('/api/appointments/:id', async (req, res) => {
     const db = await getDb();
     const id = parseInt(req.params.id);
-    const { status } = req.body;
-    
+    const { status, volumeMl, note, isPaid, donationType, rejectionReason } = req.body;
+
+    const allowedStatuses = ['pending', 'confirmed', 'completed', 'cancelled', 'no_show'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Недопустимый статус записи' });
+    }
+
     if (!db.donationAppointments) db.donationAppointments = [];
     const appt = db.donationAppointments.find(a => a.id === id);
     if (!appt) return res.status(404).json({ error: 'Not found' });
-    if (!requireCenter(req, res, appt.centerId)) return;
+    const session = requireCenter(req, res, appt.centerId);
+    if (!session) return;
 
     appt.status = status;
 
-    // If completed, create a donation record — but only once. Guard against
-    // duplicates so repeated PUTs (or double-clicks) don't inflate donor stats.
+    // When the center completes a donation it records the actual blood-product type,
+    // the collected volume (мл), whether it was paid, and an internal comment. These
+    // are persisted on the appointment AND copied into a regular Donation record so
+    // the donation shows up everywhere a manually-added donation would.
     if (status === 'completed') {
+        // The center may correct the donation type at completion (e.g. donor booked
+        // plasma but ended up giving whole blood).
+        const finalType = donationType || appt.donationType;
+
+        let parsedVolume: number | undefined;
+        if (volumeMl !== undefined && volumeMl !== null && String(volumeMl).trim() !== '') {
+            parsedVolume = parseInt(volumeMl);
+            if (isNaN(parsedVolume) || parsedVolume < 0 || parsedVolume > 1000) {
+                return res.status(400).json({ error: 'Недопустимый объем донации (0–1000 мл)' });
+            }
+        }
+
+        appt.donationType = finalType;
+        appt.volumeMl = parsedVolume;
+        appt.isPaid = Boolean(isPaid);
+        appt.note = note ? String(note) : undefined;
+        appt.rejectionReason = undefined;
+
+        // Create the donation only once. Guard against duplicates so repeated PUTs
+        // (or double-clicks) don't inflate donor stats.
         const donationExists = db.donations.some(d =>
             d.donorId === appt.donorId &&
             d.centerId === appt.centerId &&
@@ -1901,13 +1930,31 @@ app.get('/api/download/contraindications', (req, res) => {
                 donorId: appt.donorId,
                 centerId: appt.centerId,
                 donationDate: appt.appointmentDate,
-                donationType: appt.donationType,
+                donationType: finalType,
+                isPaid: Boolean(isPaid),
+                volumeMl: parsedVolume,
+                note: note ? String(note) : undefined,
+                addedBy: session.uid,
                 createdAt: new Date().toISOString()
             });
             await recalculateDonorStats(appt.donorId);
         }
+    } else if (status === 'cancelled' || status === 'no_show') {
+        // Rejecting a booking: store the reason and notify the donor by email.
+        appt.rejectionReason = rejectionReason ? String(rejectionReason) : undefined;
+
+        const donor = db.donors.find(d => d.id === appt.donorId);
+        if (donor && donor.email && donor.emailNotificationsEnabled) {
+            try {
+                sendTransactionalEmail(donor.email, 'appointment_rejected', {
+                    reason: appt.rejectionReason || 'Не указана',
+                    date: appt.appointmentDate,
+                    time: appt.appointmentTime
+                });
+            } catch (e) {}
+        }
     }
-    
+
     await saveDb(db);
     res.json(appt);
   });
@@ -1970,7 +2017,7 @@ app.get('/api/download/contraindications', (req, res) => {
       }
     });
 
-    const PORT = 3000;
+    const PORT = Number(process.env.PORT) || 3000;
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`[Donor-Alert] Express back-end running at http://0.0.0.0:${PORT}`);
     });

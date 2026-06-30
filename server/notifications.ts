@@ -84,7 +84,7 @@ export async function sendEmailNotification(emails: string[], messageText: strin
     }
 }
 
-export async function sendTransactionalEmail(to: string, type: 'welcome' | 'center_added' | 'reset' | 'confirmed' | 'rejected', extra?: any) {
+export async function sendTransactionalEmail(to: string, type: 'welcome' | 'center_added' | 'reset' | 'confirmed' | 'rejected' | 'appointment_rejected', extra?: any) {
     const transporter = getTransporter();
     if (!transporter) return;
 
@@ -129,6 +129,18 @@ export async function sendTransactionalEmail(to: string, type: 'welcome' | 'cent
             <h2>Ваша заявка на привязку к центру крови отклонена</h2>
             <p><strong>Причина:</strong> ${extra?.reason || 'Не указана'}</p>
             <p>Вы можете исправить данные в личном кабинете и отправить заявку повторно.</p>
+            <a href="https://donor-by.vercel.app">Войти в кабинет</a>
+        `;
+    } else if (type === 'appointment_rejected') {
+        subject = 'Ваша запись на донацию отклонена';
+        const whenLine = extra?.date
+            ? `<p><strong>Дата записи:</strong> ${extra.date}${extra?.time ? ` в ${extra.time}` : ''}</p>`
+            : '';
+        htmlContent = `
+            <h2>Ваша запись на донацию отклонена</h2>
+            ${whenLine}
+            <p><strong>Причина:</strong> ${extra?.reason || 'Не указана'}</p>
+            <p>Вы можете записаться на другую дату в личном кабинете.</p>
             <a href="https://donor-by.vercel.app">Войти в кабинет</a>
         `;
     }

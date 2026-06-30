@@ -172,6 +172,18 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     note: ''
   });
 
+  // Completion of a donation appointment (center records actual product/volume/comment).
+  const [completionAppt, setCompletionAppt] = useState<any | null>(null);
+  const [completionForm, setCompletionForm] = useState({
+    donationType: 'blood' as DonationType,
+    volumeMl: '450',
+    isPaid: false,
+    note: ''
+  });
+  // Rejecting a donation appointment (center must supply a reason; donor is emailed).
+  const [apptRejectId, setApptRejectId] = useState<number | null>(null);
+  const [apptRejectReason, setApptRejectReason] = useState('');
+
   const [showAddMedicalModal, setShowAddMedicalModal] = useState(false);
   const [medicalForm, setMedicalForm] = useState({
     reason: '',
@@ -522,6 +534,63 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         closeConfirm();
       }
     });
+  };
+
+  // Sensible default collected volume (мл) per blood-product type.
+  const defaultVolumeForType = (type: string) =>
+    type === 'plasma' ? '600' : type === 'platelets' ? '250' : type === 'granulocytes' ? '300' : '450';
+
+  // Open the completion modal prefilled from the booked appointment.
+  const openCompletionModal = (a: any) => {
+    const type = (a.donationType || 'blood') as DonationType;
+    setCompletionForm({ donationType: type, volumeMl: defaultVolumeForType(type), isPaid: false, note: '' });
+    setCompletionAppt(a);
+  };
+
+  // Submit completion: records the donation on the donor and closes the modal.
+  const handleCompleteAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!completionAppt) return;
+    try {
+      const res = await fetch(`${apiBase}/appointments/${completionAppt.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'completed',
+          donationType: completionForm.donationType,
+          volumeMl: completionForm.volumeMl,
+          isPaid: completionForm.isPaid,
+          note: completionForm.note
+        })
+      });
+      if (res.ok) {
+        setCompletionAppt(null);
+        loadAppointments();
+        refreshDashboard();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || t('Не удалось завершить запись'));
+      }
+    } catch {}
+  };
+
+  // Submit rejection: requires a reason; backend notifies the donor by email.
+  const handleRejectAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (apptRejectId == null) return;
+    if (!apptRejectReason.trim()) { alert(t('Укажите причину отклонения')); return; }
+    try {
+      const res = await fetch(`${apiBase}/appointments/${apptRejectId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'cancelled', rejectionReason: apptRejectReason })
+      });
+      if (res.ok) {
+        setApptRejectId(null);
+        setApptRejectReason('');
+        loadAppointments();
+      }
+    } catch {}
   };
 
   // Add Medical note restriction
@@ -1775,8 +1844,19 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <span>•</span>
                           <span className="bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{a.donorBg}</span>
                           <span>•</span>
-                          <span>{a.donationType === 'blood' ? t('Цельная кровь') : a.donationType === 'plasma' ? t('Плазма') : t('Тромбоциты')}</span>
+                          <span>{a.donationType === 'blood' ? t('Цельная кровь') : a.donationType === 'plasma' ? t('Плазма') : a.donationType === 'granulocytes' ? t('Гранулоциты') : t('Тромбоциты')}</span>
                         </div>
+                        {a.status === 'completed' && (a.volumeMl != null || a.note) && (
+                          <div className="text-[11px] text-emerald-700 font-medium flex flex-wrap items-center gap-2 pt-0.5">
+                            {a.volumeMl != null && <span>{a.volumeMl} {t('мл')}</span>}
+                            {a.volumeMl != null && <span>•</span>}
+                            <span>{a.isPaid ? t('Платная') : t('Безвозмездная')}</span>
+                            {a.note && <span className="text-slate-500 font-light italic">— {a.note}</span>}
+                          </div>
+                        )}
+                        {a.status === 'cancelled' && a.rejectionReason && (
+                          <div className="text-[11px] text-red-600 font-light pt-0.5">{t('Причина отклонения')}: {a.rejectionReason}</div>
+                        )}
                       </div>
 
                       <div className="flex flex-col md:flex-row gap-2 shrink-0 w-full md:w-auto">
@@ -1793,42 +1873,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                         )}
                         {(a.status === 'pending' || a.status === 'confirmed') && (
                           <>
-                            <button 
-                              onClick={() => {
-                                  requestConfirm({
-                                      title: t('Завершить донацию?'),
-                                      message: `${t('Вы уверены, что хотите отметить донацию донора')} ${a.donorName} ${t('как завершенную?')}`,
-                                      variant: 'success',
-                                      confirmText: t('Завершить'),
-                                      cancelText: t('Отмена'),
-                                      onConfirm: async () => {
-                                          await fetch(`${apiBase}/appointments/${a.id}`, {
-                                              method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
-                                          });
-                                          loadAppointments();
-                                          refreshDashboard();
-                                      }
-                                  });
-                              }}
+                            <button
+                              onClick={() => openCompletionModal(a)}
                               className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >
-                              <Check className="w-4 h-4 mr-1" />{t("Завершена")}</button>
-                            <button 
-                              onClick={() => {
-                                  requestConfirm({
-                                      title: t('Отклонить запись?'),
-                                      message: `${t('Вы уверены, что хотите отклонить запись донора')} ${a.donorName} ${t('на донацию?')}`,
-                                      variant: 'danger',
-                                      confirmText: t('Отклонить'),
-                                      cancelText: t('Отмена'),
-                                      onConfirm: async () => {
-                                          await fetch(`${apiBase}/appointments/${a.id}`, {
-                                              method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'cancelled'})
-                                          });
-                                          loadAppointments();
-                                      }
-                                  });
-                              }}
+                              <Check className="w-4 h-4 mr-1" />{t("Завершить")}</button>
+                            <button
+                              onClick={() => { setApptRejectReason(''); setApptRejectId(a.id); }}
                               className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >{t("Отклонить")}</button>
                           </>
@@ -2672,6 +2723,106 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               </div>
 
               <button type="submit" disabled={isSaving} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0">{isSaving ? t('Подождите...') : t('Записать в базу и пересчитать сроки')}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* COMPLETE APPOINTMENT MODAL — center records the actual donation */}
+      {completionAppt && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
+            <button onClick={() => setCompletionAppt(null)} className="absolute right-4 top-4 p-1.5 text-slate-400">✕</button>
+            <h4 className="font-bold text-slate-800 text-base mb-1">{t("Завершение донации")}</h4>
+            <p className="text-xs text-slate-500 mb-4">{completionAppt.donorName} • {new Date(completionAppt.appointmentDate).toLocaleDateString('ru-RU')}</p>
+            <form onSubmit={handleCompleteAppointment} className="space-y-3.5">
+              <div className="space-y-1 text-xs">
+                <label className="font-semibold block">{t("Тип заготовки:")}</label>
+                <select
+                  required
+                  value={completionForm.donationType}
+                  onChange={(e) => {
+                    const v = e.target.value as DonationType;
+                    setCompletionForm({ ...completionForm, donationType: v, volumeMl: defaultVolumeForType(v) });
+                  }}
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none bg-white font-medium"
+                >
+                  <option value="blood">{t("Цельная кровь (стандарт)")}</option>
+                  <option value="plasma">{t("Плазма (Аферез)")}</option>
+                  <option value="platelets">{t("Тромбоциты (Аферез)")}</option>
+                  <option value="granulocytes">{t("Гранулоциты")}</option>
+                </select>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <label className="font-semibold block">{t("Объем в мл:")}</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={1000}
+                  value={completionForm.volumeMl}
+                  onChange={(e) => setCompletionForm({ ...completionForm, volumeMl: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs font-semibold pt-2 pb-1">
+                <span>{t("Донация на платной основе?")}</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={completionForm.isPaid}
+                    onChange={(e) => setCompletionForm({ ...completionForm, isPaid: e.target.checked })}
+                  />
+                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+                </label>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                <label className="font-semibold block">{t("Внутренний комментарий:")}</label>
+                <textarea
+                  value={completionForm.note}
+                  onChange={(e) => setCompletionForm({ ...completionForm, note: e.target.value })}
+                  placeholder={t("Процедура без осложнений, самочувствие удовлетворительное")}
+                  rows={2}
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
+                />
+              </div>
+
+              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs min-h-[44px] md:min-h-0 flex items-center justify-center">
+                <Check className="w-4 h-4 mr-1" />{t("Завершить и внести донацию")}</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* REJECT APPOINTMENT MODAL — reason is required and emailed to the donor */}
+      {apptRejectId !== null && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
+            <h4 className="font-bold text-slate-800 text-sm mb-2">{t("Причина отклонения записи")}</h4>
+            <p className="text-xs text-slate-500 mb-4">{t("Укажите причину отклонения записи на донацию. Донор получит уведомление на почту с указанной причиной.")}</p>
+            <form onSubmit={handleRejectAppointment} className="space-y-4">
+              <textarea
+                required
+                value={apptRejectReason}
+                onChange={(e) => setApptRejectReason(e.target.value)}
+                placeholder={t("Пример: на выбранную дату нет свободных мест...")}
+                rows={3}
+                className="w-full px-3 py-2 text-xs border rounded-xl focus:border-red-500 focus:outline-none"
+              />
+              <div className="flex gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => { setApptRejectId(null); setApptRejectReason(''); }}
+                  className="w-1/3 bg-slate-100 text-xs font-semibold rounded-xl"
+                >{t("Отмена")}</button>
+                <button
+                  type="submit"
+                  className="w-2/3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl min-h-[44px] md:min-h-0"
+                >{t("Отклонить запись")}</button>
+              </div>
             </form>
           </div>
         </div>

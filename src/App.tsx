@@ -12,9 +12,15 @@ import TermsOfService from './components/TermsOfService.tsx';
 import { BY_DICT } from './i18n.ts';
 import { LanguageProvider } from './LanguageContext.tsx';
 
-// Always use relative '/api' path so that Vercel routes through our proxy (/api/index.js)
-// and local development routes through the local Express server, preventing CORS and cross-domain issues.
-const API_BASE = '/api';
+// API base. In production we call the Railway backend DIRECTLY (no Vercel proxy
+// hop): set VITE_API_URL to the backend origin at build time, e.g.
+// "https://donor-production.up.railway.app". Locally VITE_API_URL is unset, so we
+// fall back to the relative '/api' served by the local Express dev server.
+// The backend already sends permissive CORS headers, so cross-origin calls work.
+const RAW_API = (import.meta.env.VITE_API_URL || '')
+  .replace(/\/+$/, '')      // strip trailing slashes
+  .replace(/\/api$/, '');   // tolerate a value that already ends in /api
+const API_BASE = RAW_API ? `${RAW_API}/api` : '/api';
 
 export default function App() {
   const [session, setSession] = useState<{

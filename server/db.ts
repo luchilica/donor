@@ -48,12 +48,15 @@ if (dbUrl) {
     dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'pgbouncer=true';
   }
 
-  // Add connect_timeout and pool_timeout to ensure Prisma fails fast rather than hanging indefinitely
+  // Add connect_timeout and pool_timeout. These must comfortably exceed a cold
+  // Supabase Pooler handshake (often >3s) — otherwise Prisma throws on a slow
+  // connection and getDb() silently falls back to the ephemeral JSON seed, so
+  // the client receives stale/empty data instead of the real database.
   if (!dbUrl.includes('connect_timeout=')) {
-    dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'connect_timeout=3';
+    dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'connect_timeout=15';
   }
   if (!dbUrl.includes('pool_timeout=')) {
-    dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'pool_timeout=3';
+    dbUrl += (dbUrl.includes('?') ? '&' : '?') + 'pool_timeout=15';
   }
 }
 
@@ -1108,9 +1111,20 @@ function checkPostgresActive(): boolean {
 }
 
 let cachedDb: DatabaseState | null = null;
+// Timestamp (ms) of the last successful DB load. getDb() serves the in-memory
+// cache while it is fresher than CACHE_TTL_MS, so back-to-back API requests don't
+// each re-dump every table from Postgres. saveDb() refreshes this on every write,
+// so mutations are reflected immediately.
+let cacheTimestamp = 0;
+const CACHE_TTL_MS = 15_000;
 
 // Load state of store
 export async function getDb(): Promise<DatabaseState> {
+  // Fast path: serve the warm in-memory snapshot if it's still fresh.
+  if (cachedDb && Date.now() - cacheTimestamp < CACHE_TTL_MS) {
+    return JSON.parse(JSON.stringify(cachedDb));
+  }
+
   const ensureAdmin = (state: DatabaseState): DatabaseState => {
     if (state && state.users && !state.users.some(u => u.email === "admin@test.by")) {
       state.users.push({
@@ -1162,6 +1176,7 @@ export async function getDb(): Promise<DatabaseState> {
         prisma.donationAppointment.findMany({ orderBy: { id: 'asc' } })
       ]);
 
+      cacheTimestamp = Date.now();
       cachedDb = {
         centers: dbCenters.map(m => ({
           id: m.id,
@@ -1303,6 +1318,10 @@ export async function getDb(): Promise<DatabaseState> {
           appointmentTime: m.appointmentTime,
           donationType: m.donationType as any,
           status: m.status as any,
+          volumeMl: (m as any).volumeMl ?? undefined,
+          isPaid: (m as any).isPaid ?? false,
+          note: (m as any).note ?? undefined,
+          rejectionReason: (m as any).rejectionReason ?? undefined,
           createdAt: m.createdAt.toISOString()
         }))
       };
@@ -1420,6 +1439,7 @@ export async function getDb(): Promise<DatabaseState> {
   if (fs.existsSync(STORE_PATH)) {
     try {
       const data = fs.readFileSync(STORE_PATH, 'utf-8');
+      cacheTimestamp = Date.now();
       cachedDb = JSON.parse(data);
       if (!cachedDb.donationAppointments) cachedDb.donationAppointments = [];
 
@@ -1463,11 +1483,13 @@ export async function getDb(): Promise<DatabaseState> {
     } catch (e) {
       console.error('Database file corrupt. Seeding again...');
       saveState(seededState);
+      cacheTimestamp = Date.now();
       cachedDb = seededState;
       return ensureAdmin(seededState);
     }
   } else {
     saveState(seededState);
+    cacheTimestamp = Date.now();
     cachedDb = seededState;
     return ensureAdmin(seededState);
   }
@@ -1477,6 +1499,7 @@ export async function saveDb(state: DatabaseState): Promise<void> {
   // Update memory cache instantly so all subsequent reads are lightning fast!
   const oldDb = cachedDb;
   cachedDb = JSON.parse(JSON.stringify(state));
+  cacheTimestamp = Date.now();
 
   const isPostgresActive = checkPostgresActive();
 
@@ -1879,6 +1902,10 @@ export async function saveDb(state: DatabaseState): Promise<void> {
                 appointmentTime: appt.appointmentTime,
                 donationType: appt.donationType as any,
                 status: appt.status as any,
+                volumeMl: appt.volumeMl ?? null,
+                isPaid: Boolean(appt.isPaid),
+                note: appt.note ?? null,
+                rejectionReason: appt.rejectionReason ?? null,
               },
               create: {
                 id: appt.id,
@@ -1888,6 +1915,10 @@ export async function saveDb(state: DatabaseState): Promise<void> {
                 appointmentTime: appt.appointmentTime,
                 donationType: appt.donationType as any,
                 status: appt.status as any,
+                volumeMl: appt.volumeMl ?? null,
+                isPaid: Boolean(appt.isPaid),
+                note: appt.note ?? null,
+                rejectionReason: appt.rejectionReason ?? null,
                 createdAt: appt.createdAt ? new Date(appt.createdAt) : new Date(),
               }
             });

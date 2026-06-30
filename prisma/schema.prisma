@@ -276,6 +276,10 @@ model DonationAppointment {
   appointmentTime String   @db.VarChar(5)
   donationType    DonationType
   status          AppointmentStatus @default(pending)
+  volumeMl        Int?
+  isPaid          Boolean  @default(false)
+  note            String?  @db.Text
+  rejectionReason String?  @db.Text
   createdAt       DateTime @default(now())
 
   @@map("donation_appointments")
