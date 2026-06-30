@@ -221,7 +221,7 @@ export default function App() {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'donor@test.by', password: 'password123' })
+        body: JSON.stringify({ email: 'aleksey.pavlov@gmail.com', password: 'password123' })
       });
       if (res.ok) {
         const data = await res.json();

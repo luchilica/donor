@@ -1271,7 +1271,7 @@ export default function GuestSection({ centers, news, onLoginSuccess, apiBase, s
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="donor@test.by"
+                    placeholder="example@mail.ru"
                     className="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
                   />
                 </div>

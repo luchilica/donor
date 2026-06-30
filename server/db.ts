@@ -555,7 +555,7 @@ const INITIAL_CENTERS: BloodCenter[] = [
 const INITIAL_USERS: User[] = [
   {
     id: 1,
-    email: "donor@test.by",
+    email: "aleksey.pavlov@gmail.com",
     passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // bcrypt for "password123"
     role: "donor",
     isActive: true,
@@ -571,7 +571,7 @@ const INITIAL_USERS: User[] = [
     createdAt: new Date().toISOString()
   },
   {
-    id: 99,
+    id: 22,
     email: "admin@test.by",
     passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // "password123"
     role: "admin",
@@ -592,7 +592,7 @@ const INITIAL_DONORS: Donor[] = [
     bloodGroup: "II_A",
     rhFactor: "positive",
     weight: 78,
-    phone: "+375 (29) 111-22-33",
+    phone: "+375 (29) 638-47-12",
     status: "active",
     pushEnabled: true,
     emailNotificationsEnabled: true,
@@ -610,28 +610,28 @@ const INITIAL_DONORS: Donor[] = [
 
 // Add 19 more realistic donors (to make 20+)
 const NAMES_MALE = [
-  { last: "Казак", first: "Максим", middle: "Валерьевич" },
-  { last: "Козлов", first: "Дмитрий", middle: "Николаевич" },
-  { last: "Новик", first: "Сергей", middle: "Андреевич" },
-  { last: "Шевченко", first: "Андрей", middle: "Сергеевич" },
-  { last: "Ковальчук", first: "Юрий", middle: "Михайлович" },
-  { last: "Климович", first: "Александр", middle: "Николаевич" },
-  { last: "Макаревич", first: "Владислав", middle: "Евгеньевич" },
-  { last: "Захаров", first: "Иван", middle: "Сергеевич" },
-  { last: "Романов", first: "Артем", middle: "Александрович" },
-  { last: "Лебедев", first: "Антон", middle: "Анатольевич" }
+  { last: "Казак", first: "Максим", middle: "Валерьевич", email: "maksim.kazak@gmail.com" },
+  { last: "Козлов", first: "Дмитрий", middle: "Николаевич", email: "d.kozlov@mail.ru" },
+  { last: "Новик", first: "Сергей", middle: "Андреевич", email: "sergey.novik@yandex.by" },
+  { last: "Шевченко", first: "Андрей", middle: "Сергеевич", email: "a.shevchenko@gmail.com" },
+  { last: "Ковальчук", first: "Юрий", middle: "Михайлович", email: "yuri.kovalchuk@tut.by" },
+  { last: "Климович", first: "Александр", middle: "Николаевич", email: "alexander.klimovich@gmail.com" },
+  { last: "Макаревич", first: "Владислав", middle: "Евгеньевич", email: "v.makarevich@mail.ru" },
+  { last: "Захаров", first: "Иван", middle: "Сергеевич", email: "ivan.zaharov@yandex.by" },
+  { last: "Романов", first: "Артем", middle: "Александрович", email: "artem.romanov@gmail.com" },
+  { last: "Лебедев", first: "Антон", middle: "Анатольевич", email: "a.lebedev@tut.by" }
 ];
 
 const NAMES_FEMALE = [
-  { last: "Клименко", first: "Ольга", middle: "Игоревна" },
-  { last: "Баранова", first: "Мария", middle: "Викторовна" },
-  { last: "Мороз", first: "Екатерина", middle: "Сергеевна" },
-  { last: "Савицкая", first: "Анна", middle: "Дмитриевна" },
-  { last: "Шушкевич", first: "Наталья", middle: "Константиновна" },
-  { last: "Карпович", first: "Елена", middle: "Витальевна" },
-  { last: "Кравцова", first: "Татьяна", middle: "Григорьевна" },
-  { last: "Васильева", first: "Ирина", middle: "Алексеевна" },
-  { last: "Кузнецова", first: "Светлана", middle: "Валерьевна" }
+  { last: "Клименко", first: "Ольга", middle: "Игоревна", email: "olga.klimenko@gmail.com" },
+  { last: "Баранова", first: "Мария", middle: "Викторовна", email: "m.baranova@mail.ru" },
+  { last: "Мороз", first: "Екатерина", middle: "Сергеевна", email: "ekaterina.moroz@yandex.by" },
+  { last: "Савицкая", first: "Анна", middle: "Дмитриевна", email: "anna.savitskaya@gmail.com" },
+  { last: "Шушкевич", first: "Наталья", middle: "Константиновна", email: "n.shushkevich@tut.by" },
+  { last: "Карпович", first: "Елена", middle: "Витальевна", email: "elena.karpovich@mail.ru" },
+  { last: "Кравцова", first: "Татьяна", middle: "Григорьевна", email: "t.kravtsova@gmail.com" },
+  { last: "Васильева", first: "Ирина", middle: "Алексеевна", email: "irina.vasileva@yandex.by" },
+  { last: "Кузнецова", first: "Светлана", middle: "Валерьевна", email: "s.kuznetsova@gmail.com" }
 ];
 
 const BLOOD_GROUPS: BloodGroup[] = ["I_O", "II_A", "III_B", "IV_AB"];
@@ -660,7 +660,20 @@ const seededState: DatabaseState = {
       resubmissionCount: 0
     }
   ],
-  donations: [],
+  donations: [
+    { id: 901, donorId: 1, centerId: 1, donationDate: "2026-04-01", donationType: "blood", isPaid: false, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2026-04-01T09:30:00Z" },
+    { id: 902, donorId: 1, centerId: 1, donationDate: "2026-01-15", donationType: "blood", isPaid: true, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2026-01-15T10:00:00Z" },
+    { id: 903, donorId: 1, centerId: 1, donationDate: "2025-10-20", donationType: "plasma", isPaid: false, volumeMl: 600, note: "Плазмаферез", addedBy: 2, createdAt: "2025-10-20T11:15:00Z" },
+    { id: 904, donorId: 1, centerId: 1, donationDate: "2025-07-12", donationType: "blood", isPaid: false, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2025-07-12T09:45:00Z" },
+    { id: 905, donorId: 1, centerId: 1, donationDate: "2025-04-05", donationType: "blood", isPaid: true, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2025-04-05T10:30:00Z" },
+    { id: 906, donorId: 1, centerId: 1, donationDate: "2025-01-18", donationType: "blood", isPaid: false, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2025-01-18T09:20:00Z" },
+    { id: 907, donorId: 1, centerId: 1, donationDate: "2024-10-09", donationType: "plasma", isPaid: false, volumeMl: 600, note: "Плазмаферез", addedBy: 2, createdAt: "2024-10-09T11:00:00Z" },
+    { id: 908, donorId: 1, centerId: 1, donationDate: "2024-06-22", donationType: "blood", isPaid: false, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2024-06-22T09:50:00Z" },
+    { id: 909, donorId: 1, centerId: 1, donationDate: "2024-03-14", donationType: "blood", isPaid: true, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2024-03-14T10:10:00Z" },
+    { id: 910, donorId: 1, centerId: 1, donationDate: "2023-11-30", donationType: "blood", isPaid: false, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2023-11-30T09:35:00Z" },
+    { id: 911, donorId: 1, centerId: 1, donationDate: "2023-08-19", donationType: "blood", isPaid: false, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2023-08-19T10:05:00Z" },
+    { id: 912, donorId: 1, centerId: 1, donationDate: "2023-05-02", donationType: "blood", isPaid: false, volumeMl: 450, note: "Регулярная донация", addedBy: 2, createdAt: "2023-05-02T09:25:00Z" }
+  ],
   medicalNotes: [],
   news: [
     {
@@ -704,11 +717,13 @@ for (let i = 0; i < 19; i++) {
   const nameSet = isMale ? NAMES_MALE[Math.floor(i / 2) % NAMES_MALE.length] : NAMES_FEMALE[Math.floor(i / 2) % NAMES_FEMALE.length];
   const bg = BLOOD_GROUPS[i % BLOOD_GROUPS.length];
   const rh = RH_FACTORS[(i + 1) % RH_FACTORS.length];
-  const weight = isMale ? 70 + (i % 6) * 4 : 54 + (i % 5) * 5; // some may be just 54 kg (underweight, non-ready)
-  const phone = `+375 (29) 555-${String(3000 + i).padStart(4, '0')}`;
+  const weight = isMale ? 70 + (i % 6) * 4 : 58 + (i % 5) * 5; // all >= 55 kg (eligible)
+  const operators = ['29', '33', '44', '25'];
+  const op = operators[i % operators.length];
+  const phone = `+375 (${op}) ${String(200 + (i * 41) % 800).padStart(3, '0')}-${String(10 + (i * 7) % 90)}-${String(10 + (i * 53) % 90)}`;
   const userId = 3 + i;
   const donorId = 2 + i;
-  const email = `donor${donorId}@test.by`;
+  const email = nameSet.email;
 
   // Create User
   seededState.users.push({
@@ -1142,8 +1157,9 @@ export async function getDb(): Promise<DatabaseState> {
 
   const ensureAdmin = (state: DatabaseState): DatabaseState => {
     if (state && state.users && !state.users.some(u => u.email === "admin@test.by")) {
+      const nextId = state.users.length > 0 ? Math.max(...state.users.map(u => u.id)) + 1 : 1;
       state.users.push({
-        id: 99,
+        id: nextId,
         email: "admin@test.by",
         passwordHash: "$2b$12$3ukPSvUa2xcepU9pbDKcXuQwEHLdZtdLoOFxUcfmoPjskjP1DbOIC", // password123
         role: "admin",

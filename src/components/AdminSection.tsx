@@ -316,7 +316,7 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
     handleUpdateEntity('medicalNotes', {
       donorId: parseInt(newHold.donorId),
       centerId: parseInt(newHold.centerId),
-      createdBy: 99,
+      createdBy: 22,
       reason: newHold.reason,
       startDate: newHold.startDate,
       endDate: newHold.endDate || null,

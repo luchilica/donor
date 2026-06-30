@@ -1931,6 +1931,16 @@ app.get('/api/download/contraindications', (req, res) => {
       return res.status(400).json({ error: 'Запись возможна только в рабочее время с 09:00 до 17:00' });
     }
 
+    // Date restrictions: no past days and no Sundays (centers are closed).
+    const nowDateStr = new Date().toISOString().split('T')[0];
+    if (!appointmentDate || appointmentDate < nowDateStr) {
+      return res.status(400).json({ error: 'Нельзя записаться на прошедшую дату' });
+    }
+    const [apy, apm, apd] = appointmentDate.split('-').map(Number);
+    if (new Date(apy, apm - 1, apd).getDay() === 0) {
+      return res.status(400).json({ error: 'По воскресеньям запись недоступна' });
+    }
+
     if (!db.donationAppointments) db.donationAppointments = [];
     const newId = db.donationAppointments.length > 0 ? Math.max(...db.donationAppointments.map(a => a.id)) + 1 : 1;
     

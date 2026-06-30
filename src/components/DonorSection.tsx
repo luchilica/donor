@@ -447,6 +447,18 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
     e.preventDefault();
     if (!appointmentForm.centerId || !appointmentForm.appointmentDate) return;
 
+    // Date restrictions: no past days and no Sundays (centers are closed).
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (appointmentForm.appointmentDate < todayStr) {
+      alert(t('Нельзя записаться на прошедшую дату'));
+      return;
+    }
+    const [apptY, apptM, apptD] = appointmentForm.appointmentDate.split('-').map(Number);
+    if (new Date(apptY, apptM - 1, apptD).getDay() === 0) {
+      alert(t('По воскресеньям запись недоступна. Пожалуйста, выберите другой день.'));
+      return;
+    }
+
     if (donor.status !== 'active') {
         alert(t('Вы должны быть подтвержденным донором для записи'));
         return;
@@ -2085,6 +2097,7 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
                         onChange={e => setAppointmentForm({ ...appointmentForm, appointmentDate: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
                       />
+                      <p className="text-[10px] text-slate-500 mt-1">{t("Нельзя записаться на прошедшие даты и воскресенья.")}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">{t("Время")}</label>
