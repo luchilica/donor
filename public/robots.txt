@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Закрываем приватные кабинеты от индексации (контент за авторизацией)
+Disallow: /api/
+
+Sitemap: https://donor-by.vercel.app/sitemap.xml

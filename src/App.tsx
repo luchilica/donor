@@ -11,6 +11,7 @@ import PrivacyPolicy from './components/PrivacyPolicy.tsx';
 import TermsOfService from './components/TermsOfService.tsx';
 import { BY_DICT } from './i18n.ts';
 import { LanguageProvider } from './LanguageContext.tsx';
+import { applyViewSeo, applyCentersStructuredData } from './seo.ts';
 
 // API base. In production we call the Railway backend DIRECTLY (no Vercel proxy
 // hop): set VITE_API_URL to the backend origin at build time, e.g.
@@ -140,6 +141,16 @@ export default function App() {
     if (language === 'RU') return key;
     return BY_DICT[key] || key;
   };
+
+  // Keep <title>/<meta> in sync with the active view (private areas → noindex).
+  useEffect(() => {
+    applyViewSeo(view);
+  }, [view]);
+
+  // Expose blood centers as Schema.org structured data on the public landing only.
+  useEffect(() => {
+    applyCentersStructuredData(view === 'home' ? centers : []);
+  }, [view, centers]);
 
   useEffect(() => {
     const handleScroll = (e?: any) => {

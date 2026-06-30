@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#fef2f2"/>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(120 175)">
+    <path d="M140 0C140 0 50 108 50 170a90 90 0 0 0 180 0C230 108 140 0 140 0z" fill="#dc2626"/>
+    <path d="M104 162a36 36 0 0 0 36 36" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+  </g>
+  <text x="470" y="280" font-family="Segoe UI, Arial, sans-serif" font-size="92" font-weight="700" fill="#7f1d1d">Донор-Алерт</text>
+  <text x="470" y="360" font-family="Segoe UI, Arial, sans-serif" font-size="42" fill="#b91c1c">Оповещения о донорстве крови</text>
+  <text x="470" y="416" font-family="Segoe UI, Arial, sans-serif" font-size="42" fill="#b91c1c">в Беларуси</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fef2f2"/>
+      <stop offset="1" stop-color="#fee2e2"/>
+    </linearGradient>
+  </defs>
+</svg>

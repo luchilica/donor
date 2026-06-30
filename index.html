@@ -1,9 +1,59 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Донор-Алерт</title>
+
+    <!-- Primary SEO -->
+    <title>Донор-Алерт — оповещения о донорстве крови в Беларуси</title>
+    <meta name="description" content="Донор-Алерт — сервис, который связывает доноров крови и центры переливания Беларуси: оповещения о нехватке крови, запись на донацию и учёт сдач." />
+    <meta name="keywords" content="донорство крови, сдать кровь, донор, центр переливания крови, Беларусь, запись на донацию, донор-алерт" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Донор-Алерт" />
+    <meta name="theme-color" content="#dc2626" />
+    <link rel="canonical" href="https://donor-by.vercel.app/" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Донор-Алерт" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:url" content="https://donor-by.vercel.app/" />
+    <meta property="og:title" content="Донор-Алерт — оповещения о донорстве крови в Беларуси" />
+    <meta property="og:description" content="Сервис, который связывает доноров крови и центры переливания Беларуси: оповещения о нехватке крови, запись на донацию и учёт сдач." />
+    <meta property="og:image" content="https://donor-by.vercel.app/og-image.svg" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Донор-Алерт — оповещения о донорстве крови в Беларуси" />
+    <meta name="twitter:description" content="Сервис, который связывает доноров крови и центры переливания Беларуси." />
+    <meta name="twitter:image" content="https://donor-by.vercel.app/og-image.svg" />
+
+    <!-- Structured data: organization + website (static, served on every domain) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://donor-by.vercel.app/#organization",
+          "name": "Донор-Алерт",
+          "url": "https://donor-by.vercel.app/",
+          "description": "Сервис оповещения доноров крови и записи на донацию в Беларуси.",
+          "areaServed": { "@type": "Country", "name": "Беларусь" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://donor-by.vercel.app/#website",
+          "url": "https://donor-by.vercel.app/",
+          "name": "Донор-Алерт",
+          "inLanguage": "ru-BY",
+          "publisher": { "@id": "https://donor-by.vercel.app/#organization" }
+        }
+      ]
+    }
+    </script>
+
     <!-- OneSignal Web Push SDK -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   </head>
@@ -12,4 +62,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
