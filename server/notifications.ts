@@ -5,35 +5,66 @@ import { Donor } from '../src/types.js';
 let transporter: nodemailer.Transporter | null = null;
 let oneSignalClient: OneSignal.Client | null = null;
 
+// Single delivery path over SMTP (nodemailer).
+async function deliverEmail(opts: { to?: string; bcc?: string[]; subject: string; html: string }): Promise<{ ok: boolean; id?: string; error?: string; provider: string }> {
+    const t = getTransporter();
+    if (!t) return { ok: false, error: 'SMTP не настроен: отсутствуют SMTP_EMAIL и/или SMTP_PASSWORD.', provider: 'none' };
+    try {
+        const info = await t.sendMail({
+            from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
+            to: opts.to,
+            bcc: opts.bcc,
+            subject: opts.subject,
+            html: opts.html,
+        });
+        return { ok: true, id: info.messageId, provider: 'smtp' };
+    } catch (e: any) {
+        return { ok: false, error: e?.message || String(e), provider: 'smtp' };
+    }
+}
+
+function resolveSmtpHost(email: string): string | undefined {
+    if (process.env.SMTP_HOST) return process.env.SMTP_HOST;
+    if (email.includes('@gmail.com')) return 'smtp.gmail.com';
+    if (email.includes('@yandex')) return 'smtp.yandex.ru';
+    if (email.includes('@mail.ru')) return 'smtp.mail.ru';
+    return undefined;
+}
+
 let smtpConfigWarned = false;
 function getTransporter(): nodemailer.Transporter | null {
     if (transporter) return transporter;
     if (!process.env.SMTP_EMAIL || !process.env.SMTP_PASSWORD) {
         if (!smtpConfigWarned) {
-            console.warn('[Email] SMTP НЕ настроен: задайте переменные окружения SMTP_EMAIL и SMTP_PASSWORD. Все письма будут пропускаться.');
+            console.warn('[Email] SMTP НЕ настроен: задайте SMTP_EMAIL и SMTP_PASSWORD. Письма пропускаются.');
             smtpConfigWarned = true;
         }
         return null;
     }
-    // Automatically determine host/port based on common providers, or allow them to be customized if needed.
-    // For Gmail, we can use the 'gmail' service shortcut.
-    const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465;
-    const isSecure = smtpPort === 465;
+    // Default to 587/STARTTLS — it passes through more firewalls (incl. PaaS hosts)
+    // than 465/SSL. We do NOT use nodemailer's `service: 'gmail'` shortcut because it
+    // forces port 465 and ignores SMTP_PORT.
+    const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587;
+    const secure = smtpPort === 465;
+    // Gmail App Passwords are shown as "xxxx xxxx xxxx xxxx" (19 chars with spaces);
+    // strip whitespace so a pasted-with-spaces value still authenticates (Gmail expects
+    // the 16 chars without spaces).
+    const pass = process.env.SMTP_PASSWORD.replace(/\s+/g, '');
     transporter = nodemailer.createTransport({
-        service: process.env.SMTP_EMAIL.includes('@gmail.com') ? 'gmail' : undefined,
-        host: process.env.SMTP_HOST || (process.env.SMTP_EMAIL.includes('@yandex') ? 'smtp.yandex.ru' : process.env.SMTP_EMAIL.includes('@mail.ru') ? 'smtp.mail.ru' : undefined),
+        host: resolveSmtpHost(process.env.SMTP_EMAIL),
         port: smtpPort,
-        secure: isSecure,
+        secure,
+        requireTLS: !secure, // force STARTTLS upgrade on 587
         auth: {
             user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD
+            pass
         },
         // Fail fast on a bad/slow SMTP config instead of hanging the request.
         connectionTimeout: 10000,
         greetingTimeout: 10000,
-        socketTimeout: 15000
+        socketTimeout: 20000
     });
-    console.log(`[Email] SMTP-транспорт создан для ${process.env.SMTP_EMAIL} (порт ${smtpPort}).`);
+    console.log(`[Email] SMTP-транспорт создан: ${resolveSmtpHost(process.env.SMTP_EMAIL)}:${smtpPort} (secure=${secure}).`);
     return transporter;
 }
 
@@ -41,19 +72,18 @@ function getTransporter(): nodemailer.Transporter | null {
 export function getEmailDiagnostics() {
     const email = process.env.SMTP_EMAIL || '';
     const masked = email ? email.replace(/^(.{2}).*(@.*)$/, '$1***$2') : null;
-    let host = process.env.SMTP_HOST || null;
-    if (!host && email.includes('@gmail.com')) host = 'smtp.gmail.com (service: gmail)';
-    else if (!host && email.includes('@yandex')) host = 'smtp.yandex.ru';
-    else if (!host && email.includes('@mail.ru')) host = 'smtp.mail.ru';
+    const host = resolveSmtpHost(email) || null;
+    const cleanPassLen = process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.replace(/\s+/g, '').length : 0;
     return {
+        provider: (process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD) ? 'SMTP (nodemailer)' : 'нет',
         configured: !!(process.env.SMTP_EMAIL && process.env.SMTP_PASSWORD),
         smtpEmailSet: !!process.env.SMTP_EMAIL,
         smtpPasswordSet: !!process.env.SMTP_PASSWORD,
         user: masked,
         host,
-        port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 465,
-        // App Password у Gmail — ровно 16 символов без пробелов; помогает поймать опечатку.
-        passwordLength: process.env.SMTP_PASSWORD ? process.env.SMTP_PASSWORD.length : 0
+        port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
+        // Длина пароля после удаления пробелов (Gmail App Password = 16 символов).
+        passwordLength: cleanPassLen
     };
 }
 
@@ -71,19 +101,12 @@ export async function verifyEmailTransport(): Promise<{ ok: boolean; error?: str
 
 // Send a one-off test email and return the real outcome.
 export async function sendTestEmail(to: string): Promise<{ ok: boolean; messageId?: string; error?: string }> {
-    const t = getTransporter();
-    if (!t) return { ok: false, error: 'SMTP не настроен: отсутствуют SMTP_EMAIL и/или SMTP_PASSWORD.' };
-    try {
-        const info = await t.sendMail({
-            from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
-            to,
-            subject: 'Донор-Алерт: тестовое письмо',
-            html: '<h2>Тест прошёл успешно ✅</h2><p>Если вы видите это письмо — отправка e-mail настроена корректно.</p>'
-        });
-        return { ok: true, messageId: info.messageId };
-    } catch (e: any) {
-        return { ok: false, error: e?.message || String(e) };
-    }
+    const result = await deliverEmail({
+        to,
+        subject: 'Донор-Алерт: тестовое письмо',
+        html: '<h2>Тест прошёл успешно ✅</h2><p>Если вы видите это письмо — отправка e-mail настроена корректно.</p>'
+    });
+    return { ok: result.ok, messageId: result.id, error: result.error };
 }
 
 function getOneSignal(): OneSignal.Client | null {
@@ -117,11 +140,6 @@ export async function sendPushNotification(playerIds: string[], messageText: str
 }
 
 export async function sendEmailNotification(emails: string[], messageText: string, centerPhone: string) {
-    const transporter = getTransporter();
-    if (!transporter) {
-        console.warn(`[Email] Пропуск массовой рассылки (${emails.length} получателей): SMTP не настроен.`);
-        return;
-    }
     if (emails.length === 0) return;
 
     const htmlContent = `
@@ -137,26 +155,15 @@ export async function sendEmailNotification(emails: string[], messageText: strin
         </div>
     `;
 
-    try {
-        const info = await transporter.sendMail({
-            from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
-            bcc: emails,
-            subject: 'Донор-Алерт: требуется кровь',
-            html: htmlContent,
-        });
-        console.log(`[Nodemailer] Successfully sent mass email to ${emails.length} recipients:`, info.messageId);
-    } catch (e: any) {
-        console.error('[Nodemailer] ERROR sending mass email:', e.message || e);
+    const result = await deliverEmail({ bcc: emails, subject: 'Донор-Алерт: требуется кровь', html: htmlContent });
+    if (result.ok) {
+        console.log(`[Email] Массовая рассылка ${emails.length} получателям через ${result.provider} (id: ${result.id}).`);
+    } else {
+        console.warn(`[Email] Массовая рассылка НЕ отправлена (${emails.length}): ${result.error}`);
     }
 }
 
 export async function sendTransactionalEmail(to: string, type: 'welcome' | 'center_added' | 'reset' | 'confirmed' | 'rejected' | 'appointment_rejected', extra?: any) {
-    const transporter = getTransporter();
-    if (!transporter) {
-        console.warn(`[Email] Пропуск письма "${type}" для ${to}: SMTP не настроен.`);
-        return;
-    }
-
     let subject = '';
     let htmlContent = '';
 
@@ -214,16 +221,11 @@ export async function sendTransactionalEmail(to: string, type: 'welcome' | 'cent
         `;
     }
 
-    try {
-        const info = await transporter.sendMail({
-            from: `"Donor-Alert" <${process.env.SMTP_EMAIL}>`,
-            to,
-            subject,
-            html: htmlContent,
-        });
-        console.log(`[Nodemailer] Successfully sent ${type} email to ${to}:`, info.messageId);
-    } catch (e: any) {
-        console.error(`[Nodemailer] ERROR sending ${type} email to ${to}:`, e.message || e);
+    const result = await deliverEmail({ to, subject, html: htmlContent });
+    if (result.ok) {
+        console.log(`[Email] Отправлено "${type}" → ${to} через ${result.provider} (id: ${result.id}).`);
+    } else {
+        console.warn(`[Email] НЕ отправлено "${type}" → ${to}: ${result.error}`);
     }
 }
 

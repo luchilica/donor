@@ -465,8 +465,13 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
 
         {emailDiag && (
           <div className="mt-4 space-y-2 text-xs">
-            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg font-bold ${emailDiag.verify?.ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
-              {emailDiag.verify?.ok ? `✅ ${t('Почта работает')}` : `❌ ${t('Письма не уходят')}`}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-lg font-bold ${emailDiag.verify?.ok ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
+                {emailDiag.verify?.ok ? `✅ ${t('Почта работает')}` : `❌ ${t('Письма не уходят')}`}
+              </div>
+              {emailDiag.provider && (
+                <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 font-mono">{t('Канал')}: {emailDiag.provider}</span>
+              )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-slate-600 font-mono mt-2">
               <span>SMTP_EMAIL: <strong className={emailDiag.smtpEmailSet ? 'text-emerald-600' : 'text-rose-600'}>{emailDiag.smtpEmailSet ? (emailDiag.user || 'задан') : t('НЕ задан')}</strong></span>
