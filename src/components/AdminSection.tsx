@@ -29,6 +29,10 @@ interface AdminSectionProps {
 }
 
 type AdminTab = 'users' | 'centers' | 'donors' | 'donations' | 'news' | 'holds' | 'appointments';
+// Backend collection names an edited record can map to. These differ from the UI
+// tab ids ('holds' → 'medicalNotes', 'appointments' → 'donationAppointments'), so
+// editingEntity.type must accept both the tab ids and the collection names.
+type AdminEntity = AdminTab | 'medicalNotes' | 'donationAppointments';
 
 export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
   const { language, setLanguage } = useLanguage();
@@ -51,7 +55,7 @@ export default function AdminSection({ token, t, apiBase }: AdminSectionProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   // Modal controls
-  const [editingEntity, setEditingEntity] = useState<{ type: AdminTab; data: any } | null>(null);
+  const [editingEntity, setEditingEntity] = useState<{ type: AdminEntity; data: any } | null>(null);
   const [isAdding, setIsAdding] = useState<AdminTab | null>(null);
 
   // New forms states (fully controlled)

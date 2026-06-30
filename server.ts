@@ -170,8 +170,14 @@ async function requireDonor(req: express.Request, res: express.Response, donorId
 }
 
 // Recalculates stats for a single donor based on their donations
-async function recalculateDonorStats(donorId: number) {
-  const db = await getDb();
+// Recompute a donor's cached aggregate counters from the donations table.
+// Pass `providedDb` to operate on the caller's already-loaded snapshot (e.g. right
+// after pushing a new donation): the donor is mutated in place and the caller is
+// responsible for the single saveDb() — this keeps the donation and the updated
+// counters in ONE atomic write. Called without `providedDb`, it loads, updates and
+// saves on its own.
+async function recalculateDonorStats(donorId: number, providedDb?: Awaited<ReturnType<typeof getDb>>) {
+  const db = providedDb ?? await getDb();
   const donor = db.donors.find(d => d.id === donorId);
   if (!donor) return;
 
@@ -213,7 +219,9 @@ async function recalculateDonorStats(donorId: number) {
   donor.lastDonationType = lastDonation ? lastDonation.donationType : null;
   donor.nextAvailableDate = nextAvailableDateStr;
 
-  await saveDb(db);
+  // Only persist when we own the snapshot. When a snapshot was provided, the
+  // caller saves once so the donation + counters land together.
+  if (!providedDb) await saveDb(db);
 }
 
 const app = express();
@@ -530,7 +538,7 @@ app.get('/api/download/contraindications', (req, res) => {
     if (entityName === 'donations') {
       const donorId = entity.donorId ? parseInt(entity.donorId) : null;
       if (donorId) {
-        setTimeout(() => recalculateDonorStats(donorId).catch(console.error), 200);
+        await recalculateDonorStats(donorId, db);
       }
     } else if (entityName === 'donationAppointments' && entity.status === 'completed') {
       const appt = collection.find((item: any) => item.id === id);
@@ -553,7 +561,7 @@ app.get('/api/download/contraindications', (req, res) => {
           });
           const donorId = parseInt(appt.donorId);
           if (donorId) {
-            setTimeout(() => recalculateDonorStats(donorId).catch(console.error), 200);
+            await recalculateDonorStats(donorId, db);
           }
         }
       }
@@ -1489,8 +1497,8 @@ app.get('/api/download/contraindications', (req, res) => {
       createdAt: new Date().toISOString()
     });
 
+    await recalculateDonorStats(donorId, db);
     await saveDb(db);
-    await recalculateDonorStats(donorId);
 
     res.json({ success: true });
   });
@@ -1505,8 +1513,8 @@ app.get('/api/download/contraindications', (req, res) => {
 
     const donorId = db.donations[donationIdx].donorId;
     db.donations.splice(donationIdx, 1);
+    await recalculateDonorStats(donorId, db);
     await saveDb(db);
-    await recalculateDonorStats(donorId);
 
     res.json({ success: true });
   });
@@ -1937,7 +1945,10 @@ app.get('/api/download/contraindications', (req, res) => {
                 addedBy: session.uid,
                 createdAt: new Date().toISOString()
             });
-            await recalculateDonorStats(appt.donorId);
+            // Recalc on THIS snapshot so the counters update together with the
+            // donation in the single saveDb(db) below (otherwise recalc would read
+            // a snapshot that doesn't yet contain the donation we just pushed).
+            await recalculateDonorStats(appt.donorId, db);
         }
     } else if (status === 'cancelled' || status === 'no_show') {
         // Rejecting a booking: store the reason and notify the donor by email.

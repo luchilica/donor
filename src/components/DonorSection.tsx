@@ -447,24 +447,53 @@ export default function DonorSection({ donor, links, donations, medicalNotes, re
         return;
     }
 
-    try {
-        const res = await fetch(`${apiBase}/appointments`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                donorId: donor.id,
-                centerId: appointmentForm.centerId,
-                appointmentDate: appointmentForm.appointmentDate,
-                appointmentTime: appointmentForm.appointmentTime,
-                donationType: appointmentForm.donationType
-            })
-        });
-        if (res.ok) {
-            setShowAppointmentModal(false);
-            setAppointmentSuccess(t('Вы успешно записаны на донацию. Ждем вас!'));
-            setTimeout(() => setAppointmentSuccess(''), 5000);
+    // Ask the donor to confirm before sending the booking, like every other
+    // mutating action in this panel.
+    const typeLabels: Record<string, string> = {
+        blood: t('Цельная кровь'),
+        plasma: t('Плазма'),
+        platelets: t('Тромбоциты'),
+        granulocytes: t('Гранулоциты'),
+    };
+    const centerName = centers.find(c => c.id === appointmentForm.centerId)?.name || '';
+    const typeLabel = typeLabels[appointmentForm.donationType] || appointmentForm.donationType;
+
+    requestConfirm({
+      title: t('Подтвердите запись на донацию'),
+      message: `${t('Записаться в')} «${centerName}» ${t('на')} ${appointmentForm.appointmentDate} ${t('в')} ${apptTime} (${typeLabel})?`,
+      variant: 'info',
+      confirmText: t('Записаться'),
+      onConfirm: async () => {
+        setIsSaving(true);
+        try {
+            const res = await fetch(`${apiBase}/appointments`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    donorId: donor.id,
+                    centerId: appointmentForm.centerId,
+                    appointmentDate: appointmentForm.appointmentDate,
+                    appointmentTime: appointmentForm.appointmentTime,
+                    donationType: appointmentForm.donationType
+                })
+            });
+            if (res.ok) {
+                setShowAppointmentModal(false);
+                setAppointmentSuccess(t('Вы успешно записаны на донацию. Ждем вас!'));
+                setTimeout(() => setAppointmentSuccess(''), 5000);
+                onRefresh();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error ? t(data.error) : t('Не удалось записаться на донацию'));
+            }
+        } catch {
+            alert(t('Не удалось записаться на донацию'));
+        } finally {
+            setIsSaving(false);
+            closeConfirm();
         }
-    } catch {}
+      }
+    });
   };
 
   const handleResubmit = (centerId: number) => {
