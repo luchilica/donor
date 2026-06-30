@@ -109,7 +109,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const [donorSearch, setDonorSearch] = useState('');
   const [filterBgs, setFilterBgs] = useState<BloodGroup[]>([]);
   const [filterRhs, setFilterRhs] = useState<RhFactor[]>([]);
-  const [filterReadiness, setFilterReadiness] = useState<string>('all');
+  const [filterReadiness, setFilterReadiness] = useState<string>('all'); // all, ready, not_ready
   const [donorList, setDonorList] = useState<Donor[]>([]);
   const [donorSortField, setDonorSortField] = useState<'lastName' | 'bloodGroup' | 'lastDonation' | 'donationsCount'>('lastName');
   const [donorSortOrder, setDonorSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -162,6 +162,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     linkId: number;
   } | null>(null);
 
+  // New forms states inside profile card
   const [showAddDonationModal, setShowAddDonationModal] = useState(false);
   const [donationForm, setDonationForm] = useState({
     donationDate: new Date().toISOString().split('T')[0],
@@ -186,6 +187,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     bloodGroup: 'I_O' as BloodGroup, rhFactor: 'positive' as RhFactor, weight: '70', phone: '', email: '', status: 'active' as DonorStatus
   });
 
+  // Manual Donor Registration from Center
   const [showManualRegModal, setShowManualRegModal] = useState(false);
   const [manualForm, setManualForm] = useState({
     lastName: '', firstName: '', middleName: '', birthDate: '1995-01-01', gender: 'male' as 'male'|'female',
@@ -193,21 +195,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   });
   const [manualError, setManualError] = useState('');
 
+  // Pending Confirmations applications list
   const [pendingTies, setPendingTies] = useState<any[]>([]);
   const [rejectionModalLinkId, setRejectionModalLinkId] = useState<number | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
-  // Appointment Completions / Cancellations
-  const [completeApptData, setCompleteApptData] = useState<{id: number, donorName: string, donorId: number, donationType: DonationType, appointmentDate: string} | null>(null);
-  const [completeApptForm, setCompleteApptForm] = useState({
-    volumeMl: '450',
-    donationType: 'blood' as DonationType,
-    isPaid: false,
-    note: ''
-  });
-  const [cancelApptData, setCancelApptData] = useState<{id: number, donorName: string} | null>(null);
-  const [cancelApptReason, setCancelApptReason] = useState('');
-
+  // Sended Alertor notifications console states
   const [notifyForm, setNotifyForm] = useState({
     bloodGroups: [] as BloodGroup[],
     rhFactor: 'both',
@@ -224,6 +217,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const [isQuickAlertOpen, setIsQuickAlertOpen] = useState(false);
   const [isAlertsHistoryOpen, setIsAlertsHistoryOpen] = useState(false);
 
+  // Alert templates state with local storage support
   const [templatesList, setTemplatesList] = useState<Array<{ id: string; name: string; text: string; isCustom?: boolean }>>(() => {
     const base = [
       { id: 'urgent_color', name: t('Дефицит крови'), text: t('Донор-Алерт: Нашему центру крови СРОЧНО требуется пополнение дефицита цельной крови. Пожалуйста, придите на донацию в ближайшее время.') },
@@ -292,6 +286,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       const res = await fetch(`${apiBase}/news`);
       if (res.ok) {
         const data = await res.json();
+        // filter news of this center
         setNewsList(data.filter((n: any) => n.centerId === center.id));
       }
     } catch {}
@@ -351,6 +346,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     } catch {}
   };
 
+  // Recount preview target count live upon alert rules changes
   const updatePreviewCount = async () => {
     try {
       const res = await fetch(`${apiBase}/center/notify/preview`, {
@@ -385,6 +381,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     }
   }, [activeMenu, notifyForm]);
 
+  // Handle Manual register submit
   const handleManualNameChange = (field: 'lastName' | 'firstName' | 'middleName', val: string) => {
     const lettersOnly = val.replace(/[^a-zA-Zа-яА-ЯёЁіІўЎ\-]/g, '');
     setManualForm(prev => ({ ...prev, [field]: lettersOnly }));
@@ -436,7 +433,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      alert(t('Донор успешно занесен в электронную картотеку!'));
+      alert('Донор успешно занесен в электронную картотеку!');
       setShowManualRegModal(false);
       loadDonors();
       refreshDashboard();
@@ -445,6 +442,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     }
   };
 
+  // Confirm pending application
   const handleConfirmPending = (linkId: number) => {
     requestConfirm({
       title: t('Одобрить заявку'),
@@ -468,10 +466,11 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     });
   };
 
+  // Reject pending application (submits cause reason text via modal)
   const handleRejectPendingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!rejectionReason.trim()) {
-      alert(t('Укажите причину обязательно'));
+      alert('Укажите причину обязательно');
       return;
     }
     requestConfirm({
@@ -498,6 +497,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     });
   };
 
+  // Add Donation Record past
   const handleAddDonation = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDonorId) return;
@@ -524,6 +524,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     });
   };
 
+  // Add Medical note restriction
   const handleAddMedical = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDonorId) return;
@@ -601,6 +602,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
     setEditError('');
 
+    // 1. Birth Date check: age between 18 and 65
     const birthDateObj = new Date(editDonorForm.birthDate);
     if (isNaN(birthDateObj.getTime())) {
       setEditError(t('Пожалуйста, введите корректную дату рождения'));
@@ -617,12 +619,14 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
       return;
     }
 
+    // 2. Email pattern check: *@* (at least 1 character before and after @)
     const emailRegex = /^.+@.+$/;
     if (!emailRegex.test(editDonorForm.email)) {
       setEditError(t('Укажите корректный e-mail в формате user@example.com (должен содержать символы до и после @)'));
       return;
     }
 
+    // 3. Weight check: not less than 55 kg
     const weightVal = parseFloat(editDonorForm.weight);
     if (isNaN(weightVal) || weightVal < 55) {
       setEditError(t('Минимальный вес донора для сдачи крови — 55 кг'));
@@ -673,6 +677,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             body: JSON.stringify({ liftNote: t('Снят досрочно лечащим врачом-трансфузиологом РНПЦ'), liftedBy: 2 })
           });
           if (res.ok) {
+            // alert('Медотвод снят!');
             loadDonorCard(selectedDonorId);
           }
         } catch {}
@@ -681,71 +686,12 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     });
   };
 
-  const handleCompleteApptSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!completeApptData) return;
-    setIsSaving(true);
-    try {
-      const res = await fetch(`${apiBase}/appointments/${completeApptData.id}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          status: 'completed',
-          volumeMl: parseInt(completeApptForm.volumeMl),
-          donationType: completeApptForm.donationType,
-          isPaid: completeApptForm.isPaid,
-          note: completeApptForm.note
-        })
-      });
-      if (res.ok) {
-        setCompleteApptData(null);
-        loadAppointments();
-        refreshDashboard();
-      } else {
-        alert(t("Ошибка при завершении записи"));
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCancelApptSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!cancelApptData) return;
-    if (!cancelApptReason.trim()) {
-      alert(t('Укажите причину обязательно'));
-      return;
-    }
-    setIsSaving(true);
-    try {
-      const res = await fetch(`${apiBase}/appointments/${cancelApptData.id}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          status: 'cancelled',
-          rejectionReason: cancelApptReason
-        })
-      });
-      if (res.ok) {
-        setCancelApptData(null);
-        loadAppointments();
-      } else {
-        alert(t("Ошибка при отклонении записи"));
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
+  // Send campaign broadcasts alertor
   const handleSendBroadcast = (e: React.FormEvent) => {
     e.preventDefault();
     setNotifySuccessMsg('');
     if (!notifyForm.messageText.trim()) {
-      alert(t('Текст уведомления пуст!'));
+      alert('Текст уведомления пуст!');
       return;
     }
     requestConfirm({
@@ -812,6 +758,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     return '';
   };
 
+  // Load alert template defaults quick
   const loadTemplateText = (text: string) => {
     setActiveTemplateId(null);
     setNotifyForm({
@@ -842,6 +789,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     const updated = [...templatesList, newTemplate];
     setTemplatesList(updated);
 
+    // Save customs to local storage
     try {
       const customsOnly = updated.filter(temp => temp.isCustom);
       localStorage.setItem(`donor_alert_templates_${center?.id || 'default'}`, JSON.stringify(customsOnly));
@@ -867,6 +815,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     }
   };
 
+  // Manage regional news CRUD
   const handleNeedsSubmit = () => {
     requestConfirm({
       title: t('Сохранить дефициты?'),
@@ -887,7 +836,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
           setTimeout(() => setNeedsSuccess(false), 3000);
           if (onRefresh) onRefresh();
         } catch (e) {
-          alert(t("Ошибка при сохранении дефицитов"));
+          alert("Ошибка при сохранении дефицитов");
         } finally {
           setNeedsSaving(false);
         }
@@ -898,7 +847,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
   const handleNewsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     requestConfirm({
-      title: editingNews ? t('Сохранить публикацию?') : t('Опубликовать новость?'),
+      title: editingNews ? 'Сохранить публикацию?' : t('Опубликовать новость?'),
       message: t('Вы уверены, что хотите сохранить изменения и опубликовать новость на портале?'),
       variant: 'info',
       confirmText: t('Сохранить'),
@@ -952,6 +901,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
     const dasharray = `${pct} ${100 - pct}`;
     const dashoffset = 25 - currentAccum;
     const midPct = currentAccum + pct / 2;
+    // Calculate angle; standard SVG offsets 3 o'clock initially, but we adjusted visually by an offset of 25 (top)
     const angle = (midPct / 100) * Math.PI * 2 - Math.PI / 2;
     const textX = 21 + Math.cos(angle) * 15.915;
     const textY = 21 + Math.sin(angle) * 15.915;
@@ -1013,6 +963,8 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             <div className="bg-white border border-red-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest mb-1">{t("всего доноров (активных)")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-red-600 leading-none tracking-tight">{stats.totalDonors}</span>
+              
+              {/* Popover summary list on hover */}
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>{t("Все зарегистрированные доноры, отслеживаемые данным центром.")}</div>
             </div>
@@ -1020,6 +972,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             <div className="bg-white border border-emerald-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-emerald-600/70 uppercase tracking-widest mb-1">{t("готовы сдать сейчас")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-emerald-600 leading-none tracking-tight">{stats.readyCount}</span>
+
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
                 {t('Остальные — временно отстранены (сроки/медотводы).')}
@@ -1029,6 +982,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             <div className="bg-white border border-amber-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-amber-600/70 uppercase tracking-widest mb-1">{t("ожидают подтверждения")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-amber-500 leading-none tracking-tight">{stats.pendingCount}</span>
+
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>{t("Новые заявки от доноров на прикрепление к вашему центру.")}</div>
             </div>
@@ -1036,6 +990,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
             <div className="bg-white border border-blue-100 p-5 rounded-2xl flex flex-col justify-center items-center text-center relative group cursor-pointer hover:bg-slate-50 transition-all shadow-sm">
               <span className="text-[10px] font-bold text-blue-600/70 uppercase tracking-widest mb-1">{t("рассылок в этом месяце")}</span>
               <span className="text-3xl sm:text-4xl font-bold text-blue-500 leading-none tracking-tight">{stats.notificationsThisMonth}</span>
+
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-48 bg-slate-900 border border-slate-800 text-slate-200 rounded-xl p-3 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[110] text-[11px] font-medium leading-relaxed font-sans">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-2.5 h-2.5 bg-slate-900 border-t border-l border-slate-800 rotate-45"></div>
                 {t('Количество отправленных SMS-оповещений.')}
@@ -1050,9 +1005,13 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
               <h3 className="font-bold text-slate-800 text-base">{t("Распределение базы по группам крови")}</h3>
               <p className="text-sm text-slate-500">{t("Отображается отношение доноров по I, II, III, IV клиническим группам:")}</p>
               
+              {/* Graphic custom interactive SVG */}
               <div className="flex flex-col sm:flex-row items-center gap-6 justify-around pt-2">
                 <svg className="w-36 h-36 shrink-0 border border-slate-50 rounded-full" viewBox="0 0 42 42">
+                  {/* Base background circle */}
                   <circle r="15.915" cx="21" cy="21" fill="transparent" stroke="#fef2f2" strokeWidth="10"></circle>
+                  
+                  {/* Dynamic slices and percentages */}
                   {pieData.map((slice) => slice.pct > 0 && (
                     <g key={slice.id}>
                       <circle 
@@ -1255,7 +1214,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       <tbody className="divide-y divide-slate-100 text-slate-600 dark:divide-slate-800">
                         {donorCard.donations.map(don => {
                           const donType = don.donationType || don.type;
-                          const typeLabel = donType === 'blood' ? 'Кровь' : donType === 'plasma' ? t('Плазма') : donType === 'platelets' ? t('Тромбоциты') : t('Гранулоциты');
+                          const typeLabel = donType === 'blood' ? 'Кровь' : donType === 'plasma' ? t('Плазма') : donType === 'platelets' ? t('Тромбоциты') : donType;
                           const paidLabel = don.isPaid ? t('возмездно') : t('безвозмездно');
                           const volume = don.volumeMl || don.volume || '—';
                           
@@ -1816,7 +1775,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <span>•</span>
                           <span className="bg-red-50 text-red-700 px-1.5 py-0.5 rounded text-[10px] font-bold">{a.donorBg}</span>
                           <span>•</span>
-                          <span>{a.donationType === 'blood' ? t('Цельная кровь') : a.donationType === 'plasma' ? t('Плазма') : a.donationType === 'platelets' ? t('Тромбоциты') : t('Гранулоциты')}</span>
+                          <span>{a.donationType === 'blood' ? t('Цельная кровь') : a.donationType === 'plasma' ? t('Плазма') : t('Тромбоциты')}</span>
                         </div>
                       </div>
 
@@ -1836,27 +1795,39 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                           <>
                             <button 
                               onClick={() => {
-                                setCompleteApptData({
-                                  id: a.id,
-                                  donorName: a.donorName,
-                                  donorId: a.donorId,
-                                  donationType: a.donationType,
-                                  appointmentDate: a.appointmentDate
-                                });
-                                setCompleteApptForm({
-                                  volumeMl: '450',
-                                  donationType: a.donationType || 'blood',
-                                  isPaid: false,
-                                  note: ''
-                                });
+                                  requestConfirm({
+                                      title: t('Завершить донацию?'),
+                                      message: `${t('Вы уверены, что хотите отметить донацию донора')} ${a.donorName} ${t('как завершенную?')}`,
+                                      variant: 'success',
+                                      confirmText: t('Завершить'),
+                                      cancelText: t('Отмена'),
+                                      onConfirm: async () => {
+                                          await fetch(`${apiBase}/appointments/${a.id}`, {
+                                              method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'completed'})
+                                          });
+                                          loadAppointments();
+                                          refreshDashboard();
+                                      }
+                                  });
                               }}
                               className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >
                               <Check className="w-4 h-4 mr-1" />{t("Завершена")}</button>
                             <button 
                               onClick={() => {
-                                setCancelApptData({ id: a.id, donorName: a.donorName });
-                                setCancelApptReason('');
+                                  requestConfirm({
+                                      title: t('Отклонить запись?'),
+                                      message: `${t('Вы уверены, что хотите отклонить запись донора')} ${a.donorName} ${t('на донацию?')}`,
+                                      variant: 'danger',
+                                      confirmText: t('Отклонить'),
+                                      cancelText: t('Отмена'),
+                                      onConfirm: async () => {
+                                          await fetch(`${apiBase}/appointments/${a.id}`, {
+                                              method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({status: 'cancelled'})
+                                          });
+                                          loadAppointments();
+                                      }
+                                  });
                               }}
                               className="w-full md:w-auto justify-center min-h-[44px] md:min-h-0 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-4 py-2 rounded-xl flex items-center shadow-xs transition-colors"
                             >{t("Отклонить")}</button>
@@ -2593,112 +2564,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
 
       {/* --- FLOATING DIALOGS & MODAL FORMS --- */}
 
-      {/* COMPLETE APPOINTMENT FORM MODAL */}
-      {completeApptData !== null && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
-            <h4 className="font-bold text-slate-800 text-base mb-1">{t("Завершение донации")}</h4>
-            <p className="text-xs text-slate-500 mb-4">{completeApptData.donorName}, {new Date(completeApptData.appointmentDate).toLocaleDateString('ru-RU')}</p>
-            
-            <form onSubmit={handleCompleteApptSubmit} className="space-y-3.5">
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold block">{t("Тип заготовки:")}</label>
-                <select 
-                  required
-                  value={completeApptForm.donationType}
-                  onChange={(e) => setCompleteApptForm({ ...completeApptForm, donationType: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white font-medium"
-                >
-                  <option value="blood">{t("Цельная кровь (стандарт)")}</option>
-                  <option value="plasma">{t("Плазма (Аферез)")}</option>
-                  <option value="platelets">{t("Тромбоциты (Аферез)")}</option>
-                  <option value="granulocytes">{t("Гранулоциты")}</option>
-                </select>
-              </div>
-
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold block">{t("Объем в мл:")}</label>
-                <input 
-                  type="number"
-                  required
-                  value={completeApptForm.volumeMl}
-                  onChange={(e) => setCompleteApptForm({ ...completeApptForm, volumeMl: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-xs font-semibold pt-2 pb-1">
-                <span>{t("Донация на платной основе?")}</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={completeApptForm.isPaid} 
-                    onChange={(e) => setCompleteApptForm({ ...completeApptForm, isPaid: e.target.checked })} 
-                  />
-                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-                </label>
-              </div>
-
-              <div className="space-y-1 text-xs">
-                <label className="font-semibold block">{t("Служебный комментарий:")}</label>
-                <textarea 
-                  value={completeApptForm.note}
-                  onChange={(e) => setCompleteApptForm({ ...completeApptForm, note: e.target.value })}
-                  placeholder={t("Процедура без осложнений, самочувствие удовлетворительное")}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="flex gap-2.5 pt-2">
-                <button 
-                  type="button" 
-                  onClick={() => setCompleteApptData(null)}
-                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl"
-                >{t("Отмена")}</button>
-                <button 
-                  type="submit" disabled={isSaving} 
-                  className="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl min-h-[44px] md:min-h-0"
-                >{isSaving ? t('Подождите...') : t('Сохранить запись')}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* CANCEL APPOINTMENT FORM MODAL */}
-      {cancelApptData !== null && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
-            <h4 className="font-bold text-slate-800 text-sm mb-2">{t("Укажите причину отклонения")}</h4>
-            <p className="text-xs text-slate-500 mb-4">{t("Опишите причину отмены. Донор получит эту информацию в личном кабинете и по электронной почте.")}</p>
-            <form onSubmit={handleCancelApptSubmit} className="space-y-4">
-              <textarea 
-                required
-                value={cancelApptReason}
-                onChange={(e) => setCancelApptReason(e.target.value)}
-                placeholder={t("Например: В день сдачи у вас зафиксировано высокое давление...")}
-                rows={3}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
-              />
-              <div className="flex gap-2.5">
-                <button 
-                  type="button" 
-                  onClick={() => setCancelApptData(null)}
-                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl"
-                >{t("Отмена")}</button>
-                <button 
-                  type="submit" disabled={isSaving} 
-                  className="w-2/3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl min-h-[44px] md:min-h-0"
-                >{isSaving ? t('Подождите...') : t('Отклонить запись')}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* REJECTION REASON INPUT FORM MODAL (for linkages) */}
+      {/* REJECTION REASON INPUT FORM MODAL */}
       {rejectionModalLinkId !== null && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
@@ -2711,17 +2577,17 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder={t("Пример: В вашей выписке отсутствует подпись терапевта...")}
                 rows={3}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                className="w-full px-3 py-2 text-xs border rounded-xl focus:border-red-500 focus:outline-none"
               />
               <div className="flex gap-2.5">
                 <button 
                   type="button" 
                   onClick={() => setRejectionModalLinkId(null)}
-                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl"
+                  className="w-1/3 bg-slate-150 bg-slate-100 text-xs font-semibold rounded-xl"
                 >{t("Отмена")}</button>
                 <button 
                   type="submit" disabled={isSaving} 
-                  className="w-2/3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl min-h-[44px] md:min-h-0"
+                  className="w-2/3 bg-red-650 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2.5 rounded-xl min-h-[44px] md:min-h-0"
                 >{isSaving ? t('Подождите...') : t('Отклонить заявку')}</button>
               </div>
             </form>
@@ -2729,7 +2595,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
         </div>
       )}
 
-      {/* ADD DONATION FOR DONOR CARD PANEL (MANUAL ADDITION) */}
+      {/* ADD DONATION FOR DONOR CARD PANEL */}
       {showAddDonationModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl p-6 shadow-xl w-full max-w-sm relative">
@@ -2752,7 +2618,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     }
                     setDonationForm({ ...donationForm, donationDate: val });
                   }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
               </div>
 
@@ -2762,7 +2628,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   required
                   value={donationForm.donationType}
                   onChange={(e) => setDonationForm({ ...donationForm, donationType: e.target.value as any })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none bg-white font-medium"
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none bg-white font-medium"
                 >
                   <option value="blood">{t("Цельная кровь (стандарт)")}</option>
                   <option value="plasma">{t("Плазма (Аферез)")}</option>
@@ -2777,7 +2643,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   type="number"
                   value={donationForm.volumeMl}
                   onChange={(e) => setDonationForm({ ...donationForm, volumeMl: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
               </div>
 
@@ -2801,7 +2667,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   onChange={(e) => setDonationForm({ ...donationForm, note: e.target.value })}
                   placeholder={t("Процедура без осложнений, самочувствие удовлетворительное")}
                   rows={2}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
               </div>
 
@@ -3013,7 +2879,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                   onChange={(e) => setMedicalForm({ ...medicalForm, reason: e.target.value })}
                   placeholder={t("Отклонение в клиническом анализе крови, ОРВИ, татуировка...")}
                   rows={2}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
               </div>
 
@@ -3032,7 +2898,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                     }
                     setMedicalForm({ ...medicalForm, startDate: val });
                   }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                  className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                 />
               </div>
 
@@ -3064,7 +2930,7 @@ export default function CenterSection({ center, onRefresh, apiBase, token }: Cen
                       }
                       setMedicalForm({ ...medicalForm, endDate: val });
                     }}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:border-red-500 focus:outline-none"
+                    className="w-full px-3 py-2 border rounded-xl focus:outline-none"
                   />
                 </div>
               )}
